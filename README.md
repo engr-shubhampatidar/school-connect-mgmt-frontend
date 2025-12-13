@@ -1,0 +1,1 @@
+# school-connect-mgmt-frontend
