@@ -2,14 +2,14 @@
 import React from "react";
 
 type Toast = {
-  id: string;
+  id?: string;
   title?: string;
   description?: string;
   type?: "success" | "error";
 };
 
 const ToastContext = React.createContext<{
-  toast: (t: Toast) => void;
+  toast: (t: Toast) => string;
   dismiss: (id: string) => void;
 } | null>(null);
 
