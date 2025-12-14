@@ -2,6 +2,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import API from "../../../lib/axios";
+import { setToken } from "../../../lib/auth";
+import { ADMIN_API } from "../../../lib/api-routes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -34,23 +37,13 @@ export default function AdminLoginPage() {
 
   const onSubmit = async (values: AdminLoginSchema) => {
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/admin/auth/login",
-        values,
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const res = await API.post(ADMIN_API.LOGIN, values);
 
       const data = res.data;
       // store token if provided (placeholder)
       const token = data?.token ?? data?.accessToken ?? null;
       if (token) {
-        try {
-          localStorage.setItem("admin_token", token);
-        } catch {
-          // ignore storage errors in SSR-unfriendly environments
-        }
+        setToken("admin", token);
       }
 
       toast({

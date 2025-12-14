@@ -3,7 +3,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import API from "../lib/axios";
+import { PUBLIC_API } from "../lib/api-routes";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import Card from "./ui/Card";
@@ -15,6 +16,7 @@ import {
   FormMessage,
 } from "./ui/Form";
 import { useToast } from "./ui/use-toast";
+import axios from "axios";
 
 const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}/;
 
@@ -64,10 +66,7 @@ export function RegisterSchoolForm() {
         logoUrl: values.logoUrl || "",
       };
 
-      await axios.post(
-        "http://localhost:3000/api/public/register-school",
-        payload
-      );
+      await API.post(PUBLIC_API.REGISTER_SCHOOL, payload);
       toast({
         id: "success-registered",
         title: "Registered",

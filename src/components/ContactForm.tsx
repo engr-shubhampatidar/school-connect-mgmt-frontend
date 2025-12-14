@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import API from "../lib/axios";
+import { PUBLIC_API } from "../lib/api-routes";
 import { Input } from "./ui/Input";
 import { Textarea } from "./ui/Textarea";
 import { Button } from "./ui/Button";
@@ -51,7 +53,7 @@ export function ContactForm() {
         message: values.message || "",
       };
 
-      await axios.post("http://localhost:3000/api/public/contact", payload);
+      await API.post(PUBLIC_API.CONTACT, payload);
 
       toast({
         id: "contact-success",

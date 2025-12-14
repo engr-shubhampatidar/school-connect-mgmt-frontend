@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API from "../../../lib/axios";
+import { ADMIN_API } from "../../../lib/api-routes";
 import { Users, BookOpen, ClipboardList } from "lucide-react";
 import StatCard from "../../../components/admin/StatCard";
 import RecentStudents from "../../../components/admin/RecentStudents";
@@ -22,16 +24,7 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("admin_token")
-          : null;
-      const res = await axios.get<DashboardResp>(
-        "http://localhost:3000/api/admin/dashboard",
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        }
-      );
+      const res = await API.get<DashboardResp>(ADMIN_API.DASHBOARD);
       setData(res.data);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
