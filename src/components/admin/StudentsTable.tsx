@@ -119,7 +119,9 @@ export default function StudentsTable({
               <tr key={s.id} className="border-t hover:bg-slate-50">
                 <td className="py-3">{s.name}</td>
                 <td className="py-3">{s.rollNo ?? "-"}</td>
-                <td className="py-3">{s.class ?? "-"}</td>
+                <td className="py-3">
+                  {typeof s.class === "string" ? s.class : s.class?.name ?? "-"}
+                </td>
                 <td className="py-3">
                   {new Intl.DateTimeFormat(undefined, {
                     year: "numeric",

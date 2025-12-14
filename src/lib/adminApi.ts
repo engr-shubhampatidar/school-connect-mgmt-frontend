@@ -6,7 +6,14 @@ export type Student = {
   id: string;
   name: string;
   rollNo?: string | number | null;
-  class?: string | null;
+  class?:
+    | string
+    | null
+    | {
+        id: string;
+        name: string;
+        section?: string | null;
+      };
   createdAt: string;
 };
 
@@ -36,7 +43,19 @@ export async function fetchStudents(
   if (query.pageSize) params.pageSize = query.pageSize;
 
   const res = await API.get<StudentsResponse>(ADMIN_API.STUDENTS, { params });
-  return res.data;
+  const data = res.data as any;
+
+  const students: Student[] = data.students ?? data.items ?? [];
+  const total: number | undefined = data.total ?? data.totalCount ?? students.length;
+  const page: number | undefined = data.page ?? data.p ?? undefined;
+  const pageSize: number | undefined = data.pageSize ?? data.limit ?? query.pageSize;
+
+  return {
+    students,
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export type Teacher = {

@@ -104,7 +104,7 @@ export default function CreateStudentDialog({
       await API.post(ADMIN_API.STUDENTS, {
         name: values.name,
         rollNo: values.rollNo ?? undefined,
-        classId: values.classId,
+        classId: "89ed309a-5f1e-442d-a5f9-58390b658c31",
         photoUrl: values.photoUrl ?? undefined,
       });
 
