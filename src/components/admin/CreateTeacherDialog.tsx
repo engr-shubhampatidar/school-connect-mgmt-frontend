@@ -12,28 +12,28 @@ import { useToast } from "../ui/use-toast";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
 
-const createStudentSchema = z.object({
+const createTeacherSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  rollNo: z
+  email: z.string().email("Must be a valid email"),
+  phone: z
     .string()
     .optional()
     .transform((v) => (v ? v.trim() : undefined)),
-  classId: z.string().min(1, "Class is required"),
-  photoUrl: z
+  subjects: z
     .string()
     .optional()
-    .refine((v) => {
-      if (!v) return true;
-      try {
-        new URL(v);
-        return true;
-      } catch {
-        return false;
-      }
-    }, "Must be a valid URL"),
+    .transform((v) =>
+      v
+        ? v
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : undefined
+    ),
+  classId: z.string().optional(),
 });
 
-type CreateStudentValues = z.infer<typeof createStudentSchema>;
+type CreateTeacherValues = z.infer<typeof createTeacherSchema>;
 
 type Props = {
   open: boolean;
@@ -41,7 +41,7 @@ type Props = {
   onCreated?: () => void;
 };
 
-export default function CreateStudentDialog({
+export default function CreateTeacherDialog({
   open,
   onClose,
   onCreated,
@@ -50,22 +50,26 @@ export default function CreateStudentDialog({
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
 
-  const form = useForm<CreateStudentValues>({
+  const form = useForm<CreateTeacherValues>({
     resolver: zodResolver(
-      createStudentSchema
-    ) as unknown as Resolver<CreateStudentValues>,
-    defaultValues: { name: "", rollNo: "", classId: "", photoUrl: "" },
+      createTeacherSchema
+    ) as unknown as Resolver<CreateTeacherValues>,
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      subjects: undefined,
+      classId: "",
+    },
   });
 
   useEffect(() => {
-    // fetch classes list; fallback to static if fails
     let mounted = true;
     (async () => {
       try {
         const res = await API.get<unknown>(ADMIN_API.CLASSES);
         if (!mounted) return;
         const data = res.data;
-        // Accept either an array or an object with a `classes` array
         if (Array.isArray(data)) {
           setClasses(data as { id: string; name: string }[]);
         } else if (
@@ -98,46 +102,46 @@ export default function CreateStudentDialog({
     };
   }, []);
 
-  const onSubmit = async (values: CreateStudentValues) => {
+  const onSubmit = async (values: CreateTeacherValues) => {
     setLoading(true);
     try {
-      await API.post(ADMIN_API.STUDENTS, {
+      await API.post(ADMIN_API.TEACHERS, {
         name: values.name,
-        rollNo: values.rollNo ?? undefined,
-        classId: "89ed309a-5f1e-442d-a5f9-58390b658c31",
-        photoUrl: values.photoUrl ?? undefined,
+        email: values.email,
+        phone: values.phone ?? undefined,
+        subjects: values.subjects ?? undefined,
+        classId: values.classId ?? undefined,
       });
 
-      toast({ title: "Student created", type: "success" });
+      toast({ title: "Teacher created", type: "success" });
       form.reset();
       onClose();
       onCreated?.();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const data = err.response?.data as Record<string, unknown> | undefined;
-        // map backend field errors if present
         if (data?.fieldErrors && typeof data.fieldErrors === "object") {
           const fe = data.fieldErrors as Record<string, unknown>;
           Object.entries(fe).forEach(([k, v]) => {
-            form.setError(k as keyof CreateStudentValues, {
+            form.setError(k as keyof CreateTeacherValues, {
               type: "server",
               message: String(v),
             });
           });
         }
         toast({
-          title: "Failed to create student",
+          title: "Failed to create teacher",
           description: (data && (data.message as string)) ?? err.message,
           type: "error",
         });
       } else if (err instanceof Error) {
         toast({
-          title: "Failed to create student",
+          title: "Failed to create teacher",
           description: err.message,
           type: "error",
         });
       } else {
-        toast({ title: "Failed to create student", type: "error" });
+        toast({ title: "Failed to create teacher", type: "error" });
       }
     } finally {
       setLoading(false);
@@ -154,10 +158,10 @@ export default function CreateStudentDialog({
           <div className="flex items-start justify-between gap-4">
             <div>
               <h3 className="text-lg font-semibold text-slate-900">
-                Create Student
+                Create Teacher
               </h3>
               <p className="text-sm text-slate-600">
-                Add a new student record to the school.
+                Invite a teacher to your school.
               </p>
             </div>
             <div>
@@ -175,30 +179,52 @@ export default function CreateStudentDialog({
             <Form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField>
                 <FormLabel>Name</FormLabel>
-                <Input {...form.register("name")} placeholder="Student name" />
+                <Input {...form.register("name")} placeholder="Full name" />
                 <FormMessage>
                   {form.formState.errors.name?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 
               <FormField>
-                <FormLabel>Roll Number</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <Input
-                  {...form.register("rollNo")}
-                  placeholder="Optional roll number"
+                  {...form.register("email")}
+                  placeholder="teacher@example.com"
                 />
                 <FormMessage>
-                  {form.formState.errors.rollNo?.message as React.ReactNode}
+                  {form.formState.errors.email?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 
               <FormField>
-                <FormLabel>Class</FormLabel>
+                <FormLabel>Phone</FormLabel>
+                <Input
+                  {...form.register("phone")}
+                  placeholder="Optional phone"
+                />
+                <FormMessage>
+                  {form.formState.errors.phone?.message as React.ReactNode}
+                </FormMessage>
+              </FormField>
+
+              <FormField>
+                <FormLabel>Subjects (comma separated)</FormLabel>
+                <Input
+                  {...form.register("subjects")}
+                  placeholder="Mathematics, Science"
+                />
+                <FormMessage>
+                  {form.formState.errors.subjects?.message as React.ReactNode}
+                </FormMessage>
+              </FormField>
+
+              <FormField>
+                <FormLabel>Assigned Class</FormLabel>
                 <select
                   className="block w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-500"
                   {...form.register("classId")}
                 >
-                  <option value="">Select class</option>
+                  <option value="">None</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -210,23 +236,12 @@ export default function CreateStudentDialog({
                 </FormMessage>
               </FormField>
 
-              <FormField>
-                <FormLabel>Photo URL</FormLabel>
-                <Input
-                  {...form.register("photoUrl")}
-                  placeholder="https://example.com/photo.jpg"
-                />
-                <FormMessage>
-                  {form.formState.errors.photoUrl?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
               <div className="mt-4 flex items-center justify-end gap-2">
                 <Button variant="ghost" onClick={onClose} type="button">
                   Cancel
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Creating…" : "Create Student"}
+                  {loading ? "Creating…" : "Create Teacher"}
                 </Button>
               </div>
             </Form>

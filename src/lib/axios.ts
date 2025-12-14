@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, type AxiosRequestHeaders } from "axios";
 import { BASE_URL } from "./api-routes";
 import { getToken, removeToken } from "./auth";
 
@@ -17,9 +17,9 @@ API.interceptors.request.use((config) => {
       const token = getToken("admin");
       if (token) {
         config.headers = {
-          ...(config.headers ?? {}),
+          ...((config.headers as AxiosRequestHeaders) ?? {}),
           Authorization: `Bearer ${token}`,
-        };
+        } as AxiosRequestHeaders;
       }
     }
   } catch {
