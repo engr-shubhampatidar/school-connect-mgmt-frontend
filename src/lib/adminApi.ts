@@ -122,3 +122,39 @@ export async function createClass(payload: {
   );
   return res.data;
 }
+
+export type Subject = {
+  id: string;
+  name: string;
+  code: string;
+  createdAt?: string;
+};
+
+export type SubjectsResponse = {
+  subjects: Subject[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+export type SubjectsQuery = {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export async function fetchSubjects(
+  query: SubjectsQuery = {}
+): Promise<SubjectsResponse> {
+  const params: Record<string, string | number> = {};
+  if (query.search) params.search = query.search;
+  if (query.page) params.page = query.page;
+  if (query.pageSize) params.pageSize = query.pageSize;
+  const res = await API.get<SubjectsResponse>(ADMIN_API.SUBJECTS, { params });
+  return res.data;
+}
+
+export async function createSubject(payload: { name: string; code: string }) {
+  const res = await API.post<{ id: string }>(ADMIN_API.SUBJECTS, payload);
+  return res.data;
+}
