@@ -9,6 +9,7 @@ export const ADMIN_API = {
   LOGIN: "/api/admin/auth/login",
   DASHBOARD: "/api/admin/dashboard",
   STUDENTS: "/api/admin/students",
+  TEACHERS: "/api/admin/teachers",
   CLASSES: "/api/admin/classes",
 };
 
