@@ -11,6 +11,7 @@ export const ADMIN_API = {
   STUDENTS: "/api/admin/students",
   TEACHERS: "/api/admin/teachers",
   CLASSES: "/api/admin/classes",
+  SUBJECTS: "/api/admin/subjects",
 };
 
 const routes = { BASE_URL, PUBLIC_API, ADMIN_API };
