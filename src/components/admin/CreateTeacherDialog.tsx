@@ -13,7 +13,7 @@ import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
 
 const createTeacherSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Must be a valid email"),
   phone: z
     .string()
@@ -55,7 +55,7 @@ export default function CreateTeacherDialog({
       createTeacherSchema
     ) as unknown as Resolver<CreateTeacherValues>,
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
       phone: "",
       subjects: undefined,
@@ -72,22 +72,26 @@ export default function CreateTeacherDialog({
         const data = res.data;
         if (Array.isArray(data)) {
           setClasses(data as { id: string; name: string }[]);
-        } else if (
-          data &&
-          typeof data === "object" &&
-          Array.isArray((data as Record<string, unknown>).classes)
-        ) {
-          setClasses(
-            (data as Record<string, unknown>).classes as {
-              id: string;
-              name: string;
-            }[]
-          );
-        } else {
-          setClasses([
-            { id: "class-1", name: "Class 1" },
-            { id: "class-2", name: "Class 2" },
-          ]);
+        } else if (data && typeof data === "object") {
+          const obj = data as Record<string, unknown>;
+          // support { items: [...] } shape from the API
+          if (Array.isArray(obj.items)) {
+            setClasses(
+              (obj.items as any[]).map((it) => ({
+                id: String(it.id),
+                name: `${String(it.name)}${
+                  it.section ? ` ${String(it.section)}` : ""
+                }`,
+              }))
+            );
+          } else if (Array.isArray(obj.classes)) {
+            setClasses(obj.classes as { id: string; name: string }[]);
+          } else {
+            setClasses([
+              { id: "class-1", name: "Class 1" },
+              { id: "class-2", name: "Class 2" },
+            ]);
+          }
         }
       } catch {
         if (!mounted) return;
@@ -106,7 +110,9 @@ export default function CreateTeacherDialog({
     setLoading(true);
     try {
       await API.post(ADMIN_API.TEACHERS, {
-        name: values.name,
+        // send both keys to support either backend shape
+        fullName: values.fullName,
+        name: values.fullName,
         email: values.email,
         phone: values.phone ?? undefined,
         subjects: values.subjects ?? undefined,
@@ -123,7 +129,10 @@ export default function CreateTeacherDialog({
         if (data?.fieldErrors && typeof data.fieldErrors === "object") {
           const fe = data.fieldErrors as Record<string, unknown>;
           Object.entries(fe).forEach(([k, v]) => {
-            form.setError(k as keyof CreateTeacherValues, {
+            const field = (
+              k === "name" ? "fullName" : k
+            ) as keyof CreateTeacherValues;
+            form.setError(field, {
               type: "server",
               message: String(v),
             });
@@ -178,10 +187,10 @@ export default function CreateTeacherDialog({
           <div className="mt-4">
             <Form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField>
-                <FormLabel>Name</FormLabel>
-                <Input {...form.register("name")} placeholder="Full name" />
+                <FormLabel>Full Name</FormLabel>
+                <Input {...form.register("fullName")} placeholder="Full name" />
                 <FormMessage>
-                  {form.formState.errors.name?.message as React.ReactNode}
+                  {form.formState.errors.fullName?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 

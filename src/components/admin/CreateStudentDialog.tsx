@@ -79,6 +79,17 @@ export default function CreateStudentDialog({
               name: string;
             }[]
           );
+        } else if (
+          data &&
+          typeof data === "object" &&
+          Array.isArray((data as Record<string, unknown>).items)
+        ) {
+          setClasses(
+            (data as Record<string, unknown>).items as {
+              id: string;
+              name: string;
+            }[]
+          );
         } else {
           setClasses([
             { id: "class-1", name: "Class 1" },
@@ -104,7 +115,7 @@ export default function CreateStudentDialog({
       await API.post(ADMIN_API.STUDENTS, {
         name: values.name,
         rollNo: values.rollNo ?? undefined,
-        classId: "89ed309a-5f1e-442d-a5f9-58390b658c31",
+        classId: values.classId,
         photoUrl: values.photoUrl ?? undefined,
       });
 

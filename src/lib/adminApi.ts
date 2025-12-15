@@ -97,7 +97,49 @@ export async function fetchTeachers(
     params,
     ...(config ?? {}),
   });
-  return res.data;
+  const data = res.data as any;
+
+  const items: any[] = data.teachers ?? data.items ?? [];
+
+  const teachers: Teacher[] = (items || []).map((it: any) => {
+    const user = it.user ?? {};
+    const name = user.fullName ?? it.name ?? "";
+    const email = user.email ?? it.email ?? "";
+    const phone = it.phone ?? user.phone ?? null;
+
+    let subjects: string[] | null = null;
+    if (Array.isArray(it.subjects)) {
+      subjects = it.subjects.map((s: any) => s?.name ?? s).filter(Boolean);
+    }
+
+    let assignedClasses: string[] | null = null;
+    // some APIs return classes, some return assignedClasses
+    const classesArr = it.classes ?? it.assignedClasses ?? [];
+    if (Array.isArray(classesArr) && classesArr.length > 0) {
+      assignedClasses = classesArr.map((c: any) => c?.name ?? c).filter(Boolean);
+    }
+
+    return {
+      id: it.id ?? user.id ?? "",
+      name,
+      email,
+      phone,
+      subjects,
+      assignedClasses,
+      invitedAt: it.invitedAt ?? null,
+    } as Teacher;
+  });
+
+  const total: number | undefined = data.total ?? data.totalCount ?? teachers.length;
+  const page: number | undefined = data.page ?? data.p ?? query.page;
+  const pageSize: number | undefined = data.pageSize ?? data.limit ?? query.pageSize;
+
+  return {
+    teachers,
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export type ClassItem = {
@@ -128,7 +170,19 @@ export async function fetchClasses(
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<ClassesResponse>(ADMIN_API.CLASSES, { params });
-  return res.data;
+  const data = res.data as any;
+
+  const classes: ClassItem[] = data.classes ?? data.items ?? [];
+  const total: number | undefined = data.total ?? data.totalCount ?? classes.length;
+  const page: number | undefined = data.page ?? data.p ?? query.page;
+  const pageSize: number | undefined = data.pageSize ?? data.limit ?? query.pageSize;
+
+  return {
+    classes,
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function createClass(payload: {
