@@ -14,6 +14,8 @@ export default function AdminSubjectsPage() {
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
   const load = useCallback(
     async (q?: SubjectsQuery) => {
       setLoading(true);
@@ -36,6 +38,14 @@ export default function AdminSubjectsPage() {
     const q: SubjectsQuery = { page, pageSize };
     void load(q);
   }, [page, pageSize, load]);
+
+  // Ensure current page is within available range when total changes
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(total / pageSize));
+    if (page > tp) {
+      setPage(tp);
+    }
+  }, [total, pageSize, page]);
 
   const [creatingOpen, setCreatingOpen] = useState(false);
 
@@ -151,13 +161,22 @@ export default function AdminSubjectsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button
-                  onClick={() => setPage(Math.max(1, page - 1))}
+                  onClick={() => {
+                    if (page > 1) setPage(page - 1);
+                  }}
                   disabled={page <= 1}
                 >
                   Previous
                 </Button>
                 <div className="text-sm text-slate-700">Page {page}</div>
-                <Button onClick={() => setPage(page + 1)}>Next</Button>
+                <Button
+                  onClick={() => {
+                    if (page < totalPages) setPage(page + 1);
+                  }}
+                  disabled={page >= totalPages}
+                >
+                  Next
+                </Button>
               </div>
             </div>
           </Card>

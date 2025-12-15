@@ -224,7 +224,19 @@ export async function fetchSubjects(
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<SubjectsResponse>(ADMIN_API.SUBJECTS, { params });
-  return res.data;
+  const data = res.data as any;
+
+  const subjects: Subject[] = data.subjects ?? data.items ?? [];
+  const total: number | undefined = data.total ?? data.totalCount ?? subjects.length;
+  const page: number | undefined = data.page ?? data.p ?? query.page;
+  const pageSize: number | undefined = data.pageSize ?? data.limit ?? query.pageSize;
+
+  return {
+    subjects,
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function createSubject(payload: { name: string; code: string }) {
