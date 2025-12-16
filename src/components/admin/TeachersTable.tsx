@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
+import TeacherDetailsDrawer from "./TeacherDetailsDrawer";
 import { Teacher } from "../../lib/adminApi";
 
 type Props = {
@@ -34,6 +35,22 @@ export default function TeachersTable({
     Math.ceil((total || teachers.length) / pageSize)
   );
 
+  // Drawer has been extracted to a separate component using shadcn Drawer.
+  // Table no longer controls drawer state; consumers should render TeacherDetailsDrawer.
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  function openDrawer(id: string) {
+    const t = teachers.find((x) => x.id === id) ?? null;
+    setSelectedTeacher(t);
+    setIsDrawerOpen(true);
+  }
+
+  function closeDrawer() {
+    setIsDrawerOpen(false);
+    setSelectedTeacher(null);
+  }
+
   if (loading) {
     return (
       <Card>
@@ -44,8 +61,6 @@ export default function TeachersTable({
                 <th className="text-left py-2">Name</th>
                 <th className="text-left py-2">Email</th>
                 <th className="text-left py-2">Phone</th>
-                <th className="text-left py-2">Subjects</th>
-                <th className="text-left py-2">Assigned Classes</th>
                 <th className="text-left py-2">Actions</th>
               </tr>
             </thead>
@@ -114,31 +129,55 @@ export default function TeachersTable({
               <th className="text-left py-2">Name</th>
               <th className="text-left py-2">Email</th>
               <th className="text-left py-2">Phone</th>
-              <th className="text-left py-2">Subjects</th>
-              <th className="text-left py-2">Assigned Classes</th>
               <th className="text-left py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {teachers.map((t) => (
               <tr key={t.id} className="border-t hover:bg-slate-50">
-                <td className="py-3">{t.name}</td>
-                <td className="py-3">{t.email}</td>
+                <td className="py-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      aria-label="View teacher details"
+                      title="View details"
+                      onClick={() => openDrawer(t.id)}
+                      className="rounded p-1 hover:bg-slate-100"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-slate-600"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zM9 8a1 1 0 112 0v5a1 1 0 11-2 0V8zm1-3a1.25 1.25 0 100 2.5A1.25 1.25 0 0010 5z" />
+                      </svg>
+                    </button>
+                    <div className="truncate font-medium text-slate-900">
+                      {t.name ?? "-"}
+                    </div>
+                  </div>
+                </td>
+                <td className="py-3">{t.email ?? "-"}</td>
                 <td className="py-3">{t.phone ?? "-"}</td>
                 <td className="py-3">
-                  {(t.subjects && t.subjects.join(", ")) ?? "-"}
-                </td>
-                <td className="py-3">
-                  {(t.assignedClasses && t.assignedClasses.join(", ")) ?? "-"}
-                </td>
-                <td className="py-3">
                   <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => onEdit?.(t.id)}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        const name = t.name ?? "-";
+                        window.alert(`Edit clicked for ${name}`);
+                        onEdit?.(t.id);
+                      }}
+                    >
                       Edit
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => onResendInvite?.(t.id)}
+                      onClick={() => {
+                        const name = t.name ?? "-";
+                        window.alert(`Resend Invite clicked for ${name}`);
+                        onResendInvite?.(t.id);
+                      }}
                     >
                       Resend Invite
                     </Button>
@@ -172,6 +211,18 @@ export default function TeachersTable({
           </Button>
         </div>
       </div>
+
+      {/* Drawer has been moved to a separate component: TeacherDetailsDrawer.
+          Consumers should import and control it externally. */}
+      <TeacherDetailsDrawer
+        isOpen={isDrawerOpen}
+        teacher={selectedTeacher}
+        onClose={closeDrawer}
+        onEdit={(id: string) => onEdit?.(id)}
+        onResendInvite={(id: string) => onResendInvite?.(id)}
+      />
     </Card>
   );
 }
+
+// Drawer is rendered above and controlled via state in this component.
