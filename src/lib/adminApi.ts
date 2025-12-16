@@ -92,7 +92,11 @@ export async function fetchTeachers(
   if (query.email) params.email = query.email;
   if (query.subject) params.subject = query.subject;
   if (query.page) params.page = query.page;
-  if (query.pageSize) params.pageSize = query.pageSize;
+  if (query.pageSize) {
+    params.pageSize = query.pageSize;
+    // some APIs expect `limit` instead of `pageSize`
+    params.limit = query.pageSize;
+  }
   const res = await API.get<TeachersResponse>(ADMIN_API.TEACHERS, {
     params,
     ...(config ?? {}),
@@ -112,11 +116,40 @@ export async function fetchTeachers(
       subjects = it.subjects.map((s: any) => s?.name ?? s).filter(Boolean);
     }
 
+    // handle assignment-based responses: some APIs return assignments array
+    // with className/classSection and subjectName fields
+    const assignments = Array.isArray(it.assignments) ? it.assignments : [];
+    if (assignments.length > 0) {
+      const subjFromAssignments = assignments
+        .map((a: any) => a?.subjectName ?? (a.subject ?? a.subject_id ?? null))
+        .filter(Boolean);
+      if (subjFromAssignments.length > 0) {
+        subjects = Array.from(new Set([...(subjects ?? []), ...subjFromAssignments]));
+      }
+    }
+
     let assignedClasses: string[] | null = null;
     // some APIs return classes, some return assignedClasses
     const classesArr = it.classes ?? it.assignedClasses ?? [];
     if (Array.isArray(classesArr) && classesArr.length > 0) {
       assignedClasses = classesArr.map((c: any) => c?.name ?? c).filter(Boolean);
+    }
+
+    // also support classes provided inside `assignments` objects
+    if (assignments.length > 0) {
+      const classesFromAssignments = assignments
+        .map((a: any) => {
+          const name = a?.className ?? a?.name ?? a?.class ?? null;
+          const section = a?.classSection ?? a?.section ?? null;
+          if (!name) return null;
+          return section ? `${name} - ${section}` : name;
+        })
+        .filter(Boolean);
+      if (classesFromAssignments.length > 0) {
+        assignedClasses = Array.from(
+          new Set([...(assignedClasses ?? []), ...classesFromAssignments])
+        );
+      }
     }
 
     return {
@@ -130,12 +163,28 @@ export async function fetchTeachers(
     } as Teacher;
   });
 
-  const total: number | undefined = data.total ?? data.totalCount ?? teachers.length;
-  const page: number | undefined = data.page ?? data.p ?? query.page;
+  // derive pagination values
+  let total: number | undefined = data.total ?? data.totalCount ?? teachers.length;
+  const page: number | undefined = data.page ?? data.p ?? query.page ?? 1;
   const pageSize: number | undefined = data.pageSize ?? data.limit ?? query.pageSize;
 
+  // If the API returned all items without pagination (no total provided)
+  // and the caller requested a page/pageSize, perform client-side slicing
+  // so the UI gets only the items for the requested page.
+  let finalTeachers = teachers;
+  if (
+    typeof pageSize === "number" &&
+    typeof query.page === "number" &&
+    (data.total === undefined && data.totalCount === undefined) &&
+    teachers.length > pageSize
+  ) {
+    total = teachers.length;
+    const start = (query.page - 1) * pageSize;
+    finalTeachers = teachers.slice(start, start + pageSize);
+  }
+
   return {
-    teachers,
+    teachers: finalTeachers,
     total,
     page,
     pageSize,
