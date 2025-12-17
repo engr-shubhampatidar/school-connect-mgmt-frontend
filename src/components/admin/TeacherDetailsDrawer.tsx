@@ -28,6 +28,35 @@ export default function TeacherDetailsDrawer({
 }: Props) {
   const name = teacher?.name ?? "Teacher details";
 
+  const formatItem = (item: unknown, idx: number) => {
+    if (item && typeof item === "object") {
+      const it = item as Record<string, unknown>;
+      const id = it.id ?? it._id ?? idx;
+      const nameVal =
+        (typeof it.name === "string" && it.name) ||
+        (typeof it.className === "string" && it.className) ||
+        (typeof it.subjectName === "string" && it.subjectName) ||
+        (typeof it.class === "string" && it.class) ||
+        null;
+      const section =
+        (typeof it.classSection === "string" && it.classSection) ||
+        (typeof it.section === "string" && it.section) ||
+        null;
+      let label = "";
+      if (nameVal)
+        label = section ? `${nameVal} - ${section}` : String(nameVal);
+      else {
+        try {
+          label = JSON.stringify(it);
+        } catch {
+          label = String(it as unknown as string);
+        }
+      }
+      return { key: String(id), label };
+    }
+    return { key: String(item ?? idx), label: String(item ?? "") };
+  };
+
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
@@ -80,14 +109,17 @@ export default function TeacherDetailsDrawer({
                 </h4>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {teacher.subjects && teacher.subjects.length > 0 ? (
-                    teacher.subjects.map((s, idx) => (
-                      <span
-                        key={s ?? idx}
-                        className="rounded bg-slate-100 px-2 py-1 text-sm text-slate-800"
-                      >
-                        {s}
-                      </span>
-                    ))
+                    teacher.subjects.map((s, idx) => {
+                      const { key, label } = formatItem(s, idx);
+                      return (
+                        <span
+                          key={key}
+                          className="rounded bg-slate-100 px-2 py-1 text-sm text-slate-800"
+                        >
+                          {label}
+                        </span>
+                      );
+                    })
                   ) : (
                     <div className="text-sm text-slate-600">-</div>
                   )}
@@ -101,11 +133,14 @@ export default function TeacherDetailsDrawer({
                 <div className="mt-2 space-y-2 text-sm text-slate-800">
                   {teacher.assignedClasses &&
                   teacher.assignedClasses.length > 0 ? (
-                    teacher.assignedClasses.map((c, idx) => (
-                      <div key={c ?? idx} className="rounded border px-3 py-2">
-                        {c}
-                      </div>
-                    ))
+                    teacher.assignedClasses.map((c, idx) => {
+                      const { key, label } = formatItem(c, idx);
+                      return (
+                        <div key={key} className="rounded border px-3 py-2">
+                          {label}
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="text-sm text-slate-600">-</div>
                   )}
@@ -119,7 +154,13 @@ export default function TeacherDetailsDrawer({
                 <div className="mt-2 text-sm text-slate-800">
                   {teacher.assignedClasses &&
                   teacher.assignedClasses.length > 0 ? (
-                    <div>Primary class: {teacher.assignedClasses[0]}</div>
+                    <div>
+                      Primary class:{" "}
+                      {(() => {
+                        const pc = (teacher.assignedClasses as unknown[])[0];
+                        return formatItem(pc, 0).label || "-";
+                      })()}
+                    </div>
                   ) : (
                     <div className="text-sm text-slate-600">-</div>
                   )}
