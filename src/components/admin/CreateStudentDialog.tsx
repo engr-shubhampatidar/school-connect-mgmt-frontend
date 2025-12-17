@@ -11,6 +11,7 @@ import { Input } from "../ui/Input";
 import { useToast } from "../ui/use-toast";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
+import type { ClassItem } from "@/lib/adminApi";
 
 const createStudentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -48,7 +49,7 @@ export default function CreateStudentDialog({
 }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
   const form = useForm<CreateStudentValues>({
     resolver: zodResolver(
@@ -65,42 +66,40 @@ export default function CreateStudentDialog({
         const res = await API.get<unknown>(ADMIN_API.CLASSES);
         if (!mounted) return;
         const data = res.data;
-        // Accept either an array or an object with a `classes` array
-        if (Array.isArray(data)) {
-          setClasses(data as { id: string; name: string }[]);
-        } else if (
-          data &&
-          typeof data === "object" &&
-          Array.isArray((data as Record<string, unknown>).classes)
-        ) {
-          setClasses(
-            (data as Record<string, unknown>).classes as {
-              id: string;
-              name: string;
-            }[]
-          );
-        } else if (
-          data &&
-          typeof data === "object" &&
-          Array.isArray((data as Record<string, unknown>).items)
-        ) {
-          setClasses(
-            (data as Record<string, unknown>).items as {
-              id: string;
-              name: string;
-            }[]
-          );
+        // Normalize classes from several possible shapes and include `section` when present
+        const normalize = (it: any): ClassItem => {
+          if (!it) return { id: "", name: "", section: null };
+          if (typeof it === "string") {
+            return { id: it, name: it, section: null };
+          }
+          const id = it.id ?? it._id ?? it.classId ?? "";
+          const name = it.name ?? it.className ?? it.title ?? "";
+          const section = it.section ?? it.classSection ?? null;
+          return { id, name, section };
+        };
+
+        let arr: any[] = [];
+        if (Array.isArray(data)) arr = data;
+        else if (data && typeof data === "object") {
+          if (Array.isArray((data as Record<string, unknown>).classes))
+            arr = (data as Record<string, unknown>).classes as any[];
+          else if (Array.isArray((data as Record<string, unknown>).items))
+            arr = (data as Record<string, unknown>).items as any[];
+        }
+
+        if (arr.length > 0) {
+          setClasses(arr.map(normalize));
         } else {
           setClasses([
-            { id: "class-1", name: "Class 1" },
-            { id: "class-2", name: "Class 2" },
+            { id: "class-1", name: "Class 1", section: null },
+            { id: "class-2", name: "Class 2", section: null },
           ]);
         }
       } catch {
         if (!mounted) return;
         setClasses([
-          { id: "class-1", name: "Class 1" },
-          { id: "class-2", name: "Class 2" },
+          { id: "class-1", name: "Class 1", section: null },
+          { id: "class-2", name: "Class 2", section: null },
         ]);
       }
     })();
@@ -213,6 +212,7 @@ export default function CreateStudentDialog({
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
+                      {c.section ? ` - ${c.section}` : ""}
                     </option>
                   ))}
                 </select>

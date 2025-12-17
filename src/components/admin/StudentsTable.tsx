@@ -120,7 +120,13 @@ export default function StudentsTable({
                 <td className="py-3">{s.name}</td>
                 <td className="py-3">{s.rollNo ?? "-"}</td>
                 <td className="py-3">
-                  {typeof s.class === "string" ? s.class : s.class?.name ?? "-"}
+                  {typeof s.class === "string"
+                    ? s.class
+                    : s.class
+                    ? `${s.class.name}${
+                        s.class.section ? ` - ${s.class.section}` : ""
+                      }`
+                    : "-"}
                 </td>
                 <td className="py-3">
                   {new Intl.DateTimeFormat(undefined, {

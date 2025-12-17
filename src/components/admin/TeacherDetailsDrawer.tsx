@@ -28,6 +28,33 @@ export default function TeacherDetailsDrawer({
 }: Props) {
   const name = teacher?.name ?? "Teacher details";
 
+  function renderSubjectLabel(s: any) {
+    if (!s && s !== 0) return "-";
+    if (typeof s === "string") return s;
+    return s.subjectName ?? s.name ?? s.subject ?? String(s);
+  }
+
+  function subjectKey(s: any, idx: number) {
+    if (!s && s !== 0) return `sub-${idx}`;
+    if (typeof s === "string") return s;
+    return s.subjectId ?? s.id ?? `sub-${idx}`;
+  }
+
+  function renderClassLabel(c: any) {
+    if (!c && c !== 0) return "-";
+    if (typeof c === "string") return c;
+    const name = c.className ?? c.name ?? c.class ?? null;
+    const section = c.classSection ?? c.section ?? null;
+    if (!name) return String(c);
+    return section ? `${name} - ${section}` : name;
+  }
+
+  function classKey(c: any, idx: number) {
+    if (!c && c !== 0) return `class-${idx}`;
+    if (typeof c === "string") return c;
+    return c.classId ?? c.id ?? `class-${idx}`;
+  }
+
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DrawerContent>
@@ -82,10 +109,10 @@ export default function TeacherDetailsDrawer({
                   {teacher.subjects && teacher.subjects.length > 0 ? (
                     teacher.subjects.map((s, idx) => (
                       <span
-                        key={s ?? idx}
+                        key={subjectKey(s, idx)}
                         className="rounded bg-slate-100 px-2 py-1 text-sm text-slate-800"
                       >
-                        {s}
+                        {renderSubjectLabel(s)}
                       </span>
                     ))
                   ) : (
@@ -102,8 +129,11 @@ export default function TeacherDetailsDrawer({
                   {teacher.assignedClasses &&
                   teacher.assignedClasses.length > 0 ? (
                     teacher.assignedClasses.map((c, idx) => (
-                      <div key={c ?? idx} className="rounded border px-3 py-2">
-                        {c}
+                      <div
+                        key={classKey(c, idx)}
+                        className="rounded border px-3 py-2"
+                      >
+                        {renderClassLabel(c)}
                       </div>
                     ))
                   ) : (
@@ -119,7 +149,10 @@ export default function TeacherDetailsDrawer({
                 <div className="mt-2 text-sm text-slate-800">
                   {teacher.assignedClasses &&
                   teacher.assignedClasses.length > 0 ? (
-                    <div>Primary class: {teacher.assignedClasses[0]}</div>
+                    <div>
+                      Primary class:{" "}
+                      {renderClassLabel(teacher.assignedClasses[0])}
+                    </div>
                   ) : (
                     <div className="text-sm text-slate-600">-</div>
                   )}
