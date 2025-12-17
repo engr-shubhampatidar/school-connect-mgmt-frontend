@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { fetchSubjects, Subject, SubjectsQuery } from "../../../lib/adminApi";
 import Button from "../../../components/ui/Button";
-import AddSubjectDialog from "./components/AddSubjectDialog";
+import AddSubjectDialog from "../../../components/admin/AddSubjectDialog";
 import Card from "../../../components/ui/Card";
 
 export default function AdminSubjectsPage() {
