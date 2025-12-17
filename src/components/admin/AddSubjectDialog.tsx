@@ -4,17 +4,12 @@ import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import Button from "../../../../components/ui/Button";
-import Card from "../../../../components/ui/Card";
-import {
-  Form,
-  FormField,
-  FormLabel,
-  FormMessage,
-} from "../../../../components/ui/Form";
-import { Input } from "../../../../components/ui/Input";
-import { useToast } from "../../../../components/ui/use-toast";
-import { createSubject } from "../../../../lib/adminApi";
+import Button from "../ui/Button";
+import Card from "../ui/Card";
+import { Form, FormField, FormLabel, FormMessage } from "../ui/Form";
+import { Input } from "../ui/Input";
+import { useToast } from "../ui/use-toast";
+import { createSubject } from "../../lib/adminApi";
 
 const createSubjectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
