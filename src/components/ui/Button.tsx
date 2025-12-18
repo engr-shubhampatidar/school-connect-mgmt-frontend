@@ -2,7 +2,7 @@
 import React from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "ghost";
+  variant?: "default" | "ghost" | "pill";
 };
 
 export function Button({
@@ -15,8 +15,9 @@ export function Button({
   const variants: Record<string, string> = {
     default: "bg-sky-600 text-white hover:bg-sky-700",
     ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
+    pill: "bg-gray-200",
   };
-  return (
+  return ( 
     <button
       className={`${base} ${variants[variant]} ${className}`.trim()}
       {...props}

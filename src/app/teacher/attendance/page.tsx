@@ -231,17 +231,17 @@ export default function TeacherAttendancePage() {
             <thead>
               <tr className="text-left text-slate-600">
                 <th className="py-2">Roll</th>
-                <th className="py-2">Name</th>
-                <th className="py-2">Status</th>
+                <th className="py-2 ">Name</th>
+                <th className="py-2 flex  items-center justify-center  max-w-[150px]">Status</th>
               </tr>
             </thead>
             <tbody>
               {students.map((s) => (
-                <tr key={s.studentId} className="border-t">
-                  <td className="py-2">{s.rollNo ?? "-"}</td>
-                  <td className="py-2">{s.name}</td>
-                  <td className="py-2">
-                    <div className="inline-flex items-center gap-2">
+                <tr key={s.studentId} className="border-t ">
+                  <td className="py-2 ">{s.rollNo ?? "-"}</td>
+                  <td className="py-2 min-w-[100px]">{s.name}</td>
+                  <td className="py-2 flex items-center justify-center max-w-[150px]">
+                    <div className="gap-2">
                       <AttendanceStatusBar
                         value={s.status || "PRESENT"}
                         onChange={(v) => setStatus(s.studentId, v)}
