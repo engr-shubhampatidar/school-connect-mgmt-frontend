@@ -2,6 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
+import AttendanceStatusBar, {
+  type AttendanceValue,
+} from "../../../components/ui/AttendanceStatusBar";
 import { useToast } from "../../../components/ui/use-toast";
 import {
   getTeacherClass,
@@ -15,7 +18,7 @@ type StudentRow = {
   studentId: string;
   name: string;
   rollNo?: string | number | null;
-  status: "PRESENT" | "ABSENT" | "LATE" | "";
+  status: AttendanceValue;
 };
 
 function todayISO() {
@@ -62,7 +65,7 @@ export default function TeacherAttendancePage() {
           studentId: s.id ?? s.studentId ?? "",
           name: s.name ?? "",
           rollNo: s.rollNo ?? s.roll_no ?? "",
-          status: "",
+          status: "PRESENT",
         }));
         setStudents(st);
       } catch (err: unknown) {
@@ -106,7 +109,10 @@ export default function TeacherAttendancePage() {
             {} as Record<string, string>
           );
           setStudents((s) =>
-            s.map((r) => ({ ...r, status: map[r.studentId] ?? "" }))
+            s.map((r) => ({
+              ...r,
+              status: (map[r.studentId] ?? "PRESENT") as AttendanceValue,
+            }))
           );
           setAttendanceExists(true);
         } else {
@@ -236,20 +242,11 @@ export default function TeacherAttendancePage() {
                   <td className="py-2">{s.name}</td>
                   <td className="py-2">
                     <div className="inline-flex items-center gap-2">
-                      <select
-                        value={s.status}
-                        onChange={(e) => {
-                          const v = e.target.value as StudentRow["status"];
-                          setStatus(s.studentId, v);
-                        }}
+                      <AttendanceStatusBar
+                        value={s.status || "PRESENT"}
+                        onChange={(v) => setStatus(s.studentId, v)}
                         disabled={attendanceExists}
-                        className="rounded-md border border-slate-200 px-2 py-1 text-sm"
-                      >
-                        <option value="">--</option>
-                        <option value="PRESENT">Present</option>
-                        <option value="ABSENT">Absent</option>
-                        <option value="LATE">Late</option>
-                      </select>
+                      />
                     </div>
                   </td>
                 </tr>
