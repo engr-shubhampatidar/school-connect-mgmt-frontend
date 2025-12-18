@@ -14,6 +14,18 @@ export const ADMIN_API = {
   SUBJECTS: "/api/admin/subjects",
 };
 
+export const TEACHER_API = {
+  LOGIN: "/api/teacher/auth/login",
+  ME: "/api/teacher/me",
+  CLASS: "/api/teacher/class",
+};
+
+export const ATTENDANCE_API = {
+  BASE: "/api/attendance",
+  CLASS: (classId: string) => `/api/attendance/class/${classId}`,
+  STUDENT: (studentId: string) => `/api/attendance/student/${studentId}`,
+};
+
 const routes = { BASE_URL, PUBLIC_API, ADMIN_API };
 
 export default routes;

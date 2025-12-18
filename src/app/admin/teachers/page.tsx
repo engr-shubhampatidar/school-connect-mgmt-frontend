@@ -43,12 +43,10 @@ export default function AdminTeachersPage() {
       } catch (err: unknown) {
         // ignore abort errors
         if (err instanceof Error) {
-          if (
-            (err as any).name === "CanceledError" ||
-            (err as any).code === "ERR_CANCELED"
-          ) {
-            return;
-          }
+          const e = err as unknown as Record<string, unknown>;
+          const name = typeof e.name === "string" ? e.name : undefined;
+          const code = typeof e.code === "string" ? e.code : undefined;
+          if (name === "CanceledError" || code === "ERR_CANCELED") return;
           setError(err.message);
         } else setError("Failed to load teachers");
       } finally {

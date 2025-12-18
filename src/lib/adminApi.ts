@@ -43,26 +43,36 @@ export async function fetchStudents(
   if (query.pageSize) params.pageSize = query.pageSize;
 
   const res = await API.get<StudentsResponse>(ADMIN_API.STUDENTS, { params });
-  const data = res.data as any;
+  const data = res.data as unknown;
 
-  const items: any[] = data.students ?? data.items ?? [];
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const items = (
+    Array.isArray(d.students)
+      ? d.students
+      : Array.isArray(d.items)
+      ? d.items
+      : []
+  ) as unknown[];
 
-  const students: Student[] = (items || []).map((it: any) => {
+  const students: Student[] = (items || []).map((it) => {
+    const itObj =
+      it && typeof it === "object" ? (it as Record<string, unknown>) : {};
     const rawClass =
-      it.currentClass ??
-      it.class ??
-      it.classId ??
-      it.class_id ??
-      it.classId ??
+      itObj.currentClass ??
+      itObj.class ??
+      itObj.classId ??
+      itObj.class_id ??
       null;
 
     let classVal: Student["class"] = null;
     if (rawClass) {
       if (typeof rawClass === "object") {
+        const rc = rawClass as Record<string, unknown>;
         classVal = {
-          id: rawClass.id ?? rawClass._id ?? rawClass.classId ?? "",
-          name: rawClass.name ?? rawClass.className ?? "",
-          section: rawClass.section ?? rawClass.classSection ?? null,
+          id: (rc.id ?? rc._id ?? rc.classId ?? "") as string,
+          name: (rc.name ?? rc.className ?? "") as string,
+          section: (rc.section ?? rc.classSection ?? null) as string | null,
         };
       } else if (typeof rawClass === "string") {
         classVal = rawClass;
@@ -70,11 +80,19 @@ export async function fetchStudents(
     }
 
     return {
-      id: it.id ?? it._id ?? "",
-      name: it.name ?? it.fullName ?? it.user?.fullName ?? "",
-      rollNo: it.rollNo ?? it.roll_no ?? it.rollNumber ?? null,
+      id: (itObj.id ?? itObj._id ?? "") as string,
+      name: (itObj.name ??
+        itObj.fullName ??
+        (itObj.user && (itObj.user as Record<string, unknown>).fullName) ??
+        "") as string,
+      rollNo: (itObj.rollNo ?? itObj.roll_no ?? itObj.rollNumber ?? null) as
+        | string
+        | number
+        | null,
       class: classVal,
-      createdAt: it.createdAt ?? it.created_at ?? new Date().toISOString(),
+      createdAt: (itObj.createdAt ??
+        itObj.created_at ??
+        new Date().toISOString()) as string,
     } as Student;
   });
 
@@ -135,28 +153,54 @@ export async function fetchTeachers(
     params,
     ...(config ?? {}),
   });
-  const data = res.data as any;
+  const data = res.data as unknown;
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const items = (
+    Array.isArray(d.teachers)
+      ? d.teachers
+      : Array.isArray(d.items)
+      ? d.items
+      : []
+  ) as unknown[];
 
-  const items: any[] = data.teachers ?? data.items ?? [];
-
-  const teachers: Teacher[] = (items || []).map((it: any) => {
-    const user = it.user ?? {};
-    const name = user.fullName ?? it.name ?? "";
-    const email = user.email ?? it.email ?? "";
-    const phone = it.phone ?? user.phone ?? null;
+  const teachers: Teacher[] = (items || []).map((it) => {
+    const itObj =
+      it && typeof it === "object" ? (it as Record<string, unknown>) : {};
+    const user =
+      itObj.user && typeof itObj.user === "object"
+        ? (itObj.user as Record<string, unknown>)
+        : {};
+    const name = (user.fullName ?? itObj.name ?? "") as string;
+    const email = (user.email ?? itObj.email ?? "") as string;
+    const phone = (itObj.phone ?? user.phone ?? null) as string | null;
 
     let subjects: string[] | null = null;
-    if (Array.isArray(it.subjects)) {
-      subjects = it.subjects.map((s: any) => s?.name ?? s).filter(Boolean);
+    if (Array.isArray(itObj.subjects)) {
+      subjects = (itObj.subjects as unknown[])
+        .map((s) =>
+          s && typeof s === "object"
+            ? (s as Record<string, unknown>).name ?? null
+            : typeof s === "string"
+            ? s
+            : null
+        )
+        .filter(Boolean) as string[];
     }
 
-    // handle assignment-based responses: some APIs return assignments array
-    // with className/classSection and subjectName fields
-    const assignments = Array.isArray(it.assignments) ? it.assignments : [];
+    const assignments = Array.isArray(itObj.assignments)
+      ? (itObj.assignments as unknown[])
+      : [];
     if (assignments.length > 0) {
       const subjFromAssignments = assignments
-        .map((a: any) => a?.subjectName ?? a.subject ?? a.subject_id ?? null)
-        .filter(Boolean);
+        .map((a) => {
+          if (!a || typeof a !== "object") return null;
+          const ao = a as Record<string, unknown>;
+          return (ao.subjectName ?? ao.subject ?? ao.subject_id) as
+            | string
+            | null;
+        })
+        .filter(Boolean) as string[];
       if (subjFromAssignments.length > 0) {
         subjects = Array.from(
           new Set([...(subjects ?? []), ...subjFromAssignments])
@@ -165,24 +209,32 @@ export async function fetchTeachers(
     }
 
     let assignedClasses: string[] | null = null;
-    // some APIs return classes, some return assignedClasses
-    const classesArr = it.classes ?? it.assignedClasses ?? [];
+    const classesArr = (itObj.classes ?? itObj.assignedClasses) as
+      | unknown[]
+      | undefined;
     if (Array.isArray(classesArr) && classesArr.length > 0) {
       assignedClasses = classesArr
-        .map((c: any) => c?.name ?? c)
-        .filter(Boolean);
+        .map((c) => {
+          if (!c) return null;
+          if (typeof c === "object")
+            return (c as Record<string, unknown>).name as string | null;
+          if (typeof c === "string") return c;
+          return null;
+        })
+        .filter(Boolean) as string[];
     }
 
-    // also support classes provided inside `assignments` objects
     if (assignments.length > 0) {
       const classesFromAssignments = assignments
-        .map((a: any) => {
-          const name = a?.className ?? a?.name ?? a?.class ?? null;
-          const section = a?.classSection ?? a?.section ?? null;
+        .map((a) => {
+          if (!a || typeof a !== "object") return null;
+          const ao = a as Record<string, unknown>;
+          const name = (ao.className ?? ao.name ?? ao.class) as string | null;
+          const section = (ao.classSection ?? ao.section) as string | null;
           if (!name) return null;
           return section ? `${name} - ${section}` : name;
         })
-        .filter(Boolean);
+        .filter(Boolean) as string[];
       if (classesFromAssignments.length > 0) {
         assignedClasses = Array.from(
           new Set([...(assignedClasses ?? []), ...classesFromAssignments])
@@ -191,13 +243,13 @@ export async function fetchTeachers(
     }
 
     return {
-      id: it.id ?? user.id ?? "",
+      id: (itObj.id ?? user.id ?? "") as string,
       name,
       email,
       phone,
       subjects,
       assignedClasses,
-      invitedAt: it.invitedAt ?? null,
+      invitedAt: (itObj.invitedAt ?? null) as string | null,
     } as Teacher;
   });
 
@@ -260,14 +312,14 @@ export async function fetchClasses(
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<ClassesResponse>(ADMIN_API.CLASSES, { params });
-  const data = res.data as any;
+  const data = res.data as unknown;
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
-  const classes: ClassItem[] = data.classes ?? data.items ?? [];
-  const total: number | undefined =
-    data.total ?? data.totalCount ?? classes.length;
-  const page: number | undefined = data.page ?? data.p ?? query.page;
-  const pageSize: number | undefined =
-    data.pageSize ?? data.limit ?? query.pageSize;
+  const classes: ClassItem[] = (d.classes ?? d.items ?? []) as ClassItem[];
+  const total: number | undefined = d.total ?? d.totalCount ?? classes.length;
+  const page: number | undefined = d.page ?? d.p ?? query.page;
+  const pageSize: number | undefined = d.pageSize ?? d.limit ?? query.pageSize;
 
   return {
     classes,
@@ -316,14 +368,14 @@ export async function fetchSubjects(
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<SubjectsResponse>(ADMIN_API.SUBJECTS, { params });
-  const data = res.data as any;
+  const data = res.data as unknown;
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
-  const subjects: Subject[] = data.subjects ?? data.items ?? [];
-  const total: number | undefined =
-    data.total ?? data.totalCount ?? subjects.length;
-  const page: number | undefined = data.page ?? data.p ?? query.page;
-  const pageSize: number | undefined =
-    data.pageSize ?? data.limit ?? query.pageSize;
+  const subjects: Subject[] = (d.subjects ?? d.items ?? []) as Subject[];
+  const total: number | undefined = d.total ?? d.totalCount ?? subjects.length;
+  const page: number | undefined = d.page ?? d.p ?? query.page;
+  const pageSize: number | undefined = d.pageSize ?? d.limit ?? query.pageSize;
 
   return {
     subjects,
