@@ -122,6 +122,13 @@ export async function fetchAttendanceForClassDate(
   return res.data;
 }
 
+export async function fetchAttendanceByClass(
+  classId: string
+): Promise<unknown> {
+  const res = await TAPI.get<unknown>(ATTENDANCE_API.CLASS(classId));
+  return res.data;
+}
+
 export async function markAttendance(payload: {
   classId: string;
   date: string;
