@@ -112,28 +112,34 @@ export default function CreateTeacherDialog({
         if (!mounted) return;
         const cdata = cRes.data;
         const sdata = sRes.data;
-        const normalize = (arr: any[]) =>
-          arr.map((it) => ({
-            id: String(
-              it.id ?? it._id ?? it.uuid ?? it.value ?? it.key ?? it.name
-            ),
-            name: String(it.name ?? it.title ?? it.value),
-          }));
+        const normalize = (arr: unknown[]) =>
+          arr.map((it) => {
+            if (it && typeof it === "object") {
+              const o = it as Record<string, unknown>;
+              return {
+                id: String(
+                  o.id ?? o._id ?? o.uuid ?? o.value ?? o.key ?? o.name ?? ""
+                ),
+                name: String(o.name ?? o.title ?? o.value ?? ""),
+              };
+            }
+            return { id: String(it ?? ""), name: String(it ?? "") };
+          });
         setClasses(
           Array.isArray(cdata)
-            ? normalize(cdata)
-            : Array.isArray((cdata as any).items)
-            ? normalize((cdata as any).items)
+            ? normalize(cdata as unknown[])
+            : Array.isArray((cdata as Record<string, unknown>).items)
+            ? normalize((cdata as Record<string, unknown>).items as unknown[])
             : []
         );
         setSubjects(
           Array.isArray(sdata)
-            ? normalize(sdata)
-            : Array.isArray((sdata as any).items)
-            ? normalize((sdata as any).items)
+            ? normalize(sdata as unknown[])
+            : Array.isArray((sdata as Record<string, unknown>).items)
+            ? normalize((sdata as Record<string, unknown>).items as unknown[])
             : []
         );
-      } catch (e) {
+      } catch {
         // fallback to empty lists
         if (!mounted) return;
         setClasses([]);
@@ -171,7 +177,7 @@ export default function CreateTeacherDialog({
       onCreated?.();
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        const data = err.response?.data as Record<string, any> | undefined;
+        const data = err.response?.data as Record<string, unknown> | undefined;
         if (data?.fieldErrors && typeof data.fieldErrors === "object") {
           const fe = data.fieldErrors as Record<string, unknown>;
           Object.entries(fe).forEach(([k, v]) => {
@@ -179,7 +185,7 @@ export default function CreateTeacherDialog({
               k === "name" ? "fullName" : k
             ) as keyof CreateTeacherValues;
             try {
-              form.setError(field as any, {
+              form.setError(field as unknown as keyof CreateTeacherValues, {
                 type: "server",
                 message: String(v),
               });
@@ -309,8 +315,10 @@ export default function CreateTeacherDialog({
                     />
                     <FormMessage>
                       {
-                        (form.formState.errors as any).subjects
-                          ?.message as React.ReactNode
+                        (
+                          (form.formState.errors as Record<string, unknown>)
+                            .subjects as Record<string, unknown> | undefined
+                        )?.message as React.ReactNode
                       }
                     </FormMessage>
                   </div>
@@ -346,8 +354,12 @@ export default function CreateTeacherDialog({
                         />
                         <FormMessage>
                           {
-                            (form.formState.errors as any).classTeacher
-                              ?.message as React.ReactNode
+                            (
+                              (form.formState.errors as Record<string, unknown>)
+                                .classTeacher as
+                                | Record<string, unknown>
+                                | undefined
+                            )?.message as React.ReactNode
                           }
                         </FormMessage>
                       </div>
@@ -376,9 +388,9 @@ export default function CreateTeacherDialog({
                                 `assignClassSubjects.${idx}.classId`
                               ) ?? ""
                             }
-                            onChange={(v) =>
+                            onChange={(v: string) =>
                               form.setValue(
-                                `assignClassSubjects.${idx}.classId` as any,
+                                `assignClassSubjects.${idx}.classId` as unknown as keyof CreateTeacherValues,
                                 v
                               )
                             }
@@ -386,23 +398,32 @@ export default function CreateTeacherDialog({
                           />
                         </div>
                         <div className="col-span-5">
-                          <Select
-                            options={subjects.filter((s) =>
+                          {(() => {
+                            const availableSubjects = subjects.filter((s) =>
                               (form.watch("subjects") ?? []).includes(s.id)
-                            )}
-                            value={
-                              form.watch(
-                                `assignClassSubjects.${idx}.subjectId`
-                              ) ?? ""
-                            }
-                            onChange={(v) =>
-                              form.setValue(
-                                `assignClassSubjects.${idx}.subjectId` as any,
-                                v
-                              )
-                            }
-                            placeholder="Select subject (optional)"
-                          />
+                            );
+                            const opts =
+                              availableSubjects.length > 0
+                                ? availableSubjects
+                                : [{ id: "", name: "Not available" }];
+                            return (
+                              <Select
+                                options={opts}
+                                value={
+                                  form.watch(
+                                    `assignClassSubjects.${idx}.subjectId`
+                                  ) ?? ""
+                                }
+                                onChange={(v: string) =>
+                                  form.setValue(
+                                    `assignClassSubjects.${idx}.subjectId` as unknown as keyof CreateTeacherValues,
+                                    v
+                                  )
+                                }
+                                placeholder="Select subject (optional)"
+                              />
+                            );
+                          })()}
                         </div>
                         <div className="col-span-2 flex gap-2">
                           <Button
@@ -428,8 +449,12 @@ export default function CreateTeacherDialog({
                     </div>
                     <FormMessage>
                       {
-                        (form.formState.errors as any).assignClassSubjects
-                          ?.message as React.ReactNode
+                        (
+                          (form.formState.errors as Record<string, unknown>)
+                            .assignClassSubjects as
+                            | Record<string, unknown>
+                            | undefined
+                        )?.message as React.ReactNode
                       }
                     </FormMessage>
                   </div>

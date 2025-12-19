@@ -117,7 +117,19 @@ export type Teacher = {
   phone?: string | null;
   subjects?: string[] | null;
   assignedClasses?: string[] | null;
+  classTeacher?: { id: string; name: string; section?: string | null } | null;
+  classes?: TeacherClassRaw[] | null;
   invitedAt?: string | null;
+};
+
+export type TeacherClassRaw = {
+  classId?: string;
+  className?: string;
+  classSection?: string | null;
+  subjectName?: string | null;
+  id?: string;
+  name?: string;
+  section?: string | null;
 };
 
 export type TeachersResponse = {
@@ -216,12 +228,37 @@ export async function fetchTeachers(
       assignedClasses = classesArr
         .map((c) => {
           if (!c) return null;
-          if (typeof c === "object")
-            return (c as Record<string, unknown>).name as string | null;
+          if (typeof c === "object") {
+            const co = c as Record<string, unknown>;
+            const name = (co.className ?? co.name ?? co.class ?? null) as
+              | string
+              | null;
+            const section = (co.classSection ?? co.section ?? null) as
+              | string
+              | null;
+            const subject = (co.subjectName ?? co.subject ?? null) as
+              | string
+              | null;
+            if (!name) return null;
+            return section
+              ? `${name} - ${section}${subject ? ` (${subject})` : ""}`
+              : `${name}${subject ? ` (${subject})` : ""}`;
+          }
           if (typeof c === "string") return c;
           return null;
         })
         .filter(Boolean) as string[];
+    }
+
+    // map single class teacher object if present
+    let classTeacher: { id: string; name: string; section?: string | null } | null = null;
+    const ct = itObj.classTeacher ?? itObj.class_teacher ?? itObj.classTeacherId ?? null;
+    if (ct && typeof ct === "object") {
+      const cto = ct as Record<string, unknown>;
+      const id = (cto.classId ?? cto.id ?? cto._id ?? "") as string;
+      const name = (cto.className ?? cto.name ?? "") as string;
+      const section = (cto.classSection ?? cto.section ?? null) as string | null;
+      if (name) classTeacher = { id, name, section };
     }
 
     if (assignments.length > 0) {
@@ -249,6 +286,8 @@ export async function fetchTeachers(
       phone,
       subjects,
       assignedClasses,
+      classes: Array.isArray(classesArr) ? (classesArr as TeacherClassRaw[]) : null,
+      classTeacher,
       invitedAt: (itObj.invitedAt ?? null) as string | null,
     } as Teacher;
   });

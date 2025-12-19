@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
@@ -50,27 +51,28 @@ export default function TeacherDashboardPage() {
         if (me) setTeacher(me);
 
         // getTeacherClass may return either { class, students } or raw class
-        const res = (await getTeacherClass()) as unknown as
-          | ApiResponse
-          | TeacherClass;
+        const raw = (await getTeacherClass()) as unknown;
         if (!mounted) return;
 
-        if (res && typeof res === "object" && "class" in (res as any)) {
-          const parsed = res as ApiResponse;
-          setKlass((parsed.class ?? null) as TeacherClass | null);
-          setStudents(parsed.students ?? []);
-        } else {
-          // legacy: response itself is a class and may have students
-          const parsed = res as TeacherClass & {
-            students?: ApiResponse["students"];
-          };
-          setKlass(parsed as TeacherClass);
-          setStudents(parsed.students ?? []);
+        if (raw && typeof raw === "object") {
+          const r = raw as Record<string, unknown>;
+          if ("class" in r) {
+            const parsed = r as ApiResponse;
+            setKlass((parsed.class ?? null) as TeacherClass | null);
+            setStudents(parsed.students ?? []);
+          } else {
+            // legacy: response itself is a class and may have students
+            const parsed = raw as TeacherClass & {
+              students?: ApiResponse["students"];
+            };
+            setKlass(parsed as TeacherClass);
+            setStudents(parsed.students ?? []);
+          }
         }
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          // @ts-expect-error
+          // @ts-expect-error -- err may have `message` string property
           message = (err as { message?: string }).message ?? message;
         }
         toastRef.current?.({
@@ -162,14 +164,13 @@ export default function TeacherDashboardPage() {
                 aria-label={`Open ${s.name ?? "student"} profile`}
                 type="button"
               >
-                <img
+                {/* <Image
                   src={s.photoUrl ?? FALLBACK_IMG}
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG;
-                  }}
                   alt={s.name ? `${s.name} photo` : "Student photo"}
+                  width={48}
+                  height={48}
                   className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                />
+                /> */}
                 <div>
                   <div className="text-sm font-medium">
                     {s.name ?? "Unnamed"}

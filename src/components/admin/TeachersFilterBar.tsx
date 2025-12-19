@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
+import Select from "../ui/Select";
 
 export type TeachersFilters = {
   search?: string;
@@ -69,16 +70,17 @@ export default function TeachersFilterBar({
 
         <div className="w-48">
           <label className="sr-only">Subject</label>
-          <select
+          <Select
+            options={[
+              { id: "", name: "All subjects" },
+              { id: "Mathematics", name: "Mathematics" },
+              { id: "Science", name: "Science" },
+              { id: "English", name: "English" },
+            ]}
             value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="block w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-500"
-          >
-            <option value="">All subjects</option>
-            <option value="Mathematics">Mathematics</option>
-            <option value="Science">Science</option>
-            <option value="English">English</option>
-          </select>
+            onChange={(v) => setSubject(v)}
+            placeholder="All subjects"
+          />
         </div>
 
         <div className="flex items-center gap-2">

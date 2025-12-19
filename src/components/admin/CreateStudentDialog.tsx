@@ -6,8 +6,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
-import { Form, FormField, FormLabel, FormMessage } from "../ui/Form";
+import {
+  Form,
+  FormField,
+  FormLabel,
+  FormMessage,
+  FormControl,
+} from "../ui/Form";
 import { Input } from "../ui/Input";
+import Select from "../ui/Select";
+import { Controller } from "react-hook-form";
 import { useToast } from "../ui/use-toast";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
@@ -67,24 +75,29 @@ export default function CreateStudentDialog({
         if (!mounted) return;
         const data = res.data;
         // Normalize classes from several possible shapes and include `section` when present
-        const normalize = (it: any): ClassItem => {
+        const normalize = (it: unknown): ClassItem => {
           if (!it) return { id: "", name: "", section: null };
           if (typeof it === "string") {
             return { id: it, name: it, section: null };
           }
-          const id = it.id ?? it._id ?? it.classId ?? "";
-          const name = it.name ?? it.className ?? it.title ?? "";
-          const section = it.section ?? it.classSection ?? null;
-          return { id, name, section };
+          if (typeof it === "object") {
+            const o = it as Record<string, unknown>;
+            const id = (o.id ?? o._id ?? o.classId ?? "") as string;
+            const name = (o.name ?? o.className ?? o.title ?? "") as string;
+            const section = (o.section ?? o.classSection ?? null) as
+              | string
+              | null;
+            return { id, name, section };
+          }
+          return { id: "", name: "", section: null };
         };
 
-        let arr: any[] = [];
-        if (Array.isArray(data)) arr = data;
+        let arr: unknown[] = [];
+        if (Array.isArray(data)) arr = data as unknown[];
         else if (data && typeof data === "object") {
-          if (Array.isArray((data as Record<string, unknown>).classes))
-            arr = (data as Record<string, unknown>).classes as any[];
-          else if (Array.isArray((data as Record<string, unknown>).items))
-            arr = (data as Record<string, unknown>).items as any[];
+          const d = data as Record<string, unknown>;
+          if (Array.isArray(d.classes)) arr = d.classes as unknown[];
+          else if (Array.isArray(d.items)) arr = d.items as unknown[];
         }
 
         if (arr.length > 0) {
@@ -204,18 +217,25 @@ export default function CreateStudentDialog({
 
               <FormField>
                 <FormLabel>Class</FormLabel>
-                <select
-                  className="block w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-500"
-                  {...form.register("classId")}
-                >
-                  <option value="">Select class</option>
-                  {classes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                      {c.section ? ` - ${c.section}` : ""}
-                    </option>
-                  ))}
-                </select>
+                <FormControl>
+                  <Controller
+                    control={form.control}
+                    name="classId"
+                    render={({ field }) => (
+                      <Select
+                        options={classes.map((c) => ({
+                          id: c.id,
+                          name: `${c.name}${
+                            c.section ? ` - ${c.section}` : ""
+                          }`,
+                        }))}
+                        value={field.value ?? ""}
+                        onChange={(v) => field.onChange(v)}
+                        placeholder="Select class"
+                      />
+                    )}
+                  />
+                </FormControl>
                 <FormMessage>
                   {form.formState.errors.classId?.message as React.ReactNode}
                 </FormMessage>

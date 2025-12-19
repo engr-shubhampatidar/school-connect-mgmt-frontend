@@ -132,7 +132,6 @@ export default function AdminSubjectsPage() {
                   <tr>
                     <th className="text-left py-2">Subject Name</th>
                     <th className="text-left py-2">Subject Code</th>
-                    <th className="text-left py-2">Created</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -140,15 +139,6 @@ export default function AdminSubjectsPage() {
                     <tr key={s.id} className="border-t hover:bg-slate-50">
                       <td className="py-3">{s.name}</td>
                       <td className="py-3">{s.code}</td>
-                      <td className="py-3">
-                        {s.createdAt
-                          ? new Intl.DateTimeFormat(undefined, {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            }).format(new Date(s.createdAt))
-                          : "-"}
-                      </td>
                     </tr>
                   ))}
                 </tbody>

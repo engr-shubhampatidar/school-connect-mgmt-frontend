@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
 import AttendanceStatusBar, {
@@ -27,8 +27,8 @@ function todayISO() {
 
 export default function TeacherAttendancePage() {
   const { toast } = useToast();
-  const toastRef = React.useRef(toast);
-  React.useEffect(() => {
+  const toastRef = useRef(toast);
+  useEffect(() => {
     toastRef.current = toast;
   }, [toast]);
   const [loading, setLoading] = useState(true);
@@ -50,28 +50,34 @@ export default function TeacherAttendancePage() {
       try {
         const res = await getTeacherClass();
         if (!mounted) return;
-        // support both older shape (TeacherClass) and new shape { class, students }
-        let clsData: TeacherClass;
-        let studentsArr: Array<any> = [];
-        if (res && typeof res === "object" && "class" in (res as any)) {
-          clsData = (res as any).class as TeacherClass;
-          studentsArr = (res as any).students ?? [];
-        } else {
-          clsData = res as TeacherClass;
-          studentsArr = (clsData.students ?? []) as Array<any>;
-        }
-        setKlass(clsData);
-        const st = (studentsArr ?? []).map((s: any) => ({
-          studentId: s.id ?? s.studentId ?? "",
-          name: s.name ?? "",
-          rollNo: s.rollNo ?? s.roll_no ?? "",
-          status: "PRESENT",
-        }));
+        const r = res as unknown as Record<string, unknown> | null;
+        const clsData =
+          r && typeof r === "object" && "class" in r
+            ? (r.class as unknown)
+            : (res as unknown);
+        const studentsArr = Array.isArray(
+          (r as Record<string, unknown> | null)?.students
+        )
+          ? ((r as Record<string, unknown>)!.students as unknown[])
+          : Array.isArray(
+              (clsData as Record<string, unknown> | undefined)?.students
+            )
+          ? ((clsData as Record<string, unknown>)!.students as unknown[])
+          : [];
+        setKlass(clsData as TeacherClass);
+        const st = (studentsArr ?? []).map((s: unknown) => {
+          const so = (s as Record<string, unknown>) ?? {};
+          return {
+            studentId: (so.id ?? so.studentId ?? "") as string,
+            name: (so.name ?? "") as string,
+            rollNo: (so.rollNo ?? so.roll_no ?? "") as string,
+            status: "PRESENT" as AttendanceValue,
+          };
+        });
         setStudents(st);
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          // @ts-expect-error -- guarded above
           message = (err as { message?: string }).message ?? message;
         }
         toastRef.current?.({
@@ -91,14 +97,17 @@ export default function TeacherAttendancePage() {
 
   useEffect(() => {
     if (!klass?.id) return;
+    const classId = klass.id;
     let mounted = true;
     async function loadAttendance() {
       try {
-        const data = await fetchAttendanceForClassDate(klass.id, date);
+        const data = (await fetchAttendanceForClassDate(classId, date)) as
+          | { students?: unknown[] }
+          | undefined;
         if (!mounted) return;
-        if (Array.isArray(data?.students) && data.students.length > 0) {
-          const map = data.students.reduce(
-            (acc: Record<string, string>, cur) => {
+        if (data && Array.isArray(data.students) && data.students.length > 0) {
+          const map = (data.students as unknown[]).reduce(
+            (acc: Record<string, string>, cur: unknown) => {
               const id =
                 (cur as { studentId?: string; id?: string }).studentId ??
                 (cur as { studentId?: string; id?: string }).id;
@@ -168,7 +177,9 @@ export default function TeacherAttendancePage() {
         date,
         students: students.map((s) => ({
           studentId: s.studentId,
-          status: s.status || "ABSENT",
+          // backend currently accepts only PRESENT or ABSENT
+          // map LATE -> PRESENT to avoid validation errors
+          status: s.status === "LATE" ? "PRESENT" : s.status || "ABSENT",
         })),
       };
       await markAttendance(payload);
@@ -232,7 +243,9 @@ export default function TeacherAttendancePage() {
               <tr className="text-left text-slate-600">
                 <th className="py-2">Roll</th>
                 <th className="py-2 ">Name</th>
-                <th className="py-2 flex  items-center justify-center  max-w-[150px]">Status</th>
+                <th className="py-2 flex  items-center justify-center  max-w-[150px]">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>

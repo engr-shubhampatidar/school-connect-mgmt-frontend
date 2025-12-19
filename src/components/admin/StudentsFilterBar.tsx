@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
+import Select from "../ui/Select";
 
 export type StudentsFilters = {
   search?: string;
@@ -61,29 +62,31 @@ export default function StudentsFilterBar({
 
         <div className="w-48">
           <label className="sr-only">Class</label>
-          <select
+          <Select
+            options={[
+              { id: "", name: "All classes" },
+              { id: "Class 1", name: "Class 1" },
+              { id: "Class 2", name: "Class 2" },
+              { id: "Class 3", name: "Class 3" },
+            ]}
             value={klass}
-            onChange={(e) => setKlass(e.target.value)}
-            className="block w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-500"
-          >
-            <option value="">All classes</option>
-            <option value="Class 1">Class 1</option>
-            <option value="Class 2">Class 2</option>
-            <option value="Class 3">Class 3</option>
-          </select>
+            onChange={(v) => setKlass(v)}
+            placeholder="All classes"
+          />
         </div>
 
         <div className="w-48">
           <label className="sr-only">Status</label>
-          <select
+          <Select
+            options={[
+              { id: "", name: "Any status" },
+              { id: "active", name: "Active" },
+              { id: "inactive", name: "Inactive" },
+            ]}
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="block w-full rounded-md border border-slate-200 px-3 py-2 text-sm focus:border-sky-500"
-          >
-            <option value="">Any status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+            onChange={(v) => setStatus(v)}
+            placeholder="Any status"
+          />
         </div>
 
         <div className="flex items-center gap-2">

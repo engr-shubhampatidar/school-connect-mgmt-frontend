@@ -131,16 +131,43 @@ export default function TeacherDetailsDrawer({
                   Classes
                 </h4>
                 <div className="mt-2 space-y-2 text-sm text-slate-800">
-                  {teacher.assignedClasses &&
-                  teacher.assignedClasses.length > 0 ? (
-                    teacher.assignedClasses.map((c, idx) => {
-                      const { key, label } = formatItem(c, idx);
-                      return (
-                        <div key={key} className="rounded border px-3 py-2">
-                          {label}
+                  {(teacher.assignedClasses &&
+                    teacher.assignedClasses.length > 0) ||
+                  (Array.isArray(teacher.classes) &&
+                    teacher.classes.length > 0) ? (
+                    // prefer assignedClasses (strings), else raw classes array
+                    teacher.assignedClasses &&
+                    teacher.assignedClasses.length > 0 ? (
+                      teacher.assignedClasses.map((c, idx) => (
+                        <div
+                          key={`${c}-${idx}`}
+                          className="rounded border px-3 py-2"
+                        >
+                          {c}
                         </div>
-                      );
-                    })
+                      ))
+                    ) : (
+                      teacher.classes!.map((c, idx: number) => {
+                        const name = c?.className ?? c?.name ?? "";
+                        const section = c?.classSection ?? c?.section ?? null;
+                        const subject = c?.subjectName ?? null;
+                        const label = name
+                          ? section
+                            ? `${name} - ${section}${
+                                subject ? ` (${subject})` : ""
+                              }`
+                            : `${name}${subject ? ` (${subject})` : ""}`
+                          : "-";
+                        return (
+                          <div
+                            key={String(c?.classId ?? c?.id ?? idx)}
+                            className="rounded border px-3 py-2"
+                          >
+                            {label}
+                          </div>
+                        );
+                      })
+                    )
                   ) : (
                     <div className="text-sm text-slate-600">-</div>
                   )}
@@ -149,20 +176,37 @@ export default function TeacherDetailsDrawer({
 
               <section>
                 <h4 className="text-sm font-semibold text-slate-700">
-                  Primary Class
+                  Assigned Class
                 </h4>
                 <div className="mt-2 text-sm text-slate-800">
-                  {teacher.assignedClasses &&
-                  teacher.assignedClasses.length > 0 ? (
+                  {teacher.classTeacher ? (
                     <div>
-                      Primary class:{" "}
-                      {(() => {
-                        const pc = (teacher.assignedClasses as unknown[])[0];
-                        return formatItem(pc, 0).label || "-";
-                      })()}
+                      {teacher.classTeacher.name}
+                      {teacher.classTeacher.section
+                        ? ` - ${teacher.classTeacher.section}`
+                        : ""}
                     </div>
+                  ) : teacher.assignedClasses &&
+                    teacher.assignedClasses.length > 0 ? (
+                    <div>{teacher.assignedClasses[0]}</div>
+                  ) : Array.isArray(teacher.classes) &&
+                    teacher.classes.length > 0 ? (
+                    (() => {
+                      const c = teacher.classes![0];
+                      const name = c?.className ?? c?.name ?? "";
+                      const section = c?.classSection ?? c?.section ?? null;
+                      return (
+                        <div>
+                          {name
+                            ? section
+                              ? `${name} - ${section}`
+                              : name
+                            : "-"}
+                        </div>
+                      );
+                    })()
                   ) : (
-                    <div className="text-sm text-slate-600">-</div>
+                    <div className="text-sm text-slate-600">None</div>
                   )}
                 </div>
               </section>

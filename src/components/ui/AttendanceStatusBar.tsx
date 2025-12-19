@@ -14,7 +14,7 @@ interface AttendanceStatusBarProps {
 const OPTIONS: {
   value: AttendanceValue;
   label: string;
-  Icon: React.ComponentType<any>;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   activeBg: string;
   inactiveText: string;
   inactiveBorder: string;
@@ -73,9 +73,9 @@ export function AttendanceStatusBar({
         const base = `group h-8 px-2 rounded-full inline-flex items-center gap-2 text-xs transition-colors duration-150 `;
         const stateClasses = active
           ? `bg-gray-200 border-transparent`
-          : `bg-transparent bg-gray-300 ${opt.inactiveBorder} ${opt.inactiveText} ${
-              disabled ? "" : opt.hoverBg
-            }`;
+          : `bg-transparent bg-gray-300 ${opt.inactiveBorder} ${
+              opt.inactiveText
+            } ${disabled ? "" : opt.hoverBg}`;
 
         return (
           <Button
