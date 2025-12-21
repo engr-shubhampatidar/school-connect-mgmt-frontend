@@ -160,7 +160,7 @@ export default function TeacherDashboardPage() {
             {students.map((s) => (
               <button
                 key={s.id}
-                onClick={() => router.push(`/teacher/students/${s.id}`)}
+                onClick={() => router.push(`/teacher/attendance/${s.id}`)}
                 className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm text-left bg-white"
                 aria-label={`Open ${s.name ?? "student"} profile`}
                 type="button"
