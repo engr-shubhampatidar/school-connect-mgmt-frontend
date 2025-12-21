@@ -47,7 +47,7 @@ export default function StudentsFilterBar({
           })),
         ];
         setClassOptions(opts);
-      } catch (e) {
+      } catch {
         // ignore — keep default options
       }
     })();

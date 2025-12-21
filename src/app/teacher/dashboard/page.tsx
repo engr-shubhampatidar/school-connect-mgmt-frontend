@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
@@ -25,13 +24,20 @@ type ApiResponse = {
   }>;
 };
 
+type Student = {
+  id: string;
+  name?: string;
+  rollNo?: string;
+  photoUrl?: string;
+};
+
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState<TeacherMe | null>(null);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [students, setStudents] = useState<ApiResponse["students"]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
 
   const toastRef = React.useRef(toast);
   React.useEffect(() => {
@@ -72,10 +78,9 @@ export default function TeacherDashboardPage() {
         }
       } catch (err: unknown) {
         let message = "Error";
-        if (typeof err === "object" && err !== null && "message" in err) {
-          // @ts-expect-error -- err may have `message` string property
-          message = (err as { message?: string }).message ?? message;
-        }
+        if (err instanceof Error) message = err.message;
+        else if (typeof err === "object" && err !== null && "message" in err)
+          message = String((err as { message?: unknown }).message ?? message);
         toastRef.current?.({
           title: "Unable to load",
           description: message,
@@ -91,9 +96,6 @@ export default function TeacherDashboardPage() {
       mounted = false;
     };
   }, [router]);
-
-  const FALLBACK_IMG =
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%' height='100%' fill='%23e2e8f0'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='18' fill='%2373747a'>?</text></svg>";
 
   if (loading) {
     return (
@@ -196,10 +198,10 @@ function AttendanceHistoryCard({
   students,
 }: {
   classId: string;
-  students: ApiResponse["students"];
+  students: Student[];
 }) {
   const [loading, setLoading] = useState(true);
-  const [records, setRecords] = useState<Array<Record<string, any>>>([]);
+  const [records, setRecords] = useState<Array<Record<string, unknown>>>([]);
   const [dates, setDates] = useState<string[]>([]);
 
   useEffect(() => {
@@ -212,33 +214,47 @@ function AttendanceHistoryCard({
         if (!mounted) return;
 
         // Normalize into flat records array with { studentId, date, status }
-        let flat: Array<Record<string, any>> = [];
+        let flat: Array<Record<string, unknown>> = [];
 
         if (Array.isArray(data)) {
           // common shape: array of attendance objects each containing `date` and `students`
-          const arr = data as Array<Record<string, any>>;
+          const arr = data as Array<Record<string, unknown>>;
           if (arr.length > 0 && Array.isArray(arr[0].students)) {
             for (const att of arr) {
-              const d = att.date || att.createdAt || null;
+              const d =
+                (att as Record<string, unknown>).date ??
+                (att as Record<string, unknown>).createdAt ??
+                null;
               const ds = d ? String(d).slice(0, 10) : "";
-              for (const st of att.students as Array<Record<string, any>>) {
-                flat.push({
-                  studentId:
-                    st.studentId ?? st.student_id ?? st.student ?? st.sid,
-                  status: st.status ?? st.attendance ?? "",
-                  date: ds,
-                });
+              for (const st of (att as Record<string, unknown>)
+                .students as Array<Record<string, unknown>>) {
+                const sid =
+                  (st as Record<string, unknown>).studentId ??
+                  (st as Record<string, unknown>).student_id ??
+                  (st as Record<string, unknown>).student ??
+                  (st as Record<string, unknown>).sid;
+                const status =
+                  (st as Record<string, unknown>).status ??
+                  (st as Record<string, unknown>).attendance ??
+                  "";
+                flat.push({ studentId: sid, status, date: ds });
               }
             }
           } else {
             // assume already flat student-level records
-            flat = data as Array<Record<string, any>>;
+            flat = data as Array<Record<string, unknown>>;
           }
         } else if (data && typeof data === "object") {
           // try common shapes: { records: [...] } or { byDate: { date: [...] } }
-          const obj = data as Record<string, any>;
-          if (Array.isArray(obj.records)) flat = obj.records;
-          else if (Array.isArray(obj.attendances)) flat = obj.attendances;
+          const obj = data as Record<string, unknown>;
+          const maybeRecords = (obj as Record<string, unknown>)
+            .records as unknown;
+          const maybeAttendances = (obj as Record<string, unknown>)
+            .attendances as unknown;
+          if (Array.isArray(maybeRecords))
+            flat = maybeRecords as Array<Record<string, unknown>>;
+          else if (Array.isArray(maybeAttendances))
+            flat = maybeAttendances as Array<Record<string, unknown>>;
           else if (obj.byDate && typeof obj.byDate === "object") {
             for (const [d, items] of Object.entries(obj.byDate)) {
               if (Array.isArray(items)) {
@@ -251,7 +267,7 @@ function AttendanceHistoryCard({
             // fallback: try to collect nested arrays
             for (const v of Object.values(obj)) {
               if (Array.isArray(v)) {
-                flat = flat.concat(v as Array<Record<string, any>>);
+                flat = flat.concat(v as Array<Record<string, unknown>>);
               }
             }
           }
@@ -274,7 +290,7 @@ function AttendanceHistoryCard({
 
         setRecords(flat);
         setDates(recent);
-      } catch (err) {
+      } catch {
         setRecords([]);
         setDates([]);
       } finally {
@@ -304,11 +320,20 @@ function AttendanceHistoryCard({
   // build lookup: map studentId -> { date -> status }
   const lookup: Record<string, Record<string, string>> = {};
   for (const r of records) {
-    const sid = r.studentId || r.student || r.student_id || r.sid;
-    const d = r.date || "";
-    const st = r.status || r.attendance || r.value || "";
+    const rawSid =
+      (r as Record<string, unknown>).studentId ??
+      (r as Record<string, unknown>).student ??
+      (r as Record<string, unknown>).student_id ??
+      (r as Record<string, unknown>).sid;
+    const sid = rawSid ? String(rawSid) : "";
+    const d = String((r as Record<string, unknown>).date ?? "");
+    const st =
+      (r as Record<string, unknown>).status ??
+      (r as Record<string, unknown>).attendance ??
+      (r as Record<string, unknown>).value ??
+      "";
     if (!sid || !d) continue;
-    if (!lookup[sid]) lookup[sid] = {};
+    if (!lookup[sid]) lookup[sid] = {} as Record<string, string>;
     lookup[sid][d] = String(st);
   }
 
@@ -332,7 +357,9 @@ function AttendanceHistoryCard({
           <table className="w-full table-fixed border-collapse">
             <thead>
               <tr className="text-left text-xs text-slate-600">
-                <th className="pb-2 pr-4 sticky left-0 bg-white  border-r  w-44">Student</th>
+                <th className="pb-2 pr-4 sticky left-0 bg-white  border-r  w-44">
+                  Student
+                </th>
                 {dates.map((d) => (
                   <th key={d} className="pb-2 w-28 px-4">
                     {d}
