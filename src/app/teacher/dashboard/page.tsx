@@ -30,7 +30,7 @@ export default function TeacherDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState<TeacherMe | null>(null);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [students, setStudents] = useState<ApiResponse["students"]>([]);
+  const [students, setStudents] = useState<NonNullable<ApiResponse["students"]>>([]);
 
   const toastRef = React.useRef(toast);
   React.useEffect(() => {
@@ -72,8 +72,8 @@ export default function TeacherDashboardPage() {
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          // @ts-expect-error -- err may have `message` string property
-          message = (err as { message?: string }).message ?? message;
+          const maybeMessage = (err as any).message;
+          if (typeof maybeMessage === "string") message = maybeMessage;
         }
         toastRef.current?.({
           title: "Unable to load",

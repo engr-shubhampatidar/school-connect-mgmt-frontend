@@ -84,7 +84,7 @@ export default function CreateTeacherDialog({
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
 
   const form = useForm<CreateTeacherValues>({
-    resolver: zodResolver(createTeacherSchema),
+    resolver: zodResolver(createTeacherSchema) as any,
     defaultValues: {
       fullName: "",
       email: "",
