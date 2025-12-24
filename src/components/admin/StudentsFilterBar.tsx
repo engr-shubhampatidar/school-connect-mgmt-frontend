@@ -4,6 +4,7 @@ import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import Select from "../ui/Select";
+import { fetchClasses } from "../../lib/adminApi";
 
 export type StudentsFilters = {
   search?: string;
@@ -25,6 +26,35 @@ export default function StudentsFilterBar({
   const [search, setSearch] = useState(initial?.search ?? "");
   const [klass, setKlass] = useState(initial?.class ?? "");
   const [status, setStatus] = useState(initial?.status ?? "");
+  const [classOptions, setClassOptions] = useState<
+    {
+      id: string;
+      name: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      try {
+        const resp = await fetchClasses({ pageSize: 1000 });
+        if (!mounted) return;
+        const opts = [
+          { id: "", name: "All classes" },
+          ...(resp.classes ?? []).map((c) => ({
+            id: c.id ?? c.name,
+            name: c.section ? `${c.name} - ${c.section}` : c.name,
+          })),
+        ];
+        setClassOptions(opts);
+      } catch {
+        // ignore — keep default options
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Debounce search and auto-apply — skip initial mount to avoid duplicate calls
   const didMountRef = useRef(false);
@@ -63,12 +93,11 @@ export default function StudentsFilterBar({
         <div className="w-48">
           <label className="sr-only">Class</label>
           <Select
-            options={[
-              { id: "", name: "All classes" },
-              { id: "Class 1", name: "Class 1" },
-              { id: "Class 2", name: "Class 2" },
-              { id: "Class 3", name: "Class 3" },
-            ]}
+            options={
+              classOptions.length
+                ? classOptions
+                : [{ id: "", name: "All classes" }]
+            }
             value={klass}
             onChange={(v) => setKlass(v)}
             placeholder="All classes"

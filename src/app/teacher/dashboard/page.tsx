@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
@@ -9,6 +8,7 @@ import { useToast } from "../../../components/ui/use-toast";
 import {
   getTeacherMe,
   getTeacherClass,
+  fetchAttendanceByClass,
   type TeacherClass,
   type TeacherMe,
 } from "../../../lib/teacherApi";
@@ -24,13 +24,22 @@ type ApiResponse = {
   }>;
 };
 
+type Student = {
+  id: string;
+  name?: string;
+  rollNo?: string;
+  photoUrl?: string;
+};
+
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [teacher, setTeacher] = useState<TeacherMe | null>(null);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [students, setStudents] = useState<NonNullable<ApiResponse["students"]>>([]);
+  const [students, setStudents] = useState<
+    NonNullable<ApiResponse["students"]>
+  >([]);
 
   const toastRef = React.useRef(toast);
   React.useEffect(() => {
@@ -90,9 +99,6 @@ export default function TeacherDashboardPage() {
       mounted = false;
     };
   }, [router]);
-
-  const FALLBACK_IMG =
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%' height='100%' fill='%23e2e8f0'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='18' fill='%2373747a'>?</text></svg>";
 
   if (loading) {
     return (
@@ -159,7 +165,7 @@ export default function TeacherDashboardPage() {
             {students.map((s) => (
               <button
                 key={s.id}
-                onClick={() => router.push(`/teacher/students/${s.id}`)}
+                onClick={() => router.push(`/teacher/attendance/${s.id}`)}
                 className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm text-left bg-white"
                 aria-label={`Open ${s.name ?? "student"} profile`}
                 type="button"
@@ -184,6 +190,208 @@ export default function TeacherDashboardPage() {
           </div>
         )}
       </Card>
+
+      <AttendanceHistoryCard classId={klass.id} students={students} />
     </div>
+  );
+}
+
+function AttendanceHistoryCard({
+  classId,
+  students,
+}: {
+  classId: string;
+  students: Student[];
+}) {
+  const [loading, setLoading] = useState(true);
+  const [records, setRecords] = useState<Array<Record<string, unknown>>>([]);
+  const [dates, setDates] = useState<string[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const data = (await fetchAttendanceByClass(classId)) as unknown;
+        if (!mounted) return;
+
+        // Normalize into flat records array with { studentId, date, status }
+        let flat: Array<Record<string, unknown>> = [];
+
+        if (Array.isArray(data)) {
+          // common shape: array of attendance objects each containing `date` and `students`
+          const arr = data as Array<Record<string, unknown>>;
+          if (arr.length > 0 && Array.isArray(arr[0].students)) {
+            for (const att of arr) {
+              const d =
+                (att as Record<string, unknown>).date ??
+                (att as Record<string, unknown>).createdAt ??
+                null;
+              const ds = d ? String(d).slice(0, 10) : "";
+              for (const st of (att as Record<string, unknown>)
+                .students as Array<Record<string, unknown>>) {
+                const sid =
+                  (st as Record<string, unknown>).studentId ??
+                  (st as Record<string, unknown>).student_id ??
+                  (st as Record<string, unknown>).student ??
+                  (st as Record<string, unknown>).sid;
+                const status =
+                  (st as Record<string, unknown>).status ??
+                  (st as Record<string, unknown>).attendance ??
+                  "";
+                flat.push({ studentId: sid, status, date: ds });
+              }
+            }
+          } else {
+            // assume already flat student-level records
+            flat = data as Array<Record<string, unknown>>;
+          }
+        } else if (data && typeof data === "object") {
+          // try common shapes: { records: [...] } or { byDate: { date: [...] } }
+          const obj = data as Record<string, unknown>;
+          const maybeRecords = (obj as Record<string, unknown>)
+            .records as unknown;
+          const maybeAttendances = (obj as Record<string, unknown>)
+            .attendances as unknown;
+          if (Array.isArray(maybeRecords))
+            flat = maybeRecords as Array<Record<string, unknown>>;
+          else if (Array.isArray(maybeAttendances))
+            flat = maybeAttendances as Array<Record<string, unknown>>;
+          else if (obj.byDate && typeof obj.byDate === "object") {
+            for (const [d, items] of Object.entries(obj.byDate)) {
+              if (Array.isArray(items)) {
+                for (const it of items) {
+                  flat.push({ ...(it as object), date: d });
+                }
+              }
+            }
+          } else {
+            // fallback: try to collect nested arrays
+            for (const v of Object.values(obj)) {
+              if (Array.isArray(v)) {
+                flat = flat.concat(v as Array<Record<string, unknown>>);
+              }
+            }
+          }
+        }
+
+        // Ensure date string format and collect unique dates
+        const dateSet = new Set<string>();
+        flat = flat.map((r) => {
+          const d = r.date || r.attendanceDate || r.createdAt || r.day || null;
+          const ds = d ? String(d).slice(0, 10) : "";
+          if (ds) dateSet.add(ds);
+          return { ...r, date: ds };
+        });
+
+        const sortedDates = Array.from(dateSet).sort((a, b) =>
+          a < b ? 1 : -1
+        );
+        // show all dates (no 7-day limit)
+        const recent = sortedDates;
+
+        setRecords(flat);
+        setDates(recent);
+      } catch {
+        setRecords([]);
+        setDates([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [classId]);
+
+  function statusBadge(status?: string) {
+    const s = String(status ?? "").toUpperCase();
+    const base =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    if (s === "PRESENT" || s === "P")
+      return <span className={`${base} bg-green-100 text-green-800`}>P</span>;
+    if (s === "ABSENT" || s === "A")
+      return <span className={`${base} bg-red-100 text-red-800`}>A</span>;
+    if (s === "LATE" || s === "L")
+      return <span className={`${base} bg-yellow-100 text-yellow-800`}>L</span>;
+    return <span className={`${base} bg-slate-100 text-slate-700`}>-</span>;
+  }
+
+  // build lookup: map studentId -> { date -> status }
+  const lookup: Record<string, Record<string, string>> = {};
+  for (const r of records) {
+    const rawSid =
+      (r as Record<string, unknown>).studentId ??
+      (r as Record<string, unknown>).student ??
+      (r as Record<string, unknown>).student_id ??
+      (r as Record<string, unknown>).sid;
+    const sid = rawSid ? String(rawSid) : "";
+    const d = String((r as Record<string, unknown>).date ?? "");
+    const st =
+      (r as Record<string, unknown>).status ??
+      (r as Record<string, unknown>).attendance ??
+      (r as Record<string, unknown>).value ??
+      "";
+    if (!sid || !d) continue;
+    if (!lookup[sid]) lookup[sid] = {} as Record<string, string>;
+    lookup[sid][d] = String(st);
+  }
+
+  return (
+    <Card>
+      <h3 className="text-sm font-medium mb-3">Attendance History</h3>
+
+      {loading ? (
+        <div className="py-6">
+          <div className="animate-pulse h-6 w-3/4 rounded bg-slate-100 mb-3" />
+          <div className="overflow-x-auto">
+            <div className="h-32 rounded bg-slate-100" />
+          </div>
+        </div>
+      ) : dates.length === 0 ? (
+        <div className="py-6 text-center text-sm text-slate-600">
+          No attendance history yet.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed border-collapse">
+            <thead>
+              <tr className="text-left text-xs text-slate-600">
+                <th className="pb-2 pr-4 sticky left-0 bg-white  border-r  w-44">
+                  Student
+                </th>
+                {dates.map((d) => (
+                  <th key={d} className="pb-2 w-28 px-4">
+                    {d}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((s) => (
+                <tr key={s.id} className="border-t">
+                  <td className="py-2 sticky left-0 bg-white border-r w-44 pr-4 align-top">
+                    <div className="text-sm font-medium">
+                      {s.name ?? "Unnamed"}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Roll: {s.rollNo ?? "-"}
+                    </div>
+                  </td>
+                  {dates.map((d) => (
+                    <td key={d} className="py-2 px-4 w-28 border-r align-top">
+                      {statusBadge(lookup[s.id]?.[d])}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Card>
   );
 }

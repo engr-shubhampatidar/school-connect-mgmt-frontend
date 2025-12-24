@@ -26,12 +26,9 @@ export default function AdminStudentsPage() {
       try {
         const resp = await fetchStudents(q ?? { page, pageSize });
         // debug: log normalized response
-         
-        console.log("fetchStudents response:", resp);
+
         setStudents(resp.students ?? []);
         setTotal(resp.total ?? resp.students.length ?? 0);
-         
-        console.log("loaded students:", resp.students ?? []);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError("Failed to load students");
