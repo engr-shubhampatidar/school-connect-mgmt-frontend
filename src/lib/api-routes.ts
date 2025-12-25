@@ -1,5 +1,4 @@
-export const BASE_URL =
-  "https://school-connect-mgmt-backend-engrshubhampatidars-projects.vercel.app";
+export const BASE_URL = "https://school-connect-mgmt-backend.vercel.app/";
 
 export const PUBLIC_API = {
   CONTACT: "/api/public/contact",
