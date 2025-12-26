@@ -97,13 +97,10 @@ export async function fetchStudents(
   });
 
   const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
-    students.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? undefined;
+    data.total ?? data.totalCount ?? students.length;
+  const page: number | undefined = data.page ?? data.p ?? undefined;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
-    query.pageSize;
+    data.pageSize ?? data.limit ?? query.pageSize;
 
   return {
     students,
@@ -254,13 +251,20 @@ export async function fetchTeachers(
     }
 
     // map single class teacher object if present
-    let classTeacher: { id: string; name: string; section?: string | null } | null = null;
-    const ct = itObj.classTeacher ?? itObj.class_teacher ?? itObj.classTeacherId ?? null;
+    let classTeacher: {
+      id: string;
+      name: string;
+      section?: string | null;
+    } | null = null;
+    const ct =
+      itObj.classTeacher ?? itObj.class_teacher ?? itObj.classTeacherId ?? null;
     if (ct && typeof ct === "object") {
       const cto = ct as Record<string, unknown>;
       const id = (cto.classId ?? cto.id ?? cto._id ?? "") as string;
       const name = (cto.className ?? cto.name ?? "") as string;
-      const section = (cto.classSection ?? cto.section ?? null) as string | null;
+      const section = (cto.classSection ?? cto.section ?? null) as
+        | string
+        | null;
       if (name) classTeacher = { id, name, section };
     }
 
@@ -289,7 +293,9 @@ export async function fetchTeachers(
       phone,
       subjects,
       assignedClasses,
-      classes: Array.isArray(classesArr) ? (classesArr as TeacherClassRaw[]) : null,
+      classes: Array.isArray(classesArr)
+        ? (classesArr as TeacherClassRaw[])
+        : null,
       classTeacher,
       invitedAt: (itObj.invitedAt ?? null) as string | null,
     } as Teacher;
@@ -297,13 +303,10 @@ export async function fetchTeachers(
 
   // derive pagination values
   let total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
-    teachers.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page ?? 1;
+    data.total ?? data.totalCount ?? teachers.length;
+  const page: number | undefined = data.page ?? data.p ?? query.page ?? 1;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
-    query.pageSize;
+    data.pageSize ?? data.limit ?? query.pageSize;
 
   // If the API returned all items without pagination (no total provided)
   // and the caller requested a page/pageSize, perform client-side slicing
@@ -362,14 +365,9 @@ export async function fetchClasses(
     data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
   const classes: ClassItem[] = (d.classes ?? d.items ?? []) as ClassItem[];
-  const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
-    classes.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
-  const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
-    query.pageSize;
+  const total: number | undefined = d.total ?? d.totalCount ?? classes.length;
+  const page: number | undefined = d.page ?? d.p ?? query.page;
+  const pageSize: number | undefined = d.pageSize ?? d.limit ?? query.pageSize;
 
   return {
     classes,
@@ -423,14 +421,9 @@ export async function fetchSubjects(
     data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
   const subjects: Subject[] = (d.subjects ?? d.items ?? []) as Subject[];
-  const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
-    subjects.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
-  const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
-    query.pageSize;
+  const total: number | undefined = d.total ?? d.totalCount ?? subjects.length;
+  const page: number | undefined = d.page ?? d.p ?? query.page;
+  const pageSize: number | undefined = d.pageSize ?? d.limit ?? query.pageSize;
 
   return {
     subjects,
