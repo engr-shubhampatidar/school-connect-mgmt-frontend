@@ -30,19 +30,31 @@ function smallDot(color: string) {
   return `w-2 h-2 rounded-full ${color}`;
 }
 
-export default function AttendanceRow({ record }: { record: any }) {
-  const present = (record.students ?? []).filter(
-    (s: any) => (s.status ?? "") === "PRESENT"
+type AttendanceHistoryRecord = {
+  date?: string;
+  students?: Array<{ status?: string } | Record<string, unknown>>;
+  status?: string;
+  [k: string]: unknown;
+};
+
+export default function AttendanceRow({
+  record,
+}: {
+  record: AttendanceHistoryRecord;
+}) {
+  const students = Array.isArray(record.students) ? record.students : [];
+  const present = students.filter(
+    (s) => String(s?.status ?? "").toUpperCase() === "PRESENT"
   ).length;
-  const absent = (record.students ?? []).filter(
-    (s: any) => (s.status ?? "") === "ABSENT"
+  const absent = students.filter(
+    (s) => String(s?.status ?? "").toUpperCase() === "ABSENT"
   ).length;
-  const leave = (record.students ?? []).filter(
-    (s: any) => (s.status ?? "") === "LEAVE"
+  const leave = students.filter(
+    (s) => String(s?.status ?? "").toUpperCase() === "LEAVE"
   ).length;
   const isComplete =
-    (record.status ?? "") === "MARKED" ||
-    (record.status ?? "").toLowerCase() === "complete";
+    String(record.status ?? "").toUpperCase() === "MARKED" ||
+    String(record.status ?? "").toLowerCase() === "complete";
 
   return (
     <tr className="border-b hover:bg-slate-50">

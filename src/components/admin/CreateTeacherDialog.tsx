@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import type { Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -84,7 +85,7 @@ export default function CreateTeacherDialog({
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
 
   const form = useForm<CreateTeacherValues>({
-    resolver: zodResolver(createTeacherSchema) as any,
+    resolver: zodResolver(createTeacherSchema) as Resolver<CreateTeacherValues>,
     defaultValues: {
       fullName: "",
       email: "",

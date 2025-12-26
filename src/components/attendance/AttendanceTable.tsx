@@ -2,7 +2,18 @@
 import React from "react";
 import AttendanceRow from "./AttendanceRow";
 
-export default function AttendanceTable({ records }: { records: any[] }) {
+type AttendanceRecord = {
+  date?: string;
+  status?: string;
+  attendance?: string;
+  [k: string]: unknown;
+};
+
+export default function AttendanceTable({
+  records,
+}: {
+  records: AttendanceRecord[];
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">

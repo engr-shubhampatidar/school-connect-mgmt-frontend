@@ -12,8 +12,16 @@ import AttendanceTable from "./components/AttendanceTable";
 export default function AttendanceHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [records, setRecords] = useState<any[]>([]);
-  const [klass, setKlass] = useState<Record<string, any> | null>(null);
+  type AttendanceHistoryRecord = {
+    date?: string;
+    students?: Array<{ status?: string } | Record<string, unknown>>;
+    status?: string;
+    id?: string;
+    [k: string]: unknown;
+  };
+
+  const [records, setRecords] = useState<AttendanceHistoryRecord[]>([]);
+  const [klass, setKlass] = useState<ClassMeta | null>(null);
   const [klassId, setKlassId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -56,12 +64,14 @@ export default function AttendanceHistoryPage() {
           params = { startDate: selectedDate, endDate: selectedDate };
         }
 
-        const data = (await fetchAttendanceByClass(idStr, params)) as
-          | any[]
-          | null;
-        const arr = Array.isArray(data) ? data : [];
+        const data = (await fetchAttendanceByClass(idStr, params)) as unknown;
+        const arr = Array.isArray(data)
+          ? (data as AttendanceHistoryRecord[])
+          : [];
         arr.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          (a, b) =>
+            new Date(String(b.date ?? "")).getTime() -
+            new Date(String(a.date ?? "")).getTime()
         );
         if (!mounted) return;
         setRecords(arr);
@@ -87,12 +97,14 @@ export default function AttendanceHistoryPage() {
     setError(null);
     try {
       const params = date ? { startDate: date, endDate: date } : undefined;
-      const data = (await fetchAttendanceByClass(klassId, params)) as
-        | any[]
-        | null;
-      const arr = Array.isArray(data) ? data : [];
+      const data = (await fetchAttendanceByClass(klassId, params)) as unknown;
+      const arr = Array.isArray(data)
+        ? (data as AttendanceHistoryRecord[])
+        : [];
       arr.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        (a, b) =>
+          new Date(String(b.date ?? "")).getTime() -
+          new Date(String(a.date ?? "")).getTime()
       );
       setRecords(arr);
     } catch (err: unknown) {

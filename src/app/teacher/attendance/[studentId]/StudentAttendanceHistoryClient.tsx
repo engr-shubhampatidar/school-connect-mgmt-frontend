@@ -12,19 +12,54 @@ import AttendanceTable from "../../../../components/attendance/AttendanceTable";
 import LoadingState from "../../../../components/attendance/LoadingState";
 import EmptyState from "../../../../components/attendance/EmptyState";
 
-type AttendanceRecord = { date?: string; status?: string; [k: string]: any };
+type AttendanceApiItem = {
+  id: string;
+  attendance?: {
+    id?: string;
+    date?: string;
+    status?: string;
+    [k: string]: unknown;
+  };
+  attendanceId?: string;
+  studentId?: string;
+  status?: string;
+  createdAt?: string;
+  [k: string]: unknown;
+};
+
+type ApiResponse = {
+  studentId?: string;
+  studentName?: string;
+  class?: string;
+  section?: string;
+  attendance?: AttendanceApiItem[];
+  [k: string]: unknown;
+};
+
+type AttendanceRecord = {
+  id?: string;
+  date: string;
+  status: string;
+  attendanceId?: string;
+  createdAt?: string;
+  [k: string]: unknown;
+};
 
 export default function StudentAttendanceHistoryClient({
   studentId,
 }: {
   studentId?: string | null;
 }) {
-  const params = useParams();
-  const effectiveStudentId = studentId ?? (params as any)?.studentId ?? null;
+  const params = useParams() as { studentId?: string };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [student, setStudent] = useState<any | null>(null);
+  const [student, setStudent] = useState<{
+    id?: string | null;
+    name?: string | null;
+    className?: string | null;
+    section?: string | null;
+  } | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,20 +69,9 @@ export default function StudentAttendanceHistoryClient({
       return;
     }
 
-    // Debug: studentId should be provided by route params
-    // Log early to help diagnose undefined studentId during API calls
-    // eslint-disable-next-line no-console
-    console.log(
-      "StudentAttendanceHistory: prop studentId=",
-      studentId,
-      "params studentId=",
-      (params as any)?.studentId,
-      "effective=",
-      effectiveStudentId
-    );
+    const effectiveStudentId = studentId ?? params?.studentId ?? null;
 
     if (!effectiveStudentId) {
-      // avoid making API calls with undefined id
       setError("Missing studentId");
       setLoading(false);
       return;
@@ -58,54 +82,52 @@ export default function StudentAttendanceHistoryClient({
       setLoading(true);
       setError(null);
       try {
-        // eslint-disable-next-line no-console
-        console.log("StudentAttendanceHistory: fetching", {
-          studentId: effectiveStudentId,
-          date,
-        });
         const res = await TAPI.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
           params: date ? { date } : undefined,
         });
-        const data = res?.data;
+        const data = res?.data as ApiResponse | AttendanceApiItem[] | null;
 
-        // extract student metadata
-        const s =
-          data?.student ?? data?.studentInfo ?? data?.studentDetails ?? null;
-        if (s && mounted) setStudent(s);
-
-        // Extract records: support array-shaped or container object
-        let recs: any[] = [];
-        if (Array.isArray(data)) recs = data;
-        else if (data) {
-          recs =
-            data.records ??
-            data.attendance ??
-            data.attendances ??
-            data.history ??
-            [];
+        // extract student metadata from top-level shape
+        if (data && !Array.isArray(data)) {
+          const top = data as ApiResponse;
+          const s = {
+            id: top.studentId ?? null,
+            name: top.studentName ?? null,
+            className: top.class ?? null,
+            section: top.section ?? null,
+          };
+          if (mounted) setStudent(s);
         }
 
-        // Normalize
-        const normalized = (recs ?? [])
-          .map((r: any) => ({
-            date: r.date ?? r.createdAt ?? r.day ?? null,
-            status: r.status ?? r.attendance ?? r.value ?? "",
-            ...r,
-          }))
-          .filter((r: any) => r.date)
+        // Extract records
+        let recs: AttendanceApiItem[] = [];
+        if (Array.isArray(data)) recs = data as AttendanceApiItem[];
+        else if (data) recs = (data as ApiResponse).attendance ?? [];
+
+        const normalized: AttendanceRecord[] = (recs ?? [])
+          .map((r) => {
+            const date = r.attendance?.date ?? r.createdAt ?? "";
+            const status = r.status ?? (r.attendance?.status as string) ?? "";
+            return {
+              id: r.id,
+              date,
+              status,
+              attendanceId: r.attendanceId,
+              createdAt: r.createdAt,
+            } as AttendanceRecord;
+          })
+          .filter((r) => r.date)
           .sort(
-            (a: any, b: any) =>
-              new Date(b.date).getTime() - new Date(a.date).getTime()
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           );
 
-        // If no date selected, take last 7 days
         const final = date ? normalized : normalized.slice(0, 7);
-
         if (!mounted) return;
         setRecords(final);
-      } catch (err: any) {
+      } catch (err) {
         if (!mounted) return;
-        setError(err?.message ?? "Failed to load");
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message || "Failed to load");
         setRecords([]);
       } finally {
         if (mounted) setLoading(false);
@@ -116,27 +138,24 @@ export default function StudentAttendanceHistoryClient({
     return () => {
       mounted = false;
     };
-  }, [studentId, selectedDate]);
+  }, [studentId, selectedDate, params]);
 
   const studentMeta = useMemo(() => {
     if (student)
       return {
-        id: student.id ?? student.studentId ?? student._id ?? null,
-        name: student.name ?? student.fullName ?? null,
-        rollNo: student.rollNo ?? student.roll_no ?? student.roll ?? null,
-        className:
-          student.className ?? student.class ?? student.classTitle ?? null,
-        subject: student.subject ?? null,
+        id: student.id ?? null,
+        name: student.name ?? null,
+        className: student.className ?? null,
+        section: student.section ?? null,
       };
-    // try to infer from records
+
     if (records.length > 0) {
-      const r = records[0] as any;
+      const r = records[0];
       return {
-        id: r.studentId ?? r.student?.id ?? r.id ?? null,
-        name: r.student?.name ?? r.studentName ?? r.name ?? null,
-        rollNo: r.rollNo ?? r.roll_no ?? null,
-        className: r.className ?? r.class ?? null,
-        subject: r.subject ?? null,
+        id: r.id ?? null,
+        name: null,
+        className: null,
+        section: null,
       };
     }
     return null;

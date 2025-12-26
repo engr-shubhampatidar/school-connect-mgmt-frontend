@@ -1,11 +1,16 @@
 "use client";
 import React from "react";
 
-export default function ClassHeader({
-  klass,
-}: {
-  klass: Record<string, any> | null;
-}) {
+type ClassMeta = {
+  name?: string;
+  className?: string;
+  section?: string;
+  sectionName?: string;
+  subject?: string | null;
+  [k: string]: unknown;
+} | null;
+
+export default function ClassHeader({ klass }: { klass: ClassMeta }) {
   const title = klass?.name ?? klass?.className ?? "";
   const section = klass?.section ?? klass?.sectionName ?? "";
   const subject = klass?.subject ?? null;

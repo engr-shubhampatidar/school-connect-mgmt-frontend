@@ -27,6 +27,14 @@ function SkeletonRow() {
   );
 }
 
+type AttendanceHistoryRecord = {
+  date?: string;
+  students?: Array<{ status?: string } | Record<string, unknown>>;
+  status?: string;
+  id?: string;
+  [k: string]: unknown;
+};
+
 export default function AttendanceTable({
   loading,
   error,
@@ -34,7 +42,7 @@ export default function AttendanceTable({
 }: {
   loading: boolean;
   error: string | null;
-  records: any[];
+  records: AttendanceHistoryRecord[];
 }) {
   if (loading) {
     return (
@@ -81,8 +89,8 @@ export default function AttendanceTable({
         </tr>
       </thead>
       <tbody>
-        {records.map((r) => (
-          <AttendanceRow key={r.date} record={r} />
+        {records.map((r, idx) => (
+          <AttendanceRow key={r.id ?? `${r.date ?? ""}-${idx}`} record={r} />
         ))}
       </tbody>
     </table>

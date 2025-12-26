@@ -2,8 +2,19 @@
 import React from "react";
 import AttendanceStatusBadge from "./AttendanceStatusBadge";
 
-export default function AttendanceRow({ record }: { record: any }) {
-  const date = record?.date ? new Date(record.date) : null;
+type AttendanceRecord = {
+  date?: string;
+  status?: string;
+  attendance?: string;
+  [k: string]: unknown;
+};
+
+export default function AttendanceRow({
+  record,
+}: {
+  record: AttendanceRecord;
+}) {
+  const date = record?.date ? new Date(String(record.date)) : null;
   const day = date
     ? date.toLocaleDateString(undefined, { weekday: "short" })
     : "-";

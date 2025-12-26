@@ -85,7 +85,7 @@ export default function TeacherDashboardPage() {
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          const maybeMessage = (err as any).message;
+          const maybeMessage = (err as { message?: unknown }).message;
           if (typeof maybeMessage === "string") message = maybeMessage;
         }
         toastRef.current?.({
