@@ -13,6 +13,10 @@ import {
   type TeacherMe,
 } from "../../../lib/teacherApi";
 import { getToken } from "../../../lib/auth";
+import StatCard from "@/components/admin/StatCard";
+import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
+import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
+import TodayScheduleCard from "../dashboard/Components/TodayScheduleCard";
 
 type ApiResponse = {
   class?: TeacherClass;
@@ -126,6 +130,149 @@ export default function TeacherDashboardPage() {
 
   return (
     <div className="p-4 space-y-4">
+      <section className="mb-6">
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col gap-4">
+            <h3 className="text-xl font-semibold">Welcomeback, Sarah</h3>
+            <div className="flex gap-4">
+              <p className=" text-sm text-slate-600">
+                Monday, October 23, 2026
+              </p>
+              <p className=" text-sm text-green-700 font-medium">
+                You are the class teacher of {klass.name + "th"}{" "}
+                {klass.section ? `- ${klass.section}` : ""}
+              </p>
+            </div>
+          </div>
+          <div className="text-sm text-slate-500">&nbsp;</div>
+        </div>
+      </section>
+      <div className="flex w-full grid-cols-1 md:grid-cols-4 gap-4 mb-4 grid">
+        <StatCard
+          label="Total Students"
+          value={students.length}
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          icon={Users}
+        />
+        <StatCard
+          label="Attenadance"
+          value="Pandding"
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          icon={ClipboardCheck}
+        />
+        <StatCard
+          label="Pandding Marks"
+          value="02"
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          icon={MailQuestionMark}
+        />
+        <StatCard
+          label="Next Class"
+          value="Physics"
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          icon={Users}
+        />
+      </div>
+      <div className="flex flex-row gap-4">
+        <section className="w-2/3 gap-4 mb-4 flex flex-col">
+          <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-lg font-semibold">My Class: 10-A</div>
+                <div className="mt-1 text-sm text-slate-600">
+                  Class Teacher Responsibilities
+                </div>
+              </div>
+
+              <div className="text-sm text-slate-600">
+                Total Students: <span className="font-semibold">32</span>
+              </div>
+            </div>
+
+            <div className="mt-4 bg-amber-50 border border-amber-100 rounded-md px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {/* <div className="text-amber-600">{WarningIcon()}</div> */}
+                <div className="text-sm text-amber-800">
+                  Morning attendance not yet submitted
+                </div>
+              </div>
+              <button className="inline-flex items-center gap-2 bg-indigo-700 text-white px-4 py-2 rounded-md shadow-sm">
+                {/* <span className="w-4 h-4">{PlusIcon()}</span> */}
+                <span>Take Attendance</span>
+              </button>
+            </div>
+          </div>
+          <AssignedSubjectsCard
+            subjects={[
+              {
+                classSection: "10-A",
+                subjectName: "Mathematics",
+                studentCount: 32,
+              },
+              {
+                classSection: "10-A",
+                subjectName: "Mathematics",
+                studentCount: 28,
+              },
+              {
+                classSection: "10-A",
+                subjectName: "Science",
+                studentCount: 35,
+              },
+              {
+                classSection: "10-A",
+                subjectName: "Physics",
+                studentCount: 30,
+              },
+              {
+                classSection: "10-A",
+                subjectName: "Physics",
+                studentCount: 30,
+              },
+            ]}
+            onViewStudents={(item) => console.log("View", item)}
+            onEnterMarks={(item) => console.log("Enter marks", item)}
+            onExport={() => console.log("Export report")}
+          />
+        </section>
+        <TodayScheduleCard
+          schedules={[
+            {
+              time: "10:00 pm",
+              title: "Physics (lab)",
+              subtitle: "Class 11-A Lab1",
+              status: "completed",
+            },
+            {
+              time: "10:35 pm",
+              title: "Physics",
+              subtitle: "Class 11-A Room-102",
+              status: "current",
+            },
+            {
+              time: "10:35 pm",
+              title: "Lunch Break",
+              subtitle: "Staff Room-100",
+            },
+            {
+              time: "11:10 pm",
+              title: "Mathematics",
+              subtitle: "Class 10-B Room-103",
+            },
+            {
+              time: "11:40 pm",
+              title: "Mathematics",
+              subtitle: "Class 10-A Room-104",
+            },
+            {
+              time: "12:20 pm",
+              title: "Science",
+              subtitle: "Class 10-C Room-115",
+            },
+          ]}
+          onViewWeek={() => console.log("View full week")}
+        />
+      </div>
       <Card>
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
           <div>
