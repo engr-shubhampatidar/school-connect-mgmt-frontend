@@ -83,12 +83,16 @@ export default function RecentStudents({
   }
 
   return (
-       <div className="w-full rounded-xl border bg-white p-6 shadow-sm">
+    <div className="w-full rounded-xl border bg-white p-6 shadow-sm">
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Recent Students</h2>
-          <p className="text-sm text-slate-500">Check complete update at same time.</p>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Recent Students
+          </h2>
+          <p className="text-sm text-slate-500">
+            Check complete update at same time.
+          </p>
         </div>
 
         {/* <button
@@ -102,25 +106,11 @@ export default function RecentStudents({
       {/* Activity List */}
       <div className="divide-y">
         {students.map((student, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between py-4"
-          >
+          <div key={index} className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
               {/* Avatar */}
               <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-200">
-                {student.avatarUrl ? (
-                  <Image
-                    src={student.avatarUrl}
-                    alt="avatar"
-                    width={36}
-                    height={36}
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-slate-600">
-                    NA
-                  </span>
-                )}
+                <span className="text-sm font-medium text-slate-600">NA</span>
               </div>
 
               {/* Text */}
@@ -135,7 +125,9 @@ export default function RecentStudents({
             </div>
 
             {/* Time */}
-            <span className="text-sm text-slate-500">{formatDate(student.createdAt)}</span>
+            <span className="text-sm text-slate-500">
+              {formatDate(student.createdAt)}
+            </span>
           </div>
         ))}
       </div>
