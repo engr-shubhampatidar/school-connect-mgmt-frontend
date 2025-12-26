@@ -5,24 +5,33 @@ import Card from "../ui/Card";
 type StatCardProps = {
   label: string;
   value: string | number;
+  className: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-export function StatCard({ label, value, icon: IconComp }: StatCardProps) {
+export function StatCard({
+  label,
+  value,
+  className,
+  icon: IconComp,
+}: StatCardProps) {
   return (
-    <Card className="flex items-center justify-between gap-4">
-      <div className="flex flex-col">
-        <span className="text-sm text-slate-500">{label}</span>
-        <span className="mt-1 text-2xl font-semibold text-slate-900">
-          {value}
-        </span>
+    <div
+      className={`${className} rounded-lg border p-6`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-slate-500">{label}</div>
+        {IconComp ? (
+          <div className="rounded-full">
+            <IconComp className="h-6 w-6 text-slate-700" />
+          </div>
+        ) : null}
       </div>
-      {IconComp ? (
-        <div className="rounded-full bg-slate-100 p-2">
-          <IconComp className="h-6 w-6 text-slate-700" />
-        </div>
-      ) : null}
-    </Card>
+      <div className="mt-4 text-3xl font-bold">{value}</div>
+      <div className="mt-3 text-sm text-slate-600">
+        <span className="text-orange-500">• Work in progress</span>
+      </div>
+    </div>
   );
 }
 

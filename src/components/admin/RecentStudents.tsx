@@ -2,6 +2,7 @@
 import React from "react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
+import Image from "next/image";
 
 type Student = {
   id: string;
@@ -82,20 +83,54 @@ export default function RecentStudents({
   }
 
   return (
-    <Card>
-      <div>
-        <h3 className="text-lg font-medium text-slate-900">Recent Students</h3>
-        <div className="mt-4 divide-y divide-slate-100">
-          {students.map((s) => (
-            <div key={s.id} className="flex items-center justify-between py-3">
-              <div className="text-sm text-slate-800">{s.name}</div>
-              <div className="text-sm text-slate-500">
-                {formatDate(s.createdAt)}
+    <div className="w-full rounded-xl border bg-white p-6 shadow-sm">
+      {/* Header */}
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Recent Students
+          </h2>
+          <p className="text-sm text-slate-500">
+            Check complete update at same time.
+          </p>
+        </div>
+
+        {/* <button
+          onClick={onViewAll}
+          className="rounded-lg border px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
+        >
+          {viewAllText}
+        </button> */}
+      </div>
+
+      {/* Activity List */}
+      <div className="divide-y">
+        {students.map((student, index) => (
+          <div key={index} className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              {/* Avatar */}
+              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-200">
+                <span className="text-sm font-medium text-slate-600">NA</span>
+              </div>
+
+              {/* Text */}
+              <div>
+                <p className="text-sm font-medium text-slate-900">
+                  {student.name}
+                </p>
+                <p className="text-sm text-slate-500">
+                  {formatDate(student.createdAt)}
+                </p>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Time */}
+            <span className="text-sm text-slate-500">
+              {formatDate(student.createdAt)}
+            </span>
+          </div>
+        ))}
       </div>
-    </Card>
+    </div>
   );
 }

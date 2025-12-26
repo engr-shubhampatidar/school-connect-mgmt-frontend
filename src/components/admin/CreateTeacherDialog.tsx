@@ -65,7 +65,7 @@ const createTeacherSchema = z
     }
   });
 
-type CreateTeacherValues = z.infer<typeof createTeacherSchema>;
+type CreateTeacherValues = z.input<typeof createTeacherSchema>;
 
 type Props = {
   open: boolean;

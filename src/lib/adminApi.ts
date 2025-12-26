@@ -97,14 +97,12 @@ export async function fetchStudents(
   });
 
   const total: number | undefined =
-    (d.total as number | undefined) ??
-    (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
     students.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? undefined;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ??
-    (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
     query.pageSize;
 
   return {
@@ -308,17 +306,12 @@ export async function fetchTeachers(
 
   // derive pagination values
   let total: number | undefined =
-    (d.total as number | undefined) ??
-    (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
     teachers.length;
   const page: number | undefined =
-    (d.page as number | undefined) ??
-    (d.p as number | undefined) ??
-    query.page ??
-    1;
+    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page ?? 1;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ??
-    (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
     query.pageSize;
 
   // If the API returned all items without pagination (no total provided)
@@ -379,14 +372,12 @@ export async function fetchClasses(
 
   const classes: ClassItem[] = (d.classes ?? d.items ?? []) as ClassItem[];
   const total: number | undefined =
-    (d.total as number | undefined) ??
-    (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
     classes.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ??
-    (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
     query.pageSize;
 
   return {
@@ -442,14 +433,12 @@ export async function fetchSubjects(
 
   const subjects: Subject[] = (d.subjects ?? d.items ?? []) as Subject[];
   const total: number | undefined =
-    (d.total as number | undefined) ??
-    (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
     subjects.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ??
-    (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
     query.pageSize;
 
   return {
