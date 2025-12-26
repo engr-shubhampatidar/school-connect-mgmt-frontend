@@ -1,127 +1,176 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { Card } from "../../../../components/ui/Card";
 import TAPI from "../../../../lib/teacherApi";
 import { ATTENDANCE_API } from "../../../../lib/api-routes";
 import { getToken } from "../../../../lib/auth";
+import StudentInfoCard from "../../../../components/attendance/StudentInfoCard";
+import AttendanceHistoryHeader from "../../../../components/attendance/AttendanceHistoryHeader";
+import AttendanceDateFilter from "../../../../components/attendance/AttendanceDateFilter";
+import AttendanceTable from "../../../../components/attendance/AttendanceTable";
+import LoadingState from "../../../../components/attendance/LoadingState";
+import EmptyState from "../../../../components/attendance/EmptyState";
 
-type AttendanceRecord = {
-  date?: string;
-  status?: string;
-  [k: string]: any;
-};
+type AttendanceRecord = { date?: string; status?: string; [k: string]: any };
 
 export default function StudentAttendanceHistoryClient({
   studentId,
 }: {
-  studentId: string;
+  studentId?: string | null;
 }) {
+  const params = useParams();
+  const effectiveStudentId = studentId ?? (params as any)?.studentId ?? null;
   const [loading, setLoading] = useState(true);
-  const [studentName, setStudentName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [student, setStudent] = useState<any | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getToken("teacher")) {
-      if (typeof window !== "undefined") window.location.href = "/teacher/login";
+      if (typeof window !== "undefined")
+        window.location.href = "/teacher/login";
+      return;
+    }
+
+    // Debug: studentId should be provided by route params
+    // Log early to help diagnose undefined studentId during API calls
+    // eslint-disable-next-line no-console
+    console.log(
+      "StudentAttendanceHistory: prop studentId=",
+      studentId,
+      "params studentId=",
+      (params as any)?.studentId,
+      "effective=",
+      effectiveStudentId
+    );
+
+    if (!effectiveStudentId) {
+      // avoid making API calls with undefined id
+      setError("Missing studentId");
+      setLoading(false);
       return;
     }
 
     let mounted = true;
-    async function load() {
+    async function load(date?: string | null) {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await TAPI.get(ATTENDANCE_API.STUDENT(studentId));
+        // eslint-disable-next-line no-console
+        console.log("StudentAttendanceHistory: fetching", {
+          studentId: effectiveStudentId,
+          date,
+        });
+        const res = await TAPI.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
+          params: date ? { date } : undefined,
+        });
         const data = res?.data;
 
-        let recs: AttendanceRecord[] = [];
-        let name: string | null = null;
+        // extract student metadata
+        const s =
+          data?.student ?? data?.studentInfo ?? data?.studentDetails ?? null;
+        if (s && mounted) setStudent(s);
 
-        if (Array.isArray(data)) {
-          recs = data as AttendanceRecord[];
-        } else if (data && typeof data === "object") {
-          // common shapes
+        // Extract records: support array-shaped or container object
+        let recs: any[] = [];
+        if (Array.isArray(data)) recs = data;
+        else if (data) {
           recs =
-            data.records ?? data.attendance ?? data.attendances ?? data.history ?? data.rows ?? [];
-          if (!Array.isArray(recs) && typeof data === "object") {
-            // fallback: treat top-level object as single-record container
-            recs = Array.isArray(data) ? data : [];
-          }
-          name = data.student?.name ?? data.name ?? null;
+            data.records ??
+            data.attendance ??
+            data.attendances ??
+            data.history ??
+            [];
         }
 
-        // Try to extract name from records if still missing
-        if (!name && recs.length > 0) {
-          const first = recs[0] as any;
-          name = first.student?.name ?? first.studentName ?? first.name ?? null;
-        }
-
-        // Normalize and sort by date desc
-        const normalized = recs
-          .map((r) => ({
+        // Normalize
+        const normalized = (recs ?? [])
+          .map((r: any) => ({
             date: r.date ?? r.createdAt ?? r.day ?? null,
             status: r.status ?? r.attendance ?? r.value ?? "",
             ...r,
           }))
-          .filter((r) => r.date)
-          .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
-          .slice(0, 10);
+          .filter((r: any) => r.date)
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+
+        // If no date selected, take last 7 days
+        const final = date ? normalized : normalized.slice(0, 7);
 
         if (!mounted) return;
-        setStudentName(name);
-        setRecords(normalized);
-      } catch (err) {
-        // silently show empty state
+        setRecords(final);
+      } catch (err: any) {
+        if (!mounted) return;
+        setError(err?.message ?? "Failed to load");
         setRecords([]);
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
-    load();
+    load(selectedDate);
     return () => {
       mounted = false;
     };
-  }, [studentId]);
+  }, [studentId, selectedDate]);
 
-  if (loading) return <div className="p-4">Loading…</div>;
+  const studentMeta = useMemo(() => {
+    if (student)
+      return {
+        id: student.id ?? student.studentId ?? student._id ?? null,
+        name: student.name ?? student.fullName ?? null,
+        rollNo: student.rollNo ?? student.roll_no ?? student.roll ?? null,
+        className:
+          student.className ?? student.class ?? student.classTitle ?? null,
+        subject: student.subject ?? null,
+      };
+    // try to infer from records
+    if (records.length > 0) {
+      const r = records[0] as any;
+      return {
+        id: r.studentId ?? r.student?.id ?? r.id ?? null,
+        name: r.student?.name ?? r.studentName ?? r.name ?? null,
+        rollNo: r.rollNo ?? r.roll_no ?? null,
+        className: r.className ?? r.class ?? null,
+        subject: r.subject ?? null,
+      };
+    }
+    return null;
+  }, [student, records]);
 
   return (
     <div className="p-4 space-y-4">
+      <StudentInfoCard student={studentMeta} />
+
       <Card>
-        <div>
-          <h2 className="text-lg font-semibold">
-            {studentName ?? "Student"} — Attendance History
-          </h2>
-        </div>
+        <AttendanceHistoryHeader>
+          <AttendanceDateFilter
+            value={selectedDate ?? null}
+            onChange={setSelectedDate}
+          />
+        </AttendanceHistoryHeader>
       </Card>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-600">
-                <th className="py-2">Date</th>
-                <th className="py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.length === 0 && (
-                <tr>
-                  <td colSpan={2} className="py-4 text-slate-600">
-                    No recent records
-                  </td>
-                </tr>
-              )}
-              {records.map((r, idx) => (
-                <tr key={idx} className="border-t">
-                  <td className="py-2">
-                    {r.date ? new Date(r.date).toLocaleDateString() : "-"}
-                  </td>
-                  <td className="py-2">{r.status ?? "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <LoadingState />
+        ) : error ? (
+          <EmptyState message={error} />
+        ) : records.length === 0 ? (
+          <EmptyState
+            message={
+              selectedDate
+                ? "No records for selected date."
+                : "No recent records."
+            }
+          />
+        ) : (
+          <AttendanceTable records={records} />
+        )}
       </Card>
     </div>
   );
