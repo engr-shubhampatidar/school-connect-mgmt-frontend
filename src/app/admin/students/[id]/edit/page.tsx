@@ -69,7 +69,7 @@ function EditStudentProfile() {
     }
 
     // avoid fetching multiple times for same id (round-trips, re-renders, strict-mode)
-    if (loadedRef.current[id]) {
+    if (loadedRef.current[id!]) {
       setLoading(false);
       return;
     }
@@ -94,7 +94,7 @@ function EditStudentProfile() {
           emergencyContact: data.emergencyContact ?? "",
           notes: data.notes ?? "",
         });
-        loadedRef.current[id] = true;
+        loadedRef.current[id!] = true;
       } catch (err: any) {
         toastRef.current?.({
           title: "Error",
