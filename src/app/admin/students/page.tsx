@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { fetchStudents, Student, StudentsQuery } from "../../../lib/adminApi";
 import StudentsFilterBar, {
   StudentsFilters,
@@ -9,6 +10,7 @@ import Button from "../../../components/ui/Button";
 import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
 
 export default function AdminStudentsPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function AdminStudentsPage() {
         onRetry={() => load({ ...filters, page, pageSize })}
         onPageChange={(p) => setPage(p)}
         onView={(id) => console.log("view", id)}
-        onEdit={(id) => console.log("edit", id)}
+        onEdit={(id) => router.push(`/admin/students/${id}/edit`)}
       />
     </div>
   );
