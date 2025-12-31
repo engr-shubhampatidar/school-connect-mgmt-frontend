@@ -83,7 +83,7 @@ export default function AssignedSubjectsCard({
 
                     <button
                       onClick={() => onEnterMarks?.(item)}
-                      className="rounded-lg border border-blue-200 px-4 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                      className="rounded-lg border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
                     >
                       Enter Marks
                     </button>

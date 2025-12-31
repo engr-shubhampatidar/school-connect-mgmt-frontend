@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../../../../components/ui/Card";
 import TAPI from "../../../../lib/teacherApi";
 import { ATTENDANCE_API } from "../../../../lib/api-routes";
@@ -8,7 +8,7 @@ import { getToken } from "../../../../lib/auth";
 type AttendanceRecord = {
   date?: string;
   status?: string;
-  [k: string]: any;
+  [k: string]: unknown;
 };
 
 export default function StudentAttendanceHistoryClient({
@@ -22,7 +22,8 @@ export default function StudentAttendanceHistoryClient({
 
   useEffect(() => {
     if (!getToken("teacher")) {
-      if (typeof window !== "undefined") window.location.href = "/teacher/login";
+      if (typeof window !== "undefined")
+        window.location.href = "/teacher/login";
       return;
     }
 
@@ -40,7 +41,12 @@ export default function StudentAttendanceHistoryClient({
         } else if (data && typeof data === "object") {
           // common shapes
           recs =
-            data.records ?? data.attendance ?? data.attendances ?? data.history ?? data.rows ?? [];
+            data.records ??
+            data.attendance ??
+            data.attendances ??
+            data.history ??
+            data.rows ??
+            [];
           if (!Array.isArray(recs) && typeof data === "object") {
             // fallback: treat top-level object as single-record container
             recs = Array.isArray(data) ? data : [];
@@ -50,7 +56,11 @@ export default function StudentAttendanceHistoryClient({
 
         // Try to extract name from records if still missing
         if (!name && recs.length > 0) {
-          const first = recs[0] as any;
+          const first = recs[0] as unknown as AttendanceRecord & {
+            student?: { name?: string };
+            studentName?: string;
+            name?: string;
+          };
           name = first.student?.name ?? first.studentName ?? first.name ?? null;
         }
 
@@ -62,12 +72,16 @@ export default function StudentAttendanceHistoryClient({
             ...r,
           }))
           .filter((r) => r.date)
-          .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.date as string).getTime() -
+              new Date(a.date as string).getTime()
+          )
           .slice(0, 10);
 
         if (!mounted) return;
         setStudentName(name);
-        setRecords(normalized);
+        setRecords(normalized as unknown as AttendanceRecord[]);
       } catch (err) {
         // silently show empty state
         setRecords([]);
@@ -107,7 +121,7 @@ export default function StudentAttendanceHistoryClient({
               {records.length === 0 && (
                 <tr>
                   <td colSpan={2} className="py-4 text-slate-600">
-                    No recent records
+                    No recent records found.
                   </td>
                 </tr>
               )}

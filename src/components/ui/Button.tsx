@@ -2,7 +2,7 @@
 import React from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "ghost" | "pill";
+  variant?: "default" | "ghost" | "pill" | "dark" ;
 };
 
 export function Button({
@@ -16,6 +16,7 @@ export function Button({
     default: "bg-sky-600 text-white hover:bg-sky-700",
     ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
     pill: "bg-gray-200",
+    dark: "bg-[#021034] text-white hover:bg-[#021034cc]",
   };
   return ( 
     <button

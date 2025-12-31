@@ -1,30 +1,49 @@
-import React from "react";
-import { ArrowUpIcon, Search } from "lucide-react";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
-} from "@/components/ui/Input-group";
+"use client";
+import { Search } from "lucide-react";
 
-import { Input } from "../ui";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+export default function Topbar({
+  onSearch,
+}: {
+  onSearch?: (query: string) => void;
+}) {
+  const pathname = usePathname();
+  const [showSearch, setShowSearch] = useState(false);
 
-export default function Topbar() {
+  const topName = pathname.split("/")[2]?.toUpperCase() || "DASHBOARD";
+
+  const handleSearchToggle = () => {
+    if (pathname.endsWith("/dashboard")) {
+      setShowSearch(true);
+    } else {
+      setShowSearch(false);
+    }
+  };
+
+  useEffect(() => {
+    handleSearchToggle();
+  }, [pathname]);
+
   return (
     <div className="sticky top-0 z-10">
       <header className="flex bg-white items-center justify-between  border-b border-slate-200 p-5 min-h-[85px] ">
-        <h2 className="text-xl font-semibold">Dashboard</h2>
+        <h2 className="text-lg font-bold min-w-[10%] truncate">{topName}</h2>
         <div className="w-full items-start- justify-center pl-8">
-          <div className="grid w-full max-w-1/2 gap-6">
-            <InputGroup>
-              <InputGroupInput placeholder="Search..." />
-              <InputGroupAddon>
-                <Search />
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
+          {/* <button onClick={handleSearchToggle}> click</button> */}
+          {showSearch && (
+            <div className="grid w-full max-w-1/2 gap-6">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name or email"
+                  onChange={(e) => onSearch?.(e.target.value)}
+                  className="rounded-lg border w-full  py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-300"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
@@ -45,15 +64,13 @@ export default function Topbar() {
   );
 }
 
-function Card({ children }) {
-  return (
-    <div className="bg-white rounded-lg border border-slate-100 p-4 shadow-sm">
-      {children}
-    </div>
-  );
-}
-
-function IconButton({ children, title }) {
+function IconButton({
+  children,
+  title,
+}: {
+  children: React.ReactNode;
+  title: string;
+}) {
   return (
     <button
       className="p-2 rounded-md shadow-md shadow-slate-300 hover:bg-slate-100 text-black"
