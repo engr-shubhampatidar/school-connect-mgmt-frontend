@@ -59,7 +59,7 @@ export default function AdminDashboardPage() {
     id ? `${id.slice(0, 8)}...${id.slice(-4)}` : "-";
 
   return (
-    <div className="container mx-auto px-4 py-6 ">
+    <div className=" px-4 py-6 ">
       <section>
         <h3 className="text-2xl font-semibold pl-4">Welcomeback, Acme Inc.</h3>
         <div className="text-sm text-slate-500">&nbsp;</div>

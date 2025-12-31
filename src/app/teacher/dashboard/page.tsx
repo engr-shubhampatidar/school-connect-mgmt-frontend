@@ -3,12 +3,10 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
-import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
 import {
   getTeacherMe,
   getTeacherClass,
-  fetchAttendanceByClass,
   type TeacherClass,
   type TeacherMe,
 } from "../../../lib/teacherApi";
@@ -29,7 +27,7 @@ type ApiResponse = {
 };
 
 type Student = {
-  id: string;
+  id?: string;
   name?: string;
   rollNo?: string;
   photoUrl?: string;
@@ -85,7 +83,9 @@ export default function TeacherDashboardPage() {
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          const maybeMessage = (err as { message?: unknown }).message;
+          // const maybeMessage = (err as { message?: unknown }).message;
+          const maybeMessage = (err as unknown as { message?: unknown })
+            .message;
           if (typeof maybeMessage === "string") message = maybeMessage;
         }
         toastRef.current?.({
@@ -136,13 +136,15 @@ export default function TeacherDashboardPage() {
       <section className="mb-6">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-4">
-            <h3 className="text-xl font-semibold">Welcomeback, Sarah</h3>
+            <h3 className="text-xl font-semibold">
+              Welcomeback, {teacher?.name ?? "Teacher"}!
+            </h3>
             <div className="flex gap-4">
               <p className=" text-sm text-slate-600">
                 Monday, October 23, 2026
               </p>
               <p className=" text-sm text-green-700 font-medium">
-                You are the class teacher of {klass.name + "th"}{" "}
+                You are the class teacher of {klass.name}{" "}
                 {klass.section ? `- ${klass.section}` : ""}
               </p>
             </div>
@@ -178,30 +180,37 @@ export default function TeacherDashboardPage() {
       </div>
       <div className="flex flex-row gap-4">
         <section className="w-2/3 gap-4 mb-4 flex flex-col">
-          <div className="bg-white rounded-lg border border-slate-100 p-6 shadow-sm">
-            <div className="flex items-start justify-between">
+          <div className="bg-[#D7E3FC] rounded-lg border border-slate-100">
+            <div className="flex items-start justify-between px-6 py-6">
               <div>
-                <div className="text-lg font-semibold">My Class: 10-A</div>
+                <div className="text-lg font-semibold">
+                  My Class: {klass.name}{" "}
+                  {klass.section ? `- ${klass.section}` : ""}
+                </div>
                 <div className="mt-1 text-sm text-slate-600">
                   Class Teacher Responsibilities
                 </div>
               </div>
 
               <div className="text-sm text-slate-600">
-                Total Students: <span className="font-semibold">32</span>
+                Total Students:{" "}
+                <span className="font-semibold">{students.length ?? "NA"}</span>
               </div>
             </div>
 
-            <div className="mt-4 bg-amber-50 border border-amber-100 rounded-md px-4 py-3 flex items-center justify-between">
+            <div className="  rounded-b-md border-t-2 border-slate-100 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {/* <div className="text-amber-600">{WarningIcon()}</div> */}
+                <div className="text-amber-600">{WarningIcon()}</div>
                 <div className="text-sm text-amber-800">
-                  Morning attendance not yet submitted
+                  {" Today's attendance not yet submitted."}
                 </div>
               </div>
-              <button className="inline-flex items-center gap-2 bg-indigo-700 text-white px-4 py-2 rounded-md shadow-sm">
+              <button
+                onClick={() => router.push("/teacher/attendance")}
+                className="inline-flex items-center gap-2 bg-[#021034] text-white px-4 py-2 rounded-md shadow-sm cursor-pointer hover:bg-[#021034]/90 transition"
+              >
                 {/* <span className="w-4 h-4">{PlusIcon()}</span> */}
-                <span>Take Attendance</span>
+                <span>+ Take Attendance</span>
               </button>
             </div>
           </div>
@@ -276,269 +285,40 @@ export default function TeacherDashboardPage() {
           onViewWeek={() => console.log("View full week")}
         />
       </div>
-      <Card>
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold">
-              {klass.name} {klass.section ? `- ${klass.section}` : ""}
-            </h2>
-            {teacher?.name && (
-              <p className="text-sm text-slate-600">Welcome, {teacher.name}</p>
-            )}
-            <p className="text-sm text-slate-600">{students.length} students</p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => router.push("/teacher/attendance")}
-              variant="default"
-              aria-label="Take attendance"
-            >
-              Take Attendance
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      <Card>
-        <h3 className="text-sm font-medium mb-3">Students</h3>
-
-        {students.length === 0 ? (
-          <div className="py-6 text-center text-sm text-slate-600">
-            No students in this class yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {students.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => router.push(`/teacher/attendance/${s.id}`)}
-                className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm text-left bg-white"
-                aria-label={`Open ${s.name ?? "student"} profile`}
-                type="button"
-              >
-                {/* <Image
-                  src={s.photoUrl ?? FALLBACK_IMG}
-                  alt={s.name ? `${s.name} photo` : "Student photo"}
-                  width={48}
-                  height={48}
-                  className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-                /> */}
-                <div>
-                  <div className="text-sm font-medium">
-                    {s.name ?? "Unnamed"}
-                  </div>
-                  <div className="text-xs text-slate-500">
-                    Roll: {s.rollNo ?? "-"}
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </Card>
-
-      <AttendanceHistoryCard classId={klass.id} students={students} />
     </div>
   );
 }
 
-function AttendanceHistoryCard({
-  classId,
-  students,
-}: {
-  classId: string;
-  students: Student[];
-}) {
-  const [loading, setLoading] = useState(true);
-  const [records, setRecords] = useState<Array<Record<string, unknown>>>([]);
-  const [dates, setDates] = useState<string[]>([]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function load() {
-      setLoading(true);
-      try {
-        const data = (await fetchAttendanceByClass(classId)) as unknown;
-        if (!mounted) return;
-
-        // Normalize into flat records array with { studentId, date, status }
-        let flat: Array<Record<string, unknown>> = [];
-
-        if (Array.isArray(data)) {
-          // common shape: array of attendance objects each containing `date` and `students`
-          const arr = data as Array<Record<string, unknown>>;
-          if (arr.length > 0 && Array.isArray(arr[0].students)) {
-            for (const att of arr) {
-              const d =
-                (att as Record<string, unknown>).date ??
-                (att as Record<string, unknown>).createdAt ??
-                null;
-              const ds = d ? String(d).slice(0, 10) : "";
-              for (const st of (att as Record<string, unknown>)
-                .students as Array<Record<string, unknown>>) {
-                const sid =
-                  (st as Record<string, unknown>).studentId ??
-                  (st as Record<string, unknown>).student_id ??
-                  (st as Record<string, unknown>).student ??
-                  (st as Record<string, unknown>).sid;
-                const status =
-                  (st as Record<string, unknown>).status ??
-                  (st as Record<string, unknown>).attendance ??
-                  "";
-                flat.push({ studentId: sid, status, date: ds });
-              }
-            }
-          } else {
-            // assume already flat student-level records
-            flat = data as Array<Record<string, unknown>>;
-          }
-        } else if (data && typeof data === "object") {
-          // try common shapes: { records: [...] } or { byDate: { date: [...] } }
-          const obj = data as Record<string, unknown>;
-          const maybeRecords = (obj as Record<string, unknown>)
-            .records as unknown;
-          const maybeAttendances = (obj as Record<string, unknown>)
-            .attendances as unknown;
-          if (Array.isArray(maybeRecords))
-            flat = maybeRecords as Array<Record<string, unknown>>;
-          else if (Array.isArray(maybeAttendances))
-            flat = maybeAttendances as Array<Record<string, unknown>>;
-          else if (obj.byDate && typeof obj.byDate === "object") {
-            for (const [d, items] of Object.entries(obj.byDate)) {
-              if (Array.isArray(items)) {
-                for (const it of items) {
-                  flat.push({ ...(it as object), date: d });
-                }
-              }
-            }
-          } else {
-            // fallback: try to collect nested arrays
-            for (const v of Object.values(obj)) {
-              if (Array.isArray(v)) {
-                flat = flat.concat(v as Array<Record<string, unknown>>);
-              }
-            }
-          }
-        }
-
-        // Ensure date string format and collect unique dates
-        const dateSet = new Set<string>();
-        flat = flat.map((r) => {
-          const d = r.date || r.attendanceDate || r.createdAt || r.day || null;
-          const ds = d ? String(d).slice(0, 10) : "";
-          if (ds) dateSet.add(ds);
-          return { ...r, date: ds };
-        });
-
-        const sortedDates = Array.from(dateSet).sort((a, b) =>
-          a < b ? 1 : -1
-        );
-        // show all dates (no 7-day limit)
-        const recent = sortedDates;
-
-        setRecords(flat);
-        setDates(recent);
-      } catch {
-        setRecords([]);
-        setDates([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [classId]);
-
-  function statusBadge(status?: string) {
-    const s = String(status ?? "").toUpperCase();
-    const base =
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-    if (s === "PRESENT" || s === "P")
-      return <span className={`${base} bg-green-100 text-green-800`}>P</span>;
-    if (s === "ABSENT" || s === "A")
-      return <span className={`${base} bg-red-100 text-red-800`}>A</span>;
-    if (s === "LATE" || s === "L")
-      return <span className={`${base} bg-yellow-100 text-yellow-800`}>L</span>;
-    return <span className={`${base} bg-slate-100 text-slate-700`}>-</span>;
-  }
-
-  // build lookup: map studentId -> { date -> status }
-  const lookup: Record<string, Record<string, string>> = {};
-  for (const r of records) {
-    const rawSid =
-      (r as Record<string, unknown>).studentId ??
-      (r as Record<string, unknown>).student ??
-      (r as Record<string, unknown>).student_id ??
-      (r as Record<string, unknown>).sid;
-    const sid = rawSid ? String(rawSid) : "";
-    const d = String((r as Record<string, unknown>).date ?? "");
-    const st =
-      (r as Record<string, unknown>).status ??
-      (r as Record<string, unknown>).attendance ??
-      (r as Record<string, unknown>).value ??
-      "";
-    if (!sid || !d) continue;
-    if (!lookup[sid]) lookup[sid] = {} as Record<string, string>;
-    lookup[sid][d] = String(st);
-  }
-
+function WarningIcon() {
   return (
-    <Card>
-      <h3 className="text-sm font-medium mb-3">Attendance History</h3>
-
-      {loading ? (
-        <div className="py-6">
-          <div className="animate-pulse h-6 w-3/4 rounded bg-slate-100 mb-3" />
-          <div className="overflow-x-auto">
-            <div className="h-32 rounded bg-slate-100" />
-          </div>
-        </div>
-      ) : dates.length === 0 ? (
-        <div className="py-6 text-center text-sm text-slate-600">
-          No attendance history yet.
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed border-collapse">
-            <thead>
-              <tr className="text-left text-xs text-slate-600">
-                <th className="pb-2 pr-4 sticky left-0 bg-white  border-r  w-44">
-                  Student
-                </th>
-                {dates.map((d) => (
-                  <th key={d} className="pb-2 w-28 px-4">
-                    {d}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.id} className="border-t">
-                  <td className="py-2 sticky left-0 bg-white border-r w-44 pr-4 align-top">
-                    <div className="text-sm font-medium">
-                      {s.name ?? "Unnamed"}
-                    </div>
-                    <div className="text-xs text-slate-500">
-                      Roll: {s.rollNo ?? "-"}
-                    </div>
-                  </td>
-                  {dates.map((d) => (
-                    <td key={d} className="py-2 px-4 w-28 border-r align-top">
-                      {statusBadge(lookup[s.id]?.[d])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </Card>
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 9v4"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 17h.01"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

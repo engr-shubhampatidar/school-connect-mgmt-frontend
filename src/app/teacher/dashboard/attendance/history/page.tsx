@@ -20,6 +20,15 @@ export default function AttendanceHistoryPage() {
     [k: string]: unknown;
   };
 
+  type ClassMeta = {
+    name?: string;
+    className?: string;
+    section?: string;
+    sectionName?: string;
+    subject?: string | null;
+    [k: string]: unknown;
+  } | null;
+
   const [records, setRecords] = useState<AttendanceHistoryRecord[]>([]);
   const [klass, setKlass] = useState<ClassMeta | null>(null);
   const [klassId, setKlassId] = useState<string | null>(null);

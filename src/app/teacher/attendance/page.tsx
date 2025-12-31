@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Card } from "../../../components/ui/Card";
-import { Button } from "../../../components/ui/Button";
 import AttendanceStatusBar, {
   type AttendanceValue,
 } from "../../../components/ui/AttendanceStatusBar";
@@ -13,7 +12,9 @@ import {
   type TeacherClass,
 } from "../../../lib/teacherApi";
 import { getToken } from "../../../lib/auth";
-import StudentAttendanceList from "../attendance/Components/StudentAttendanceList";
+import SuccessModal from "../../../components/ui/SuccessModal";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 
 type StudentRow = {
   studentId: string;
@@ -29,6 +30,7 @@ function todayISO() {
 export default function TeacherAttendancePage() {
   const { toast } = useToast();
   const toastRef = useRef(toast);
+  const router = useRouter();
   useEffect(() => {
     toastRef.current = toast;
   }, [toast]);
@@ -36,8 +38,20 @@ export default function TeacherAttendancePage() {
   const [klass, setKlass] = useState<TeacherClass | null>(null);
   const [date, setDate] = useState<string>(todayISO());
   const [students, setStudents] = useState<StudentRow[]>([]);
+  const [search, setSearch] = useState("");
+
+  const filteredStudents = useMemo(() => {
+    const q = (search ?? "").trim().toLowerCase();
+    if (!q) return students;
+    return students.filter((s) => {
+      const name = (s.name ?? "").toString().toLowerCase();
+      const roll = (s.rollNo ?? "").toString().toLowerCase();
+      return name.includes(q) || roll.includes(q);
+    });
+  }, [students, search]);
   const [submitting, setSubmitting] = useState(false);
   const [attendanceExists, setAttendanceExists] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!getToken("teacher")) {
@@ -208,91 +222,118 @@ export default function TeacherAttendancePage() {
   return (
     <>
       <div className="space-y-4 p-4 pb-20">
-          <Card>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
-              <div>
-                <p className="text-[12px] text-slate-600">Class & Section</p>
-                <h2 className="text-lg font-semibold">
-                  {klass.name}
-                  {klass.section ? ` -Section ${klass.section}` : ""}
-                </h2>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex w-full items-center justify-end">
-                  <p className="text-[10px] text-right  text-slate-400">
-                    {"Today's Attendance"}
-                  </p>
-                </div>
-                <input
-                  type="date"
-                  value={date}
-                  max={maxDate}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="rounded-md border border-slate-200 px-3 py-1 text-sm"
-                />
-                {/* <Button onClick={save} disabled={submitting || attendanceExists}>
-              {submitting
-              ? "Saving…"
-              : attendanceExists
-              ? "Already marked"
-              : "Save Attendance"}
-            </Button> */}
-              </div>
+        <Card>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
+            <div>
+              <p className="text-[12px] text-slate-600">Class & Section</p>
+              <h2 className="text-lg font-semibold">
+                {klass.name}
+                {klass.section ? ` -Section ${klass.section}` : ""}
+              </h2>
             </div>
-          </Card>
-          <div className="overflow-y-auto max-h-[400px]"></div>
-          <StudentAttendanceList
-            students={[
-              { rollNo: "01", name: "Deepak Patidar", status: "present" },
-              { rollNo: "02", name: "Deepak Patidar" },
-              { rollNo: "03", name: "Deepak Patidar" },
-              { rollNo: "04", name: "Deepak Patidar" },
-              { rollNo: "05", name: "Deepak Patidar" },
-              { rollNo: "03", name: "Deepak Patidar" },
-              { rollNo: "04", name: "Deepak Patidar" },
-              { rollNo: "05", name: "Deepak Patidar" },
-              { rollNo: "03", name: "Deepak Patidar" },
-              { rollNo: "04", name: "Deepak Patidar" },
-              { rollNo: "05", name: "Deepak Patidar" },
-              { rollNo: "03", name: "Deepak Patidar" },
-              { rollNo: "04", name: "Deepak Patidar" },
-              { rollNo: "05", name: "Deepak Patidar" },
-            ]}
-            onStatusChange={(rollNo, status) => console.log(rollNo, status)}
-          />
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex w-full items-center justify-end">
+                <p className="text-[10px] text-right  text-slate-400">
+                  {"Today's Attendance"}
+                </p>
+              </div>
+              <input
+                type="date"
+                value={date}
+                max={maxDate}
+                onChange={(e) => setDate(e.target.value)}
+                className="rounded-md border border-slate-200 px-3 py-1 text-sm"
+              />
+            </div>
+          </div>
+        </Card>
+        <div className="overflow-y-auto max-h-[400px]"></div>
 
-        {/* <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-600">
-                <th className="py-2">Roll</th>
-                <th className="py-2 ">Name</th>
-                <th className="py-2 flex  items-center justify-center  max-w-[150px]">
-                  Status
-                </th>
+        <Card className="w-full rounded-xl border bg-white shadow-sm">
+          {/* Header */}
+          <div className="flex items-start justify-between p-6">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Student Attendance
+              </h2>
+              <p className="text-sm text-slate-500">
+                Total Students ({filteredStudents.length})
+              </p>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by name or roll no"
+                aria-label="Search students by name or roll number"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-500"
+              />
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className=" text-slate-600">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Roll No.</th>
+                  <th className="px-6 py-3 font-medium">Student Name</th>
+                  <th className="px-6 py-3 font-medium text-right">
+                    Attendance Status
+                  </th>
                 </tr>
-            </thead>
-            <tbody>
-              {students.map((s) => (
-                <tr key={s.studentId} className="border-t ">
-                  <td className="py-2 ">{s.rollNo ?? "-"}</td>
-                  <td className="py-2 min-w-[100px]">{s.name}</td>
-                  <td className="py-2 flex items-center justify-center max-w-[150px]">
-                    <div className="gap-2">
-                      <AttendanceStatusBar
-                      value={s.status || "PRESENT"}
-                        onChange={(v) => setStatus(s.studentId, v)}
-                        disabled={attendanceExists}
-                      />
-                    </div>
+              </thead>
+
+              <tbody>
+                {filteredStudents.map((s, index) => (
+                  <tr
+                    key={s.studentId}
+                    className={`border-b last:border-none ${
+                      index % 2 === 0 ? "bg-slate-50" : ""
+                    }`}
+                  >
+                    {/* Roll No */}
+                    <td className="px-6 py-4 font-medium text-slate-700">
+                      {s.rollNo ?? "-"}
                     </td>
-                </tr>
-              ))}
+
+                    {/* Student */}
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() =>
+                          router.push(`/teacher/attendance/${s.studentId}`)
+                        }
+                        className="flex items-center gap-3 cursor-pointer"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-700">
+                          {s.name?.charAt(0)}
+                        </div>
+                        <span className="font-medium text-slate-900">
+                          {s.name}
+                        </span>
+                      </button>
+                    </td>
+
+                    {/* Attendance */}
+                    <td className="px-6 py-4 ">
+                      <div className="flex justify-end   ">
+                        <AttendanceStatusBar
+                          value={s.status || "PRESENT"}
+                          onChange={(v) => setStatus(s.studentId, v)}
+                          disabled={attendanceExists}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
-          </table>
-        </div>
-      </Card> */}
+            </table>
+          </div>
+        </Card>
       </div>
       <div className=" border-t bg-white fixed bottom-0 left-0 w-full  md:pl-64 lg:pl-72">
         <div className="mx-auto sticky  bottom-0 flex max-h-20 items-center justify-between px-6 py-4">
@@ -317,15 +358,28 @@ export default function TeacherAttendancePage() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-4">
-            <button className="text-sm font-medium text-slate-600 hover:text-slate-900">
+            <button className="text-sm font-medium text-slate-600 hover:text-slate-900 cursor-pointer">
               Cancel
             </button>
 
-            <button className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-800">
-              Save Attendance
+            <button
+              // onClick={() => setOpen(true)}
+              onClick={() => {
+                setOpen(true);
+                save();
+              }}
+              disabled={submitting || attendanceExists}
+              className="rounded-lg bg-slate-900 px-5 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer"
+            >
+              {submitting
+                ? "Saving…"
+                : attendanceExists
+                ? "Already marked"
+                : "Save Attendance"}
             </button>
           </div>
         </div>
+        <SuccessModal open={open} onClose={() => setOpen(false)} />
       </div>
     </>
   );
