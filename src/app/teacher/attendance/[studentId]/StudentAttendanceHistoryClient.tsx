@@ -82,6 +82,13 @@ export default function StudentAttendanceHistoryClient({
       setLoading(true);
       setError(null);
       try {
+        // ensure we don't pass a null/undefined id to ATTENDANCE_API.STUDENT
+        if (!effectiveStudentId) {
+          setError("Missing student id");
+          setLoading(false);
+          return;
+        }
+
         const res = await TAPI.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
           params: date ? { date } : undefined,
         });
@@ -143,19 +150,19 @@ export default function StudentAttendanceHistoryClient({
   const studentMeta = useMemo(() => {
     if (student)
       return {
-        id: student.id ?? null,
-        name: student.name ?? null,
-        className: student.className ?? null,
-        section: student.section ?? null,
+        id: student.id ?? undefined,
+        name: student.name ?? undefined,
+        className: student.className ?? undefined,
+        section: student.section ?? undefined,
       };
 
     if (records.length > 0) {
       const r = records[0];
       return {
-        id: r.id ?? null,
-        name: null,
-        className: null,
-        section: null,
+        id: r.id ?? undefined,
+        name: undefined,
+        className: undefined,
+        section: undefined,
       };
     }
     return null;
