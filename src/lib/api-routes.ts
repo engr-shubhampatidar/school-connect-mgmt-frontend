@@ -1,4 +1,4 @@
-export const BASE_URL = "https://school-connect-mgmt-backend.vercel.app/";
+export const BASE_URL = "http://localhost:3000";
 
 export const PUBLIC_API = {
   CONTACT: "/api/public/contact",

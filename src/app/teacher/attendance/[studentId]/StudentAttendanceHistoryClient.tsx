@@ -1,24 +1,66 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { Card } from "../../../../components/ui/Card";
 import TAPI from "../../../../lib/teacherApi";
 import { ATTENDANCE_API } from "../../../../lib/api-routes";
 import { getToken } from "../../../../lib/auth";
+import StudentInfoCard from "../../../../components/attendance/StudentInfoCard";
+import AttendanceHistoryHeader from "../../../../components/attendance/AttendanceHistoryHeader";
+import AttendanceDateFilter from "../../../../components/attendance/AttendanceDateFilter";
+import AttendanceTable from "../../../../components/attendance/AttendanceTable";
+import LoadingState from "../../../../components/attendance/LoadingState";
+import EmptyState from "../../../../components/attendance/EmptyState";
+
+type AttendanceApiItem = {
+  id: string;
+  attendance?: {
+    id?: string;
+    date?: string;
+    status?: string;
+    [k: string]: unknown;
+  };
+  attendanceId?: string;
+  studentId?: string;
+  status?: string;
+  createdAt?: string;
+  [k: string]: unknown;
+};
+
+type ApiResponse = {
+  studentId?: string;
+  studentName?: string;
+  class?: string;
+  section?: string;
+  attendance?: AttendanceApiItem[];
+  [k: string]: unknown;
+};
 
 type AttendanceRecord = {
-  date?: string;
-  status?: string;
+  id?: string;
+  date: string;
+  status: string;
+  attendanceId?: string;
+  createdAt?: string;
   [k: string]: unknown;
 };
 
 export default function StudentAttendanceHistoryClient({
   studentId,
 }: {
-  studentId: string;
+  studentId?: string | null;
 }) {
+  const params = useParams() as { studentId?: string };
   const [loading, setLoading] = useState(true);
-  const [studentName, setStudentName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [student, setStudent] = useState<{
+    id?: string | null;
+    name?: string | null;
+    className?: string | null;
+    section?: string | null;
+  } | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
     if (!getToken("teacher")) {
@@ -27,115 +69,127 @@ export default function StudentAttendanceHistoryClient({
       return;
     }
 
+    const effectiveStudentId = studentId ?? params?.studentId ?? null;
+
+    if (!effectiveStudentId) {
+      setError("Missing studentId");
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
-    async function load() {
+    async function load(date?: string | null) {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await TAPI.get(ATTENDANCE_API.STUDENT(studentId));
-        const data = res?.data;
+        const res = await TAPI.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
+          params: date ? { date } : undefined,
+        });
+        const data = res?.data as ApiResponse | AttendanceApiItem[] | null;
 
-        let recs: AttendanceRecord[] = [];
-        let name: string | null = null;
-
-        if (Array.isArray(data)) {
-          recs = data as AttendanceRecord[];
-        } else if (data && typeof data === "object") {
-          // common shapes
-          recs =
-            data.records ??
-            data.attendance ??
-            data.attendances ??
-            data.history ??
-            data.rows ??
-            [];
-          if (!Array.isArray(recs) && typeof data === "object") {
-            // fallback: treat top-level object as single-record container
-            recs = Array.isArray(data) ? data : [];
-          }
-          name = data.student?.name ?? data.name ?? null;
-        }
-
-        // Try to extract name from records if still missing
-        if (!name && recs.length > 0) {
-          const first = recs[0] as unknown as AttendanceRecord & {
-            student?: { name?: string };
-            studentName?: string;
-            name?: string;
+        // extract student metadata from top-level shape
+        if (data && !Array.isArray(data)) {
+          const top = data as ApiResponse;
+          const s = {
+            id: top.studentId ?? null,
+            name: top.studentName ?? null,
+            className: top.class ?? null,
+            section: top.section ?? null,
           };
-          name = first.student?.name ?? first.studentName ?? first.name ?? null;
+          if (mounted) setStudent(s);
         }
 
-        // Normalize and sort by date desc
-        const normalized = recs
-          .map((r) => ({
-            date: r.date ?? r.createdAt ?? r.day ?? null,
-            status: r.status ?? r.attendance ?? r.value ?? "",
-            ...r,
-          }))
+        // Extract records
+        let recs: AttendanceApiItem[] = [];
+        if (Array.isArray(data)) recs = data as AttendanceApiItem[];
+        else if (data) recs = (data as ApiResponse).attendance ?? [];
+
+        const normalized: AttendanceRecord[] = (recs ?? [])
+          .map((r) => {
+            const date = r.attendance?.date ?? r.createdAt ?? "";
+            const status = r.status ?? (r.attendance?.status as string) ?? "";
+            return {
+              id: r.id,
+              date,
+              status,
+              attendanceId: r.attendanceId,
+              createdAt: r.createdAt,
+            } as AttendanceRecord;
+          })
           .filter((r) => r.date)
           .sort(
-            (a, b) =>
-              new Date(b.date as string).getTime() -
-              new Date(a.date as string).getTime()
-          )
-          .slice(0, 10);
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
 
+        const final = date ? normalized : normalized.slice(0, 7);
         if (!mounted) return;
-        setStudentName(name);
-        setRecords(normalized as unknown as AttendanceRecord[]);
+        setRecords(final);
       } catch (err) {
-        // silently show empty state
+        if (!mounted) return;
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message || "Failed to load");
         setRecords([]);
       } finally {
         if (mounted) setLoading(false);
       }
     }
 
-    load();
+    load(selectedDate);
     return () => {
       mounted = false;
     };
-  }, [studentId]);
+  }, [studentId, selectedDate, params]);
 
-  if (loading) return <div className="p-4">Loading…</div>;
+  const studentMeta = useMemo(() => {
+    if (student)
+      return {
+        id: student.id ?? null,
+        name: student.name ?? null,
+        className: student.className ?? null,
+        section: student.section ?? null,
+      };
+
+    if (records.length > 0) {
+      const r = records[0];
+      return {
+        id: r.id ?? null,
+        name: null,
+        className: null,
+        section: null,
+      };
+    }
+    return null;
+  }, [student, records]);
 
   return (
     <div className="p-4 space-y-4">
+      <StudentInfoCard student={studentMeta} />
+
       <Card>
-        <div>
-          <h2 className="text-lg font-semibold">
-            {studentName ?? "Student"} — Attendance History
-          </h2>
-        </div>
+        <AttendanceHistoryHeader>
+          <AttendanceDateFilter
+            value={selectedDate ?? null}
+            onChange={setSelectedDate}
+          />
+        </AttendanceHistoryHeader>
       </Card>
 
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-slate-600">
-                <th className="py-2">Date</th>
-                <th className="py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.length === 0 && (
-                <tr>
-                  <td colSpan={2} className="py-4 text-slate-600">
-                    No recent records found.
-                  </td>
-                </tr>
-              )}
-              {records.map((r, idx) => (
-                <tr key={idx} className="border-t">
-                  <td className="py-2">
-                    {r.date ? new Date(r.date).toLocaleDateString() : "-"}
-                  </td>
-                  <td className="py-2">{r.status ?? "-"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <LoadingState />
+        ) : error ? (
+          <EmptyState message={error} />
+        ) : records.length === 0 ? (
+          <EmptyState
+            message={
+              selectedDate
+                ? "No records for selected date."
+                : "No recent records."
+            }
+          />
+        ) : (
+          <AttendanceTable records={records} />
+        )}
       </Card>
     </div>
   );
