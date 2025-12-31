@@ -3,7 +3,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import API from "../../../lib/axios";
-import { setToken } from "../../../lib/auth";
+import { setToken, setUser } from "../../../lib/auth";
 import { ADMIN_API } from "../../../lib/api-routes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,11 +39,23 @@ export default function AdminLoginPage() {
     try {
       const res = await API.post(ADMIN_API.LOGIN, values);
 
-      const data = res.data;
-      // store token if provided (placeholder)
-      const token = data?.token ?? data?.accessToken ?? null;
-      if (token) {
-        setToken("admin", token);
+      const { accessToken, refreshToken, user: respUser } = res.data ?? {};
+
+      // store access token if provided
+      if (accessToken) {
+        setToken("admin", accessToken);
+
+        // persist user exactly as returned (use provided keys)
+        if (respUser) {
+          const userToStore = {
+            id: respUser.id,
+            name: respUser.fullName ?? respUser.name,
+            email: respUser.email,
+            role: respUser.role,
+            school: respUser.school ?? null,
+          };
+          setUser("admin", userToStore);
+        }
       }
 
       toast({

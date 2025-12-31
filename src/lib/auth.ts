@@ -6,6 +6,10 @@ function keyFor(role: Role, tokenType = "access") {
   return `${PREFIX}:${role}:${tokenType}`;
 }
 
+function profileKey(role: Role) {
+  return `${PREFIX}:${role}:profile`;
+}
+
 export function setToken(role: Role, token: string, tokenType = "access") {
   try {
     localStorage.setItem(keyFor(role, tokenType), token);
@@ -30,6 +34,31 @@ export function removeToken(role: Role, tokenType = "access") {
   }
 }
 
+export function setUser(role: Role, user: unknown) {
+  try {
+    localStorage.setItem(profileKey(role), JSON.stringify(user));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getUser<T = any>(role: Role): T | null {
+  try {
+    const v = localStorage.getItem(profileKey(role));
+    return v ? (JSON.parse(v) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function removeUser(role: Role) {
+  try {
+    localStorage.removeItem(profileKey(role));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function getAccessToken() {
   return getToken("admin");
 }
@@ -40,12 +69,16 @@ export function setAccessToken(token: string) {
 
 export function clearAuthTokens() {
   removeToken("admin");
+  removeUser("admin");
 }
 
 const auth = {
   setToken,
   getToken,
   removeToken,
+  setUser,
+  getUser,
+  removeUser,
   getAccessToken,
   setAccessToken,
   clearAuthTokens,

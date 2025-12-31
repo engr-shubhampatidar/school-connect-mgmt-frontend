@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getUser } from "../../lib/auth";
 export default function Topbar({
   onSearch,
 }: {
@@ -10,6 +11,11 @@ export default function Topbar({
 }) {
   const pathname = usePathname();
   const [showSearch, setShowSearch] = useState(false);
+  const [user, setUser] = useState<{
+    name?: string;
+    email?: string;
+    role?: string;
+  } | null>(null);
 
   const topName = pathname.split("/")[2]?.toUpperCase() || "DASHBOARD";
 
@@ -24,6 +30,15 @@ export default function Topbar({
   useEffect(() => {
     handleSearchToggle();
   }, [pathname]);
+
+  useEffect(() => {
+    try {
+      const u = getUser("admin");
+      setUser(u);
+    } catch {
+      setUser(null);
+    }
+  }, []);
 
   return (
     <div className="sticky top-0 z-10">
@@ -50,11 +65,21 @@ export default function Topbar({
           <IconButton title="Mail">{MailIcon()}</IconButton>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-800 font-medium">
-              S
+              {user?.name
+                ? user.name
+                    .split(" ")
+                    .map((s) => s[0])
+                    .slice(0, 2)
+                    .join("")
+                    .toUpperCase()
+                : "S"}
             </div>
             <div className="text-sm">
-              <div className="font-medium">shadcn</div>
-              <div className="text-xs text-slate-500">m@example.com</div>
+              <div className="font-medium">{user?.name ?? "shadcn"}</div>
+              <div className="text-xs text-slate-500">
+                {user?.role ? user.role.toUpperCase() + " · " : ""}
+                {user?.email ?? "m@example.com"}
+              </div>
             </div>
           </div>
           <div className="p-2 text-slate-500">{DotsVerticalIcon()}</div>

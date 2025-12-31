@@ -4,16 +4,23 @@ import Link from "next/link";
 import { adminNav, studentNav, teacherNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
+import { getUser } from "../../lib/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
   let navItems = [];
-  const [openSidebar, setOpenSidebar] = useState(true); // You can replace this with actual state if needed
+  const [openSidebar, setOpenSidebar] = useState(true);
 
-  const handleSideBar = () => {
-    // Logic to handle sidebar toggle can be added here
-    setOpenSidebar((prev) => !prev);
-  };
+  const [userName] = useState<string | null>(() => {
+    try {
+      const u = getUser("admin");
+      return (u && (u.fullName ?? u.name)) || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleSideBar = () => setOpenSidebar((v) => !v);
 
   if (pathname.startsWith("/admin")) {
     navItems = adminNav;
@@ -22,8 +29,9 @@ export default function Navbar() {
   } else if (pathname.startsWith("/student")) {
     navItems = studentNav;
   } else {
-    return null; // No navbar for other routes
+    return null;
   }
+
   return (
     <div className="flex h-screen bg-slate-50 sticky top-0 left-0 z-10">
       <aside
@@ -35,15 +43,13 @@ export default function Navbar() {
           <div>
             <div className="text-2xl font-semibold text-slate-900 border-b border-slate-200 pb-8 pt-5 min-h-[85px] flex items-center justify-center">
               {openSidebar ? (
-                <>
-                  <div className="flex items-center justify-center ">
-                    <PanelRight
-                      onClick={handleSideBar}
-                      className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
-                    />
-                    Acme Inc.
-                  </div>
-                </>
+                <div className="flex items-center justify-center ">
+                  <PanelRight
+                    onClick={handleSideBar}
+                    className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
+                  />
+                  {userName ?? "Acme Inc."}
+                </div>
               ) : (
                 <PanelRight
                   onClick={handleSideBar}
@@ -112,7 +118,15 @@ export default function Navbar() {
   );
 }
 
-function SidebarItem({ label, active = false, small = false }: { label: string; active?: boolean; small?: boolean }) {
+function SidebarItem({
+  label,
+  active = false,
+  small = false,
+}: {
+  label: string;
+  active?: boolean;
+  small?: boolean;
+}) {
   return (
     <div
       className={`flex items-center gap-3 px-2 py-2 rounded-md ${
