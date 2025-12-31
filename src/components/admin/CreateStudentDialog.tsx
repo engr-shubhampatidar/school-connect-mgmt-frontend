@@ -17,9 +17,10 @@ import { Input } from "../ui/Input";
 import Select from "../ui/Select";
 import { Controller } from "react-hook-form";
 import { useToast } from "../ui/use-toast";
+// classes are provided by parent; do not call API here
+import type { ClassItem } from "@/lib/adminApi";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
-import type { ClassItem } from "@/lib/adminApi";
 
 const createStudentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -48,16 +49,28 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreated?: () => void;
+  classes?: ClassItem[];
 };
 
 export default function CreateStudentDialog({
   open,
   onClose,
   onCreated,
+  classes: parentClasses,
 }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>(parentClasses ?? []);
+
+  // accept classes from parent via props; use fallback if not provided
+  useEffect(() => {
+    if (parentClasses && parentClasses.length > 0) {
+      setClasses(parentClasses);
+      return;
+    }
+    // fallback no callses, with lable no classes available
+    setClasses([{ id: "", name: "No classes available" }]);
+  }, [parentClasses]);
 
   const form = useForm<CreateStudentValues>({
     resolver: zodResolver(
@@ -65,61 +78,6 @@ export default function CreateStudentDialog({
     ) as unknown as Resolver<CreateStudentValues>,
     defaultValues: { name: "", rollNo: "", classId: "", photoUrl: "" },
   });
-
-  useEffect(() => {
-    // fetch classes list; fallback to static if fails
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await API.get<unknown>(ADMIN_API.CLASSES);
-        if (!mounted) return;
-        const data = res.data;
-        // Normalize classes from several possible shapes and include `section` when present
-        const normalize = (it: unknown): ClassItem => {
-          if (!it) return { id: "", name: "", section: null };
-          if (typeof it === "string") {
-            return { id: it, name: it, section: null };
-          }
-          if (typeof it === "object") {
-            const o = it as Record<string, unknown>;
-            const id = (o.id ?? o._id ?? o.classId ?? "") as string;
-            const name = (o.name ?? o.className ?? o.title ?? "") as string;
-            const section = (o.section ?? o.classSection ?? null) as
-              | string
-              | null;
-            return { id, name, section };
-          }
-          return { id: "", name: "", section: null };
-        };
-
-        let arr: unknown[] = [];
-        if (Array.isArray(data)) arr = data as unknown[];
-        else if (data && typeof data === "object") {
-          const d = data as Record<string, unknown>;
-          if (Array.isArray(d.classes)) arr = d.classes as unknown[];
-          else if (Array.isArray(d.items)) arr = d.items as unknown[];
-        }
-
-        if (arr.length > 0) {
-          setClasses(arr.map(normalize));
-        } else {
-          setClasses([
-            { id: "class-1", name: "Class 1", section: null },
-            { id: "class-2", name: "Class 2", section: null },
-          ]);
-        }
-      } catch {
-        if (!mounted) return;
-        setClasses([
-          { id: "class-1", name: "Class 1", section: null },
-          { id: "class-2", name: "Class 2", section: null },
-        ]);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const onSubmit = async (values: CreateStudentValues) => {
     setLoading(true);

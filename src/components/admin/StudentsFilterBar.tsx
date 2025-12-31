@@ -1,14 +1,14 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import type { ClassItem } from "../../lib/adminApi";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import Select from "../ui/Select";
-import { fetchClasses } from "../../lib/adminApi";
 
 export type StudentsFilters = {
   search?: string;
-  class?: string;
+  classId?: string;
   status?: string;
 };
 
@@ -16,45 +16,31 @@ type Props = {
   initial?: StudentsFilters;
   onApply: (f: StudentsFilters) => void;
   onClear: () => void;
+  classes?: ClassItem[];
 };
 
 export default function StudentsFilterBar({
   initial,
   onApply,
   onClear,
+  classes: parentClasses,
 }: Props) {
   const [search, setSearch] = useState(initial?.search ?? "");
-  const [klass, setKlass] = useState(initial?.class ?? "");
+  const [klass, setKlass] = useState(initial?.classId ?? "");
   const [status, setStatus] = useState(initial?.status ?? "");
-  const [classOptions, setClassOptions] = useState<
-    {
-      id: string;
-      name: string;
-    }[]
-  >([]);
 
-  useEffect(() => {
-    let mounted = true;
-    void (async () => {
-      try {
-        const resp = await fetchClasses({ pageSize: 1000 });
-        if (!mounted) return;
-        const opts = [
-          { id: "", name: "All classes" },
-          ...(resp.classes ?? []).map((c) => ({
-            id: c.id ?? c.name,
-            name: c.section ? `${c.name} - ${c.section}` : c.name,
-          })),
-        ];
-        setClassOptions(opts);
-      } catch {
-        // ignore — keep default options
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const classOptions = useMemo(() => {
+    if (parentClasses && parentClasses.length > 0) {
+      return [
+        { id: "", name: "All classes" },
+        ...parentClasses.map((c) => ({
+          id: c.id ?? c.name,
+          name: c.section ? `${c.name} - ${c.section}` : c.name,
+        })),
+      ];
+    }
+    return [{ id: "", name: "All classes" }];
+  }, [parentClasses]);
 
   // Debounce search and auto-apply — skip initial mount to avoid duplicate calls
   const didMountRef = useRef(false);
@@ -64,18 +50,18 @@ export default function StudentsFilterBar({
       return;
     }
     const t = setTimeout(() => {
-      onApply({ search: search.trim(), class: klass, status });
+      onApply({ search: search.trim(), classId: klass, status });
     }, 500);
     return () => clearTimeout(t);
   }, [search, klass, status, onApply]);
 
   const handleApply = () =>
-    onApply({ search: search.trim(), class: klass, status });
+    onApply({ search: search.trim(), classId: klass, status });
+
   const handleClear = () => {
     setSearch("");
     setKlass("");
     setStatus("");
-    onClear();
   };
 
   return (

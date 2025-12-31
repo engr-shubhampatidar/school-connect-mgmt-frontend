@@ -26,7 +26,7 @@ export type StudentsResponse = {
 
 export type StudentsQuery = {
   search?: string;
-  class?: string;
+  classId?: string;
   status?: string;
   page?: number;
   pageSize?: number;
@@ -37,79 +37,44 @@ export async function fetchStudents(
 ): Promise<StudentsResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
-  if (query.class) params.class = query.class;
+  if (query.classId) params.classId = query.classId;
   if (query.status) params.status = query.status;
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
+  const res = await API.get<{
+    items: Array<{
+      id: string;
+      name: string;
+      rollNo?: string | number | null;
+      currentClass?: { name: string; section?: string | null } | null;
+      createdAt: string;
+    }>;
+    total?: number;
+    page?: number;
+    limit?: number;
+  }>(ADMIN_API.STUDENTS, { params });
 
-  const res = await API.get<StudentsResponse>(ADMIN_API.STUDENTS, { params });
-  const data = res.data as unknown;
+  const { items = [], total, page, limit } = res.data;
 
-  const d =
-    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
-  const items = (
-    Array.isArray(d.students)
-      ? d.students
-      : Array.isArray(d.items)
-      ? d.items
-      : []
-  ) as unknown[];
-
-  const students: Student[] = (items || []).map((it) => {
-    const itObj =
-      it && typeof it === "object" ? (it as Record<string, unknown>) : {};
-    const rawClass =
-      itObj.currentClass ??
-      itObj.class ??
-      itObj.classId ??
-      itObj.class_id ??
-      null;
-
-    let classVal: Student["class"] = null;
-    if (rawClass) {
-      if (typeof rawClass === "object") {
-        const rc = rawClass as Record<string, unknown>;
-        classVal = {
-          id: (rc.id ?? rc._id ?? rc.classId ?? "") as string,
-          name: (rc.name ?? rc.className ?? "") as string,
-          section: (rc.section ?? rc.classSection ?? null) as string | null,
-        };
-      } else if (typeof rawClass === "string") {
-        classVal = rawClass;
-      }
-    }
-
-    return {
-      id: (itObj.id ?? itObj._id ?? "") as string,
-      name: (itObj.name ??
-        itObj.fullName ??
-        (itObj.user && (itObj.user as Record<string, unknown>).fullName) ??
-        "") as string,
-      rollNo: (itObj.rollNo ?? itObj.roll_no ?? itObj.rollNumber ?? null) as
-        | string
-        | number
-        | null,
-      class: classVal,
-      createdAt: (itObj.createdAt ??
-        itObj.created_at ??
-        new Date().toISOString()) as string,
-    } as Student;
-  });
-
-  const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
-    students.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? undefined;
-  const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
-    query.pageSize;
+  const students: Student[] = items.map((it) => ({
+    id: it.id,
+    name: it.name,
+    rollNo: (it.rollNo ?? null) as string | number | null,
+    class: it.currentClass
+      ? {
+          id: "",
+          name: it.currentClass.name,
+          section: it.currentClass.section ?? null,
+        }
+      : null,
+    createdAt: it.createdAt,
+  }));
 
   return {
     students,
     total,
     page,
-    pageSize,
+    pageSize: limit,
   };
 }
 
@@ -306,12 +271,17 @@ export async function fetchTeachers(
 
   // derive pagination values
   let total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ??
+    (d.totalCount as number | undefined) ??
     teachers.length;
   const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page ?? 1;
+    (d.page as number | undefined) ??
+    (d.p as number | undefined) ??
+    query.page ??
+    1;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ??
+    (d.limit as number | undefined) ??
     query.pageSize;
 
   // If the API returned all items without pagination (no total provided)
@@ -372,12 +342,14 @@ export async function fetchClasses(
 
   const classes: ClassItem[] = (d.classes ?? d.items ?? []) as ClassItem[];
   const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ??
+    (d.totalCount as number | undefined) ??
     classes.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ??
+    (d.limit as number | undefined) ??
     query.pageSize;
 
   return {
@@ -433,12 +405,14 @@ export async function fetchSubjects(
 
   const subjects: Subject[] = (d.subjects ?? d.items ?? []) as Subject[];
   const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ??
+    (d.total as number | undefined) ??
+    (d.totalCount as number | undefined) ??
     subjects.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ??
+    (d.pageSize as number | undefined) ??
+    (d.limit as number | undefined) ??
     query.pageSize;
 
   return {

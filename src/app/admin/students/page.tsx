@@ -1,7 +1,13 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { fetchStudents, Student, StudentsQuery } from "../../../lib/adminApi";
+import {
+  fetchStudents,
+  fetchClasses,
+  Student,
+  StudentsQuery,
+  ClassItem,
+} from "../../../lib/adminApi";
 import StudentsFilterBar, {
   StudentsFilters,
 } from "../../../components/admin/StudentsFilterBar";
@@ -20,30 +26,47 @@ export default function AdminStudentsPage() {
   const [pageSize] = useState<number>(10);
 
   const [filters, setFilters] = useState<StudentsFilters>({});
+  const initialMountRef = useRef(true);
 
-  const load = useCallback(
-    async (q?: StudentsQuery) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const resp = await fetchStudents(q ?? { page, pageSize });
-        // debug: log normalized response
-
-        setStudents(resp.students ?? []);
-        setTotal(resp.total ?? resp.students.length ?? 0);
-      } catch (err: unknown) {
-        if (err instanceof Error) setError(err.message);
-        else setError("Failed to load students");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [page, pageSize]
-  );
+  const load = useCallback(async (q: StudentsQuery) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await fetchStudents(q);
+      setStudents(resp.students ?? []);
+      setTotal(resp.total ?? resp.students.length ?? 0);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to load students");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
+    let mounted = true;
     const q: StudentsQuery = { ...filters, page, pageSize };
-    void load(q);
+    (async () => {
+      try {
+        await load(q);
+        if (!mounted) return;
+        if (initialMountRef.current) {
+          initialMountRef.current = false;
+          try {
+            const resp = await fetchClasses({ pageSize: 1000 });
+            if (!mounted) return;
+            setClasses(resp.classes ?? []);
+          } catch {
+            // ignore — keep empty
+          }
+        }
+      } catch {
+        // load already handles errors
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, [filters, page, pageSize, load]);
 
   const handleApply = useCallback(
@@ -60,6 +83,7 @@ export default function AdminStudentsPage() {
   }, [setFilters, setPage]);
 
   const [creatingOpen, setCreatingOpen] = useState(false);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -75,6 +99,7 @@ export default function AdminStudentsPage() {
           <Button onClick={() => setCreatingOpen(true)}>Add Student</Button>
           <CreateStudentDialog
             open={creatingOpen}
+            classes={classes}
             onClose={() => setCreatingOpen(false)}
             onCreated={() => {
               // refresh list after creation
@@ -86,6 +111,7 @@ export default function AdminStudentsPage() {
 
       <div className="mb-4">
         <StudentsFilterBar
+          classes={classes}
           initial={filters}
           onApply={handleApply}
           onClear={handleClear}
