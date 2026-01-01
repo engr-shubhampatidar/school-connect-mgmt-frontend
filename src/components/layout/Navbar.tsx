@@ -10,7 +10,7 @@ export default function Navbar() {
   const pathname = usePathname();
   let navItems = [];
   let managementNavItems: any[] = [];
-  const [openSidebar, setOpenSidebar] = useState(true);
+  const [openSidebar, setOpenSidebar] = useState(false);
 
   const [userName] = useState<string | null>(() => {
     try {
@@ -52,7 +52,7 @@ export default function Navbar() {
                     onClick={handleSideBar}
                     className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
                   />
-                  {userName ?? "Acme Inc."}
+                  {userName ?? "School."}
                 </div>
               ) : (
                 <PanelRight
@@ -114,7 +114,7 @@ export default function Navbar() {
                                 ? "bg-[#DBEAFE] text-[#021034]"
                                 : "text-[#021034]"
                             }`
-                          : "text-slate-700"
+                          : "text-[#737373]"
                       } px-2 my-2 gap-2 ${
                         openSidebar
                           ? "hover:bg-slate-100"

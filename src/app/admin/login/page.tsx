@@ -11,7 +11,6 @@ import {
   adminLoginSchema,
   type AdminLoginSchema,
 } from "../../../lib/validators/adminAuth";
-import { Card } from "../../../components/ui/Card";
 import { Input } from "../../../components/ui/Input";
 import { Button } from "../../../components/ui/Button";
 import Form, {
@@ -21,6 +20,7 @@ import Form, {
   FormControl,
 } from "../../../components/ui/Form";
 import { useToast } from "../../../components/ui/use-toast";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   // Additional context for the import statement
@@ -106,87 +106,114 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-      <Card className="w-full max-w-md">
-        <h2 className="text-lg font-semibold text-slate-900">Admin sign in</h2>
-        <p className="text-sm text-slate-600">
-          Sign in to manage your school data
-        </p>
+    <div className="min-h-screen w-full flex  p-4">
+      <div className="absolute w-1/2  lg:flex items-start justify-start hidden   flex-col pl-20 pt-20">
+        <div className="w-full flex items-center mb-92">
+          <h1 className="font-bold text-2xl text-white max-w-[100px]">
+            MAXUSE INSTITUTE
+          </h1>
+        </div>
+        <div className="flex flex-col text-white">
+          <h1 className="text-white text-[48px] max-w-[458px] font-[600] leading-[56px] mb-4">
+            One Platform. Total Control. ✨
+          </h1>
+          <p>
+            Manage academics, staff, and operations from one powerful dashboard.
+          </p>
+        </div>
 
-        <Form onSubmit={form.handleSubmit(onSubmit)} aria-live="polite">
-          <FormField>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input
-                type="email"
-                placeholder="you@school.edu"
-                {...form.register("email")}
-                aria-invalid={!!form.formState.errors.email}
-                aria-describedby={
-                  form.formState.errors.email ? "email-error" : undefined
-                }
-              />
-            </FormControl>
-            <FormMessage>
-              {form.formState.errors.email?.message as React.ReactNode}
-            </FormMessage>
-          </FormField>
+        <div className="flex items-center w-full bottom-0 mt-44 ">
+          <p className="text-white pl-60">Your data is secure and encrypted</p>
+        </div>
+      </div>
 
-          <FormField>
-            <FormLabel>Password</FormLabel>
-            <FormControl>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                {...form.register("password")}
-                aria-invalid={!!form.formState.errors.password}
-                aria-describedby={
-                  form.formState.errors.password ? "password-error" : undefined
-                }
-              />
-            </FormControl>
-            <FormMessage>
-              {form.formState.errors.password?.message as React.ReactNode}
-            </FormMessage>
-          </FormField>
+      <Image
+        src="/images/TeacherLoginImg.png"
+        alt="Teacher Login Illustration"
+        width={1600}
+        height={800}
+        className="hidden lg:flex"
+      />
 
-          <div className="pt-2">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!form.formState.isValid || form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    aria-hidden
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    />
-                  </svg>
-                  Login
-                </span>
-              ) : (
-                "Login"
-              )}
-            </Button>
+      <div className="min-w-1/2 flex w-full flex-col items-center justify-center">
+        <div className="w-full flex flex-col  items-center justify-center ">
+          <div className="w-1/2 max-w-[359px]">
+            <div className="flex flex-col items-center py-8 justify-center">
+              <div className="bg-gray-300 h-16 w-16 rounded-full p-2 flex items-center justify-center">
+                @
+              </div>
+              <h2 className="text-lg font-semibold text-[24px]">
+                Admin Portal
+              </h2>
+              <p className="text-[#737373]">School Management System</p>
+            </div>
+
+            <Form onSubmit={form.handleSubmit(onSubmit)} aria-live="polite">
+              <FormField>
+                <FormLabel>Email</FormLabel>
+                <FormMessage>
+                  {form.formState.errors.email?.message as React.ReactNode}
+                </FormMessage>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="you@school.edu"
+                    {...form.register("email")}
+                    aria-invalid={!!form.formState.errors.email}
+                    aria-describedby={
+                      form.formState.errors.email ? "email-error" : undefined
+                    }
+                  />
+                </FormControl>
+              </FormField>
+
+              <FormField>
+                <div>
+                  <div className="flex justify-between">
+                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Forgot your Password</FormLabel>
+                  </div>
+                </div>
+                <FormMessage>
+                  {form.formState.errors.password?.message as React.ReactNode}
+                </FormMessage>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...form.register("password")}
+                    aria-invalid={!!form.formState.errors.password}
+                    aria-describedby={
+                      form.formState.errors.password
+                        ? "password-error"
+                        : undefined
+                    }
+                  />
+                </FormControl>
+              </FormField>
+
+              <div className="flex w-full mt-8">
+                <Button
+                  className="w-full max-w-[359px] bg-[#021034]"
+                  type="submit"
+                  disabled={
+                    !form.formState.isValid || form.formState.isSubmitting
+                  }
+                >
+                  {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+                </Button>
+              </div>
+              <div className="mt-4 flex flex-col items-center gap-1 font-[400] text-slate-600">
+                <p>Having trouble logging in?</p>
+                <p className="text-[#377DFF]">Contact IT Support</p>
+              </div>
+            </Form>
           </div>
-        </Form>
-      </Card>
+        </div>
+        <div className="py-4 text-center sticky bottom-0 text-sm text-slate-500">
+          © 2025 Acme Inc. All rights reserved.
+        </div>
+      </div>
     </div>
   );
 }
