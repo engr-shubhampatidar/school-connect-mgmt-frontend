@@ -7,6 +7,8 @@ import TeachersFilterBar, {
 import TeachersTable from "../../../components/admin/TeachersTable";
 import Button from "../../../components/ui/Button";
 import CreateTeacherDialog from "../../../components/admin/CreateTeacherDialog";
+import StatCard from "../../../components/admin/StatCard";
+import { Users, BookOpen, ClipboardList } from "lucide-react";
 
 export default function AdminTeachersPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -83,17 +85,21 @@ export default function AdminTeachersPage() {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className=" mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Teachers</h1>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            Teacher Management
+          </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Manage teachers in your school
+            Manage, view and organize all faculty mambers
           </p>
         </div>
 
         <div>
-          <Button onClick={() => setCreatingOpen(true)}>Add Teacher</Button>
+          <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            + Add Teacher
+          </Button>
           <CreateTeacherDialog
             open={creatingOpen}
             onClose={() => setCreatingOpen(false)}
@@ -104,7 +110,79 @@ export default function AdminTeachersPage() {
         </div>
       </div>
 
-      <div className="mb-4">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-5">
+        <div>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-20 rounded bg-slate-200" />
+            </div>
+          ) : (
+            <StatCard
+              label="Total Staff"
+              value={teachers.length.toString()}
+              icon={Users}
+              className="bg-[#FFFFFF] border-[#D7E3FC]"
+              iconBgColor="bg-[#BFDBFE]"
+              progressLabel="+180 Last Month"
+              progressLabelColor="text-slate-500"
+            />
+          )}
+        </div>
+
+        <div>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-20 rounded bg-slate-200" />
+            </div>
+          ) : (
+            <StatCard
+              label="Present Today"
+              value={"08"}
+              icon={BookOpen}
+              className="bg-[#FFFFFF] border-[#D7E3FC]"
+              iconBgColor="bg-[#DDD6FE]"
+              progressLabel="80% Attendance Rate"
+              progressLabelColor="text-[#16A34A]"
+            />
+          )}
+        </div>
+        <div>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-20 rounded bg-slate-200" />
+            </div>
+          ) : (
+            <StatCard
+              label="On Leave"
+              value={"02"}
+              icon={ClipboardList}
+              className="bg-[#FFFFFF] border-[#D7E3FC]"
+              iconBgColor="bg-[#FED7AA]"
+              progressLabel="1 sick leave 1 casual leave"
+              progressLabelColor="text-slate-500"
+            />
+          )}
+        </div>
+        <div>
+          {loading ? (
+            <div className="animate-pulse">
+              <div className="h-20 rounded bg-slate-200" />
+            </div>
+          ) : (
+            <StatCard
+              label="Avg Faculty Load"
+              value={"22h"}
+              icon={BookOpen}
+              className="bg-[#FFFFFF] border-[#D7E3FC]"
+              iconBgColor="bg-[#DDD6FE]"
+              progressLabel="Peer weak / Teacher"
+              progressLabelColor="text-slate-500"
+            />
+          )}
+        </div>
+      </section>
+
+      <div className="mb-5">
         <TeachersFilterBar
           initial={filters}
           onApply={handleApply}

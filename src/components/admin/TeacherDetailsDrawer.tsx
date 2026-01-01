@@ -128,7 +128,7 @@ export default function TeacherDetailsDrawer({
 
               <section>
                 <h4 className="text-sm font-semibold text-slate-700">
-                  Classes
+                  Assigned Classes
                 </h4>
                 <div className="mt-2 space-y-2 text-sm text-slate-800">
                   {(teacher.assignedClasses &&
@@ -176,7 +176,7 @@ export default function TeacherDetailsDrawer({
 
               <section>
                 <h4 className="text-sm font-semibold text-slate-700">
-                  Assigned Class
+                  Teacher-Guardian
                 </h4>
                 <div className="mt-2 text-sm text-slate-800">
                   {teacher.classTeacher ? (

@@ -196,6 +196,7 @@ export function RegisterSchoolForm() {
             {loading ? "Registering..." : "Register School"}
           </Button>
         </div>
+        <p>Already Registered? <a href="/admin/login" className="text-blue-600">Login here</a></p>
       </Form>
     </Card>
   );
