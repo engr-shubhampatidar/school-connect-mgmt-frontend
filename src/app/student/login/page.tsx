@@ -10,8 +10,12 @@ import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
 
 const schema = z.object({
-  rollNumber: z.string(),
-  // .regex(/^\d{3}$/, "Roll number must be exactly 3 digits"),
+  rollNumber: z
+    .string()
+    .regex(
+      /^[0-9][A-Za-z]-[A-Za-z]{2}-[0-9]{4}$/,
+      "Roll number must match pattern 1C-AA-8561"
+    ),
   password: z.string().min(6),
 });
 
@@ -60,11 +64,11 @@ export default function Page() {
               </label>
               <input
                 {...register("rollNumber")}
-                inputMode="numeric"
-                maxLength={6}
-                // pattern="\d{6}"
+                inputMode="text"
+                maxLength={11}
+                pattern="^[0-9][A-Za-z]-[A-Za-z]{2}-[0-9]{4}$"
                 className="mt-1 w-full rounded-md border px-3 py-2"
-                placeholder="e.g. 123"
+                placeholder="e.g. 1C-AA-8561"
               />
             </div>
             <div>

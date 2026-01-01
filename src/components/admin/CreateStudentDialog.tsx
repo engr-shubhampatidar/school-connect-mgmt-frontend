@@ -59,6 +59,7 @@ export default function CreateStudentDialog({
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>(parentClasses ?? []);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [tempRollNo, setTempRollNo] = useState<string | null>(null);
 
   // accept classes from parent via props; use fallback if not provided
   useEffect(() => {
@@ -95,18 +96,28 @@ export default function CreateStudentDialog({
       // If backend returned a temporary password (when creating a user by email),
       // show it once to the admin. Keep the dialog open until the admin closes
       // the temporary password modal so the value isn't lost on unmount.
-      const data = resp.data as Record<string, unknown> | undefined;
-      const pw =
-        (data &&
-          (data.temporaryPassword ??
-            data.tempPassword ??
-            data.password ??
-            data.temp_password ??
-            data.temporary_password)) ||
-        null;
+      const data = resp.data as
+        | {
+            id?: string;
+            name?: string;
+            rollNo?: string;
+            temporaryPassword?: string;
+          }
+        | undefined;
+
+      const rollNo = data?.rollNo ?? null;
+      const pw = data?.temporaryPassword ?? null;
+
+      if (typeof rollNo === "string" && rollNo.length > 0) {
+        setTempRollNo(rollNo);
+      }
+
       if (typeof pw === "string" && pw.length > 0) {
         setTempPassword(pw);
-      } else {
+      }
+
+      if (!rollNo && !pw) {
+        // nothing to show
         onClose();
       }
     } catch (err: unknown) {
@@ -240,7 +251,7 @@ export default function CreateStudentDialog({
           </div>
         </Card>
       </div>
-      {tempPassword ? (
+      {tempPassword || tempRollNo ? (
         <div className="fixed inset-0 z-60 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" />
           <div className="relative w-full max-w-md p-4">
@@ -260,6 +271,7 @@ export default function CreateStudentDialog({
                     aria-label="close"
                     onClick={() => {
                       setTempPassword(null);
+                      setTempRollNo(null);
                       onClose();
                     }}
                     className="text-slate-500 hover:text-slate-700"
@@ -271,18 +283,53 @@ export default function CreateStudentDialog({
 
               <div className="mt-4">
                 <div className="rounded-md border p-4">
-                  <div className="text-sm text-slate-700">
-                    Temporary Password
+                  <div className="text-sm text-slate-700">Roll No</div>
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="font-mono text-lg text-slate-900">
+                      {tempRollNo ?? "-"}
+                    </div>
+                    <div>
+                      <Button
+                        variant="ghost"
+                        onClick={async () => {
+                          const parts: string[] = [];
+                          if (tempRollNo) parts.push(`Roll No: ${tempRollNo}`);
+                          if (tempPassword)
+                            parts.push(`Temporary Password: ${tempPassword}`);
+                          const toCopy = parts.join("\n");
+                          try {
+                            await navigator.clipboard.writeText(toCopy);
+                            toast({
+                              title: "Copied to clipboard",
+                              type: "success",
+                            });
+                          } catch {
+                            toast({ title: "Copy failed", type: "error" });
+                          }
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    </div>
                   </div>
-                  <div className="mt-2 font-mono text-lg text-slate-900">
-                    {tempPassword}
-                  </div>
+
+                  {tempPassword ? (
+                    <>
+                      <div className="mt-4 text-sm text-slate-700">
+                        Temporary Password
+                      </div>
+                      <div className="mt-2 font-mono text-lg text-slate-900">
+                        {tempPassword}
+                      </div>
+                    </>
+                  ) : null}
                 </div>
 
                 <div className="mt-4 flex justify-end">
                   <Button
                     onClick={() => {
                       setTempPassword(null);
+                      setTempRollNo(null);
                       onClose();
                     }}
                   >
