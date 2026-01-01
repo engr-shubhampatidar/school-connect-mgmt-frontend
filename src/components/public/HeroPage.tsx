@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const images = ["/images/Hero1.png", "/images/Hero2.png", "/images/Hero3.png"];
 
@@ -10,6 +11,7 @@ const images = ["/images/Hero1.png", "/images/Hero2.png", "/images/Hero3.png"];
 const slides = [...images, images[0]];
 
 export default function HeroPage() {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
   const [transition, setTransition] = useState(true);
 
@@ -37,6 +39,9 @@ export default function HeroPage() {
     <section className="w-full flex justify-center py-5 mb-[92px] flex-col">
       <div className="relative w-full min-w-full min-h-full overflow-hidden rounded-xl">
         <div
+        onClick={() => {
+          router.push("/register-school");
+        }}
           className={`flex rounded-xl ${
             transition ? "transition-transform duration-700 ease-in-out" : ""
           }`}
