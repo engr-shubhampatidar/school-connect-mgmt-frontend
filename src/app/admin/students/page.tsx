@@ -14,6 +14,7 @@ import StudentsFilterBar, {
 import StudentsTable from "../../../components/admin/StudentsTable";
 import Button from "../../../components/ui/Button";
 import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
+import StudentDetailsDrawer from "../../../components/admin/StudentDetailsDrawer";
 
 export default function AdminStudentsPage() {
   const router = useRouter();
@@ -84,6 +85,7 @@ export default function AdminStudentsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -127,8 +129,14 @@ export default function AdminStudentsPage() {
         pageSize={pageSize}
         onRetry={() => load({ ...filters, page, pageSize })}
         onPageChange={(p) => setPage(p)}
-        onView={(id) => console.log("view", id)}
+        onView={(id) => setSelectedStudentId(id)}
         onEdit={(id) => router.push(`/admin/students/${id}/edit`)}
+      />
+
+      <StudentDetailsDrawer
+        studentId={selectedStudentId}
+        isOpen={Boolean(selectedStudentId)}
+        onClose={() => setSelectedStudentId(null)}
       />
     </div>
   );

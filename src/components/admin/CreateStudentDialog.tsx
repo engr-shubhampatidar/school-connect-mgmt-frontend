@@ -24,11 +24,8 @@ import { ADMIN_API } from "@/lib/api-routes";
 
 const createStudentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  rollNo: z
-    .string()
-    .optional()
-    .transform((v) => (v ? v.trim() : undefined)),
   classId: z.string().min(1, "Class is required"),
+  email: z.string().email("Invalid email address").optional(),
   photoUrl: z
     .string()
     .optional()
@@ -61,6 +58,7 @@ export default function CreateStudentDialog({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>(parentClasses ?? []);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
 
   // accept classes from parent via props; use fallback if not provided
   useEffect(() => {
@@ -76,23 +74,41 @@ export default function CreateStudentDialog({
     resolver: zodResolver(
       createStudentSchema
     ) as unknown as Resolver<CreateStudentValues>,
-    defaultValues: { name: "", rollNo: "", classId: "", photoUrl: "" },
+    defaultValues: { name: "", classId: "", email: "", photoUrl: "" },
   });
 
   const onSubmit = async (values: CreateStudentValues) => {
     setLoading(true);
     try {
-      await API.post(ADMIN_API.STUDENTS, {
+      const resp = await API.post(ADMIN_API.STUDENTS, {
         name: values.name,
-        rollNo: values.rollNo ?? undefined,
         classId: values.classId,
+        email: values.email ?? undefined,
         photoUrl: values.photoUrl ?? undefined,
       });
 
-      toast({ title: "Student created", type: "success" });
+      toast({ title: "Student created successfully", type: "success" });
       form.reset();
-      onClose();
+      // Notify parent to refresh list
       onCreated?.();
+
+      // If backend returned a temporary password (when creating a user by email),
+      // show it once to the admin. Keep the dialog open until the admin closes
+      // the temporary password modal so the value isn't lost on unmount.
+      const data = resp.data as Record<string, unknown> | undefined;
+      const pw =
+        (data &&
+          (data.temporaryPassword ??
+            data.tempPassword ??
+            data.password ??
+            data.temp_password ??
+            data.temporary_password)) ||
+        null;
+      if (typeof pw === "string" && pw.length > 0) {
+        setTempPassword(pw);
+      } else {
+        onClose();
+      }
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const data = err.response?.data as Record<string, unknown> | undefined;
@@ -126,7 +142,6 @@ export default function CreateStudentDialog({
   };
 
   if (!open) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
@@ -163,17 +178,6 @@ export default function CreateStudentDialog({
               </FormField>
 
               <FormField>
-                <FormLabel>Roll Number</FormLabel>
-                <Input
-                  {...form.register("rollNo")}
-                  placeholder="Optional roll number"
-                />
-                <FormMessage>
-                  {form.formState.errors.rollNo?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <FormField>
                 <FormLabel>Class</FormLabel>
                 <FormControl>
                   <Controller
@@ -194,8 +198,22 @@ export default function CreateStudentDialog({
                     )}
                   />
                 </FormControl>
+                <p className="mt-1 text-sm text-slate-500">
+                  Roll number will be auto-generated
+                </p>
                 <FormMessage>
                   {form.formState.errors.classId?.message as React.ReactNode}
+                </FormMessage>
+              </FormField>
+
+              <FormField>
+                <FormLabel>Email (optional)</FormLabel>
+                <Input
+                  {...form.register("email")}
+                  placeholder="student@example.com"
+                />
+                <FormMessage>
+                  {form.formState.errors.email?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 
@@ -222,6 +240,60 @@ export default function CreateStudentDialog({
           </div>
         </Card>
       </div>
+      {tempPassword ? (
+        <div className="fixed inset-0 z-60 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative w-full max-w-md p-4">
+            <Card>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Temporary Password
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Share this password with the student — it will not be shown
+                    again.
+                  </p>
+                </div>
+                <div>
+                  <button
+                    aria-label="close"
+                    onClick={() => {
+                      setTempPassword(null);
+                      onClose();
+                    }}
+                    className="text-slate-500 hover:text-slate-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="rounded-md border p-4">
+                  <div className="text-sm text-slate-700">
+                    Temporary Password
+                  </div>
+                  <div className="mt-2 font-mono text-lg text-slate-900">
+                    {tempPassword}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <Button
+                    onClick={() => {
+                      setTempPassword(null);
+                      onClose();
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
