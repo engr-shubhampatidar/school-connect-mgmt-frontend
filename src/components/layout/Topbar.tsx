@@ -3,7 +3,8 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUser } from "../../lib/auth";
+import { getUser, clearAuthTokens } from "../../lib/auth";
+import { useRouter } from "next/navigation";
 export default function Topbar({
   onSearch,
 }: {
@@ -16,6 +17,19 @@ export default function Topbar({
     email?: string;
     role?: string;
   } | null>(null);
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    try {
+      clearAuthTokens();
+      try {
+        localStorage.clear();
+      } catch {}
+    } finally {
+      router.push("/");
+    }
+  };
 
   const topName = pathname.split("/")[2]?.toUpperCase() || "DASHBOARD";
 
@@ -93,7 +107,25 @@ export default function Topbar({
               </div>
             </div>
           </div>
-          <div className="p-2 text-black">{DotsVerticalIcon()}</div>
+          <div className="relative">
+            <button
+              aria-label="Open menu"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="p-2 text-black rounded-md hover:bg-slate-100"
+            >
+              {DotsVerticalIcon()}
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-40 rounded-md bg-white border shadow-md z-20">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
     </div>
