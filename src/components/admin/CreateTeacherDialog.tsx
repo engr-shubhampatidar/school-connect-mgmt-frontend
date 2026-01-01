@@ -21,6 +21,7 @@ import Separator from "../ui/Separator";
 import { useToast } from "../ui/use-toast";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
+import { fetchClassesWithTeacher, ClassWithTeacher } from "@/lib/adminApi";
 
 const assignmentSchema = z.object({
   classId: z.string().min(1, "Class is required"),
@@ -81,7 +82,14 @@ export default function CreateTeacherDialog({
 }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState<{ id: string; name: string }[]>([]);
+  const [classes, setClasses] = useState<
+    { id: string; name: string; disabled?: boolean }[]
+  >([]);
+  const [classesWithTeacher, setClassesWithTeacher] = useState<
+    ClassWithTeacher[]
+  >([]);
+  const [classesLoading, setClassesLoading] = useState(false);
+  const [classesError, setClassesError] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([]);
 
   const form = useForm<CreateTeacherValues>({
@@ -105,46 +113,78 @@ export default function CreateTeacherDialog({
   useEffect(() => {
     let mounted = true;
     (async () => {
+      // fetch classes-with-teacher separately so it doesn't block whole form
+      setClassesLoading(true);
+      setClassesError(null);
       try {
-        const [cRes, sRes] = await Promise.all([
-          API.get(ADMIN_API.CLASSES),
+        const [sRes, classesArr] = await Promise.allSettled([
           API.get(ADMIN_API.SUBJECTS),
+          fetchClassesWithTeacher(),
         ]);
+
         if (!mounted) return;
-        const cdata = cRes.data;
-        const sdata = sRes.data;
-        const normalize = (arr: unknown[]) =>
-          arr.map((it) => {
-            if (it && typeof it === "object") {
-              const o = it as Record<string, unknown>;
+
+        // subjects
+        if (sRes.status === "fulfilled") {
+          const sdata = (sRes.value as { data: unknown }).data;
+          const normalize = (arr: unknown[]) =>
+            arr.map((it) => {
+              if (it && typeof it === "object") {
+                const o = it as Record<string, unknown>;
+                return {
+                  id: String(
+                    o.id ?? o._id ?? o.uuid ?? o.value ?? o.key ?? o.name ?? ""
+                  ),
+                  name: String(o.name ?? o.title ?? o.value ?? ""),
+                };
+              }
+              return { id: String(it ?? ""), name: String(it ?? "") };
+            });
+          setSubjects(
+            Array.isArray(sdata)
+              ? normalize(sdata as unknown[])
+              : Array.isArray((sdata as Record<string, unknown>).items)
+              ? normalize((sdata as Record<string, unknown>).items as unknown[])
+              : []
+          );
+        } else {
+          setSubjects([]);
+        }
+
+        // classes
+        if (classesArr.status === "fulfilled") {
+          const fetched = classesArr.value as ClassWithTeacher[];
+          setClassesWithTeacher(fetched || []);
+          if (!Array.isArray(fetched) || fetched.length === 0) {
+            setClasses([
+              { id: "", name: "No classes available", disabled: true },
+            ]);
+          } else {
+            const opts = fetched.map((c) => {
+              const label = c.classSection
+                ? `${c.className} - ${c.classSection}`
+                : c.className;
               return {
-                id: String(
-                  o.id ?? o._id ?? o.uuid ?? o.value ?? o.key ?? o.name ?? ""
-                ),
-                name: String(o.name ?? o.title ?? o.value ?? ""),
+                id: c.classId,
+                name: c.classTeacher
+                  ? `${label} — Assigned to ${c.classTeacher.fullName}`
+                  : label,
+                disabled: Boolean(c.classTeacher),
               };
-            }
-            return { id: String(it ?? ""), name: String(it ?? "") };
-          });
-        setClasses(
-          Array.isArray(cdata)
-            ? normalize(cdata as unknown[])
-            : Array.isArray((cdata as Record<string, unknown>).items)
-            ? normalize((cdata as Record<string, unknown>).items as unknown[])
-            : []
-        );
-        setSubjects(
-          Array.isArray(sdata)
-            ? normalize(sdata as unknown[])
-            : Array.isArray((sdata as Record<string, unknown>).items)
-            ? normalize((sdata as Record<string, unknown>).items as unknown[])
-            : []
-        );
-      } catch {
-        // fallback to empty lists
+            });
+            setClasses(opts);
+          }
+        } else {
+          setClasses([]);
+          setClassesError("Unable to load classes. Please try again.");
+        }
+      } catch (err) {
         if (!mounted) return;
         setClasses([]);
         setSubjects([]);
+        setClassesError("Unable to load classes. Please try again.");
+      } finally {
+        if (mounted) setClassesLoading(false);
       }
     })();
     return () => {
@@ -153,6 +193,46 @@ export default function CreateTeacherDialog({
   }, []);
 
   const onSubmit = async (values: CreateTeacherValues) => {
+    // prevent assigning to already-assigned classes
+    if (values.isClassTeacher && values.classTeacher) {
+      const c = classesWithTeacher.find(
+        (x) => x.classId === values.classTeacher
+      );
+      if (c && c.classTeacher) {
+        form.setError("classTeacher" as any, {
+          type: "validation",
+          message: `Selected class is already assigned to ${c.classTeacher.fullName}`,
+        });
+        toast({
+          title: "Cannot assign class",
+          description: `Selected class is already assigned to ${c.classTeacher.fullName}`,
+          type: "error",
+        });
+        return;
+      }
+    }
+    // ensure assignClassSubjects don't pick assigned classes
+    const badAssign = (values.assignClassSubjects ?? []).find(
+      (a) =>
+        !!classesWithTeacher.find(
+          (x) => x.classId === a.classId && x.classTeacher
+        )
+    );
+    if (badAssign) {
+      form.setError("assignClassSubjects" as any, {
+        type: "validation",
+        message:
+          "One or more selected classes are already assigned to another teacher",
+      });
+      toast({
+        title: "Cannot assign class",
+        description:
+          "One or more selected classes are already assigned to another teacher",
+        type: "error",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -211,6 +291,12 @@ export default function CreateTeacherDialog({
       setLoading(false);
     }
   };
+
+  const classOptions = classesLoading
+    ? [{ id: "", name: "Loading classes...", disabled: true }]
+    : classes.length === 0
+    ? [{ id: "", name: classesError ?? "No classes available", disabled: true }]
+    : classes;
 
   if (!open) return null;
 
@@ -348,11 +434,20 @@ export default function CreateTeacherDialog({
                     {form.watch("isClassTeacher") && (
                       <div>
                         <Select
-                          options={classes}
+                          options={classOptions}
                           value={form.watch("classTeacher") ?? ""}
                           onChange={(v) => form.setValue("classTeacher", v)}
-                          placeholder="Select class"
+                          placeholder={
+                            classesLoading
+                              ? "Loading classes..."
+                              : "Select class"
+                          }
                         />
+                        {classesError && (
+                          <p className="text-xs text-destructive mt-1">
+                            {classesError}
+                          </p>
+                        )}
                         <FormMessage>
                           {
                             (
@@ -383,7 +478,7 @@ export default function CreateTeacherDialog({
                       >
                         <div className="col-span-5">
                           <Select
-                            options={classes}
+                            options={classOptions}
                             value={
                               form.watch(
                                 `assignClassSubjects.${idx}.classId`
@@ -395,7 +490,11 @@ export default function CreateTeacherDialog({
                                 v
                               )
                             }
-                            placeholder="Select class"
+                            placeholder={
+                              classesLoading
+                                ? "Loading classes..."
+                                : "Select class"
+                            }
                           />
                         </div>
                         <div className="col-span-5">

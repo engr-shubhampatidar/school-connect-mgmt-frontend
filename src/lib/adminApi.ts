@@ -362,6 +362,29 @@ export async function fetchClasses(
   };
 }
 
+export type ClassWithTeacher = {
+  classId: string;
+  className: string;
+  classSection: string;
+  classTeacher: {
+    teacherId: string;
+    fullName: string;
+    email: string;
+    phone: string;
+  } | null;
+};
+
+export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
+  const res = await API.get<ClassWithTeacher[]>(ADMIN_API.CLASSES_WITH_TEACHER);
+  const data = res.data as unknown;
+  if (Array.isArray(data)) return data as ClassWithTeacher[];
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  if (Array.isArray(d.items)) return d.items as ClassWithTeacher[];
+  if (Array.isArray(d.classes)) return d.classes as ClassWithTeacher[];
+  return [];
+}
+
 export async function createClass(payload: {
   name: string;
   section?: string | null;

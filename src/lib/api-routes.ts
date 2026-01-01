@@ -12,6 +12,7 @@ export const ADMIN_API = {
   STUDENTS: "/api/admin/students",
   TEACHERS: "/api/admin/teachers",
   CLASSES: "/api/admin/classes",
+  CLASSES_WITH_TEACHER: "/api/admin/classes/with-class-teacher",
   SUBJECTS: "/api/admin/subjects",
 };
 

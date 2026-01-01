@@ -189,7 +189,7 @@ export {
   SelectValue,
 };
 
-type Option = { id: string; name: string };
+type Option = { id: string; name: string; disabled?: boolean };
 
 export default function DefaultSelect({
   options,
@@ -220,7 +220,11 @@ export default function DefaultSelect({
           {options.map((o) => {
             const itemValue = o.id === "" ? EMPTY_ITEM_VALUE : o.id;
             return (
-              <SelectItem key={o.id || itemValue} value={itemValue}>
+              <SelectItem
+                key={o.id || itemValue}
+                value={itemValue}
+                disabled={o.disabled}
+              >
                 {o.name}
               </SelectItem>
             );
