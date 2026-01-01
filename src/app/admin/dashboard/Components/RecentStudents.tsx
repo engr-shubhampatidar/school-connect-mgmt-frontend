@@ -8,7 +8,8 @@ type Student = {
   id: string;
   name: string;
   createdAt: string;
-  email: string;
+  email?: string | null;
+  photoUrl?: string | null;
 };
 
 type Props = {

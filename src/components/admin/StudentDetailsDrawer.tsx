@@ -35,6 +35,8 @@ type StudentProfile = {
   name: string;
   rollNo?: string | null;
   classId?: string | null;
+  className?: string | null;
+  section?: string | null;
   photoUrl?: string | null;
   profile?: Profile | null;
 };
@@ -198,7 +200,7 @@ export default function StudentDetailsDrawer({
                     <div>
                       <div className="text-xs text-slate-500">Class Name</div>
                       <div className="mt-1 font-medium text-slate-900">
-                        {data?.className  ? data?.className : "-"}{" "}
+                        {data?.className ? data?.className : "-"}{" "}
                         {data?.section ? `- ${data.section}` : ""}
                       </div>
                     </div>

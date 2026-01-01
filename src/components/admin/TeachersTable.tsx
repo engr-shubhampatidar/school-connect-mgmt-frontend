@@ -12,6 +12,7 @@ type Props = {
   total?: number;
   page?: number;
   pageSize?: number;
+  onRetry?: () => void;
   onPageChange: (page: number) => void;
   onEdit?: (id: string) => void;
   onResendInvite?: (id: string) => void;
