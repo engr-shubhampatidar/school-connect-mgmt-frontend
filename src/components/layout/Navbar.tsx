@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { adminNav, studentNav, teacherNav } from "./navConfig";
+import { adminNav, studentNav, teacherNav, managementNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
 import { getUser } from "../../lib/auth";
@@ -9,6 +9,7 @@ import { getUser } from "../../lib/auth";
 export default function Navbar() {
   const pathname = usePathname();
   let navItems = [];
+  let managementNavItems: any[] = [];
   const [openSidebar, setOpenSidebar] = useState(true);
 
   const [userName] = useState<string | null>(() => {
@@ -24,6 +25,9 @@ export default function Navbar() {
 
   if (pathname.startsWith("/admin")) {
     navItems = adminNav;
+    if (pathname.startsWith("/admin")) {
+      managementNavItems = managementNav;
+    }
   } else if (pathname.startsWith("/teacher")) {
     navItems = teacherNav;
   } else if (pathname.startsWith("/student")) {
@@ -41,9 +45,9 @@ export default function Navbar() {
       >
         <div className="flex flex-col h-full">
           <div>
-            <div className="text-2xl font-semibold text-slate-900 border-b border-slate-200 pb-8 pt-5 min-h-[85px] flex items-center justify-center">
+            <div className="text-2xl font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
               {openSidebar ? (
-                <div className="flex items-center justify-center ">
+                <div className="flex items-center justify-center  font-semibold text-xl ">
                   <PanelRight
                     onClick={handleSideBar}
                     className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
@@ -58,6 +62,11 @@ export default function Navbar() {
               )}
             </div>
             <nav className="mt-8 px-4 space-y-1 gap-2">
+              {openSidebar && (
+                <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
+                  Overview....
+                </p>
+              )}
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -67,8 +76,43 @@ export default function Navbar() {
                         pathname === item.href
                           ? `${
                               openSidebar
-                                ? "bg-[#DBEAFE]  text-blue-700"
-                                : "text-blue-700"
+                                ? "bg-[#DBEAFE]  text-[#021034]"
+                                : "text-[#021034]"
+                            }`
+                          : "text-[#737373]"
+                      } px-2 my-2 gap-2 ${
+                        openSidebar
+                          ? "hover:bg-slate-100"
+                          : "justify-center py-2"
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {openSidebar && (
+                        <SidebarItem
+                          label={item.label}
+                          active={pathname === item.href}
+                        />
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+              {openSidebar && (
+                <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
+                  {pathname.startsWith("/admin") ? "Management" : ""}
+                </p>
+              )}
+              {managementNavItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href}>
+                    <div
+                      className={`flex items-center rounded-md ${
+                        pathname === item.href
+                          ? `${
+                              openSidebar
+                                ? "bg-[#DBEAFE] text-[#021034]"
+                                : "text-[#021034]"
                             }`
                           : "text-slate-700"
                       } px-2 my-2 gap-2 ${
@@ -130,7 +174,7 @@ function SidebarItem({
   return (
     <div
       className={`flex items-center gap-3 px-2 py-2 rounded-md ${
-        active ? " text-blue-700" : "text-slate-700"
+        active ? " text-[#021034]" : "text-[#737373] font-[400]"
       }`}
     >
       <div className={`${small ? "text-sm" : "font-medium"}`}>{label}</div>

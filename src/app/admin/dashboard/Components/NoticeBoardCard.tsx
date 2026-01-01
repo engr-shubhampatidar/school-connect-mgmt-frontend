@@ -41,7 +41,7 @@ export default function NoticeBoardCard({
   notices,
 }: NoticeBoardCardProps) {
   return (
-    <div className="w-full max-w-sm rounded-xl border bg-white p-6 shadow-sm">
+    <div className="w-full max-w-sm rounded-xl border border-[#D7E3FC] bg-white p-6">
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -70,9 +70,7 @@ export default function NoticeBoardCard({
                 <h4 className={`text-sm font-medium ${styles.title}`}>
                   {notice.title}
                 </h4>
-                <p className={`text-sm ${styles.message}`}>
-                  {notice.message}
-                </p>
+                <p className={`text-sm ${styles.message}`}>{notice.message}</p>
               </div>
             </div>
           );

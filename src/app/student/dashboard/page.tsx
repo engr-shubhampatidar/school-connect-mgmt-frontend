@@ -6,6 +6,7 @@ import { Card } from "../../../components/ui/Card";
 import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Page() {
   return (
@@ -54,20 +55,22 @@ function Inner() {
 
   return (
     <div className="p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="">
         <Card className="flex items-center gap-6">
-          <div>
-            <img
-              src={me?.profilePhoto ?? "/avatar.png"}
+          <div className="bg-slate-400 rounded-full overflow-hidden w-20 h-20 items-center flex-shrink-0">
+            <Image
+              src={me?.profilePhoto ?? "/images/avatar.png"}
               alt="avatar"
-              className="h-20 w-20 rounded-full object-cover"
+              width={80}
+              height={80}
+              className="rounded-full object-cover"
             />
           </div>
           <div className="flex-1">
             <div className="text-lg font-semibold">{me?.name ?? "Student"}</div>
             <div className="text-sm text-slate-600">
-              {me?.className ?? "Class"} • {me?.section ?? "Section"} • Roll{" "}
-              {me?.rollNumber ?? "-"}
+              {me?.class?.name ?? "Class"}-{me?.class?.section ?? "Section"}{"  "} • Roll{" "}
+              {me?.rollNo ?? "-"}
             </div>
           </div>
           <div className="flex gap-2">

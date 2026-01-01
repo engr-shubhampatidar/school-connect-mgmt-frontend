@@ -14,6 +14,8 @@ export type Student = {
         name: string;
         section?: string | null;
       };
+  email?: string | null;
+  photoUrl?: string | null;
   createdAt: string;
 };
 

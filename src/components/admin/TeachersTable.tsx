@@ -12,7 +12,7 @@ type Props = {
   total?: number;
   page?: number;
   pageSize?: number;
-  onRetry: () => void;
+  onRetry?: () => void;
   onPageChange: (page: number) => void;
   onEdit?: (id: string) => void;
   onResendInvite?: (id: string) => void;
@@ -21,11 +21,9 @@ type Props = {
 export default function TeachersTable({
   teachers,
   loading,
-  error,
   total = 0,
   page = 1,
   pageSize = 10,
-  onRetry,
   onPageChange,
   onEdit,
   onResendInvite,
@@ -93,18 +91,6 @@ export default function TeachersTable({
       </Card>
     );
   }
-
-  if (error) {
-    return (
-      <Card>
-        <div className="flex flex-col items-start gap-4">
-          <div className="text-sm text-slate-700">Error: {error}</div>
-          <Button onClick={onRetry}>Retry</Button>
-        </div>
-      </Card>
-    );
-  }
-
   if (!teachers || teachers.length === 0) {
     return (
       <Card>

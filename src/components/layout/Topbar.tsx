@@ -1,6 +1,6 @@
 "use client";
 import { Search } from "lucide-react";
-
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getUser } from "../../lib/auth";
@@ -43,7 +43,7 @@ export default function Topbar({
   return (
     <div className="sticky top-0 z-10">
       <header className="flex bg-white items-center justify-between  border-b border-slate-200 p-5 min-h-[85px] ">
-        <h2 className="text-lg font-bold min-w-[10%] truncate">{topName}</h2>
+        <h2 className="text-md font-bold min-w-[10%] truncate">{topName}</h2>
         <div className="w-full items-start- justify-center pl-8">
           {/* <button onClick={handleSearchToggle}> click</button> */}
           {showSearch && (
@@ -62,27 +62,38 @@ export default function Topbar({
         </div>
 
         <div className="flex items-center gap-4">
-          <IconButton title="Mail">{MailIcon()}</IconButton>
+          <IconButton title="Mail">{BellIcon()}</IconButton>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-800 font-medium">
-              {user?.name
-                ? user.name
-                    .split(" ")
-                    .map((s) => s[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()
-                : "S"}
+              {user?.name ? (
+                user.name
+                  .split(" ")
+                  .map((s) => s[0])
+                  .slice(0, 2)
+                  .join("")
+                  .toUpperCase()
+              ) : (
+                <>
+                  <Image
+                    src={`/images/Avatar.png`}
+                    alt={"User Avatar"}
+                    height={16}
+                    width={16}
+                  />
+                </>
+              )}
             </div>
-            <div className="text-sm">
-              <div className="font-medium">{user?.name ?? "shadcn"}</div>
+            <div className="text-sm min-w-[120px]">
+              <div className="font-[400] text-[12px]">
+                {user?.name ?? "shadcn"}
+              </div>
               <div className="text-xs text-slate-500">
-                {user?.role ? user.role.toUpperCase() + " · " : ""}
+                {/* {user?.role ? user.role.toUpperCase() + " · " : ""} */}
                 {user?.email ?? "m@example.com"}
               </div>
             </div>
           </div>
-          <div className="p-2 text-slate-500">{DotsVerticalIcon()}</div>
+          <div className="p-2 text-black">{DotsVerticalIcon()}</div>
         </div>
       </header>
     </div>

@@ -6,6 +6,8 @@ import {
   School,
   IndianRupee,
   ClipboardCheck,
+  BookOpen,
+  ClipboardList
 } from "lucide-react";
 
 export const adminNav = [
@@ -28,12 +30,24 @@ export const adminNav = [
     label: "Classes",
     href: "/admin/classes",
     icon: School,
-  },
-  {
-    label: "Fees",
+  }
+];
+export const managementNav = [
+   {
+    label: "Fees & Finance",
     href: "/admin/fees",
     icon: IndianRupee,
   },
+  {
+    label: "Exams & Results",
+    href: "/admin/staff",
+    icon: BookOpen,
+  },
+  {
+    label: "Reports & Analytics",
+    href: "/admin/reports",
+    icon: ClipboardList,
+  }
 ];
 
 export const teacherNav = [

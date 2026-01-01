@@ -24,7 +24,7 @@ export default function AssignedSubjectsCard({
   onEnterMarks,
 }: AssignedSubjectsCardProps) {
   return (
-    <div className="w-full rounded-xl border bg-white shadow-sm">
+    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white">
       {/* Header */}
       <div className="flex items-start justify-between border-b p-6">
         <div>

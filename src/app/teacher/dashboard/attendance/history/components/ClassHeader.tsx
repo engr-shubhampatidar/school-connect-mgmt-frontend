@@ -20,7 +20,7 @@ export default function ClassHeader({ klass }: { klass: ClassMeta }) {
       <div>
         <div className="text-sm text-slate-500">Class &amp; Section</div>
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-[24px]  font-[600]">
             {title}
             {section ? ` – ${section}` : ""}
           </h1>
