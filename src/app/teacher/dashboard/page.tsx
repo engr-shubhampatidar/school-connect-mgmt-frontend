@@ -155,6 +155,7 @@ export default function TeacherDashboardPage() {
       <div className="flex w-full grid-cols-1 md:grid-cols-4 gap-4 mb-4 grid">
         <StatCard
           label="Total Students"
+          progressLabel="+180 Last Month"
           value={students.length}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
@@ -164,18 +165,21 @@ export default function TeacherDashboardPage() {
           value="Pandding"
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={ClipboardCheck}
+          progressLabel="+180 Last Month"
         />
         <StatCard
           label="Pandding Marks"
           value="02"
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={MailQuestionMark}
+          progressLabel="+180 Last Month"
         />
         <StatCard
           label="Next Class"
           value="Physics"
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
+          progressLabel="+180 Last Month"
         />
       </div>
       <div className="flex flex-row gap-4">

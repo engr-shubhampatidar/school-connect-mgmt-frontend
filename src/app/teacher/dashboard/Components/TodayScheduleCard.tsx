@@ -19,7 +19,7 @@ export default function TodayScheduleCard({
   onViewWeek,
 }: TodayScheduleCardProps) {
   return (
-    <div className="w-full max-w-[600px] rounded-xl border bg-white p-5 shadow-sm">
+    <div className="w-full max-w-[600px] rounded-xl border border-[#D7E3FC] bg-white p-5">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">
@@ -40,7 +40,7 @@ export default function TodayScheduleCard({
           return (
             <div
               key={index}
-              className={`relative flex gap-4 border-b p-4 last:border-none
+              className={`relative flex rounded-t-lg gap-4 border-b p-4 last:border-none
                 ${isCurrent ? "bg-blue-100" : "bg-white"}
               `}
             >

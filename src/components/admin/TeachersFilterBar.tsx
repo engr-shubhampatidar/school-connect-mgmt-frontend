@@ -1,5 +1,7 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import API from "../../lib/axios";
+import { ADMIN_API } from "../../lib/api-routes";
 import { Input } from "../ui/Input";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
@@ -33,13 +35,63 @@ export default function TeachersFilterBar({
       return;
     }
     const t = setTimeout(() => {
-      onApply({ search: search.trim(), email: email.trim(), subject });
+      const s = search.trim() || email.trim();
+      onApply({ search: s, email: email.trim(), subject });
     }, 500);
     return () => clearTimeout(t);
   }, [search, email, subject, onApply]);
 
-  const handleApply = () =>
-    onApply({ search: search.trim(), email: email.trim(), subject });
+  const [subjectOptions, setSubjectOptions] = useState<{
+    id: string;
+    name: string;
+  }[]>([{ id: "", name: "All subjects" }]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      try {
+        const res = await API.get(ADMIN_API.SUBJECTS);
+        const raw = res.data as unknown;
+        const obj = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+        const items = Array.isArray(obj.subjects)
+          ? obj.subjects
+          : Array.isArray(obj.items)
+          ? obj.items
+          : Array.isArray(raw)
+          ? (raw as unknown[])
+          : [];
+
+        const opts = (items || [])
+          .map((it) => {
+            if (!it) return null;
+            if (typeof it === "string") return { id: it, name: it };
+            if (typeof it === "object") {
+              const o = it as Record<string, unknown>;
+              const id = (o.id ?? o._id ?? o.name ?? "") as string;
+              const name = (o.name ?? o.subjectName ?? id) as string;
+              return { id, name };
+            }
+            return null;
+          })
+          .filter(Boolean) as { id: string; name: string }[];
+
+        if (mounted && opts.length > 0) {
+          setSubjectOptions([{ id: "", name: "All subjects" }, ...opts]);
+        }
+      } catch (e) {
+        // keep default options on error
+      }
+    }
+    void load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleApply = () => {
+    const s = search.trim() || email.trim();
+    onApply({ search: s, email: email.trim(), subject });
+  };
   const handleClear = () => {
     setSearch("");
     setEmail("");
@@ -71,12 +123,7 @@ export default function TeachersFilterBar({
         <div className="w-48">
           <label className="sr-only">Subject</label>
           <Select
-            options={[
-              { id: "", name: "All subjects" },
-              { id: "Mathematics", name: "Mathematics" },
-              { id: "Science", name: "Science" },
-              { id: "English", name: "English" },
-            ]}
+            options={subjectOptions}
             value={subject}
             onChange={(v) => setSubject(v)}
             placeholder="All subjects"

@@ -61,10 +61,10 @@ export default function Page() {
               <input
                 {...register("rollNumber")}
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={16}
                 // pattern="\d{6}"
                 className="mt-1 w-full rounded-md border px-3 py-2"
-                placeholder="e.g. 123"
+                placeholder="e.g.10A-KU-6787"
               />
             </div>
             <div>

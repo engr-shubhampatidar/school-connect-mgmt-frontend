@@ -24,7 +24,7 @@ export default function ClassSummaryCard({
 }: ClassSummaryCardProps) {
   const router = useRouter();
   return (
-    <div className="w-full h-full rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="w-full h-full rounded-xl border border-[#D7E3FC] bg-white">
       {/* Top Section */}
       <div className="p-6">
         <div className="flex items-start justify-between">

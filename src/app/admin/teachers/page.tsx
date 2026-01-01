@@ -22,9 +22,13 @@ export default function AdminTeachersPage() {
   const [creatingOpen, setCreatingOpen] = useState(false);
 
   const controllerRef = useRef<AbortController | null>(null);
+  const lastFetchRef = useRef<number | null>(null);
 
   const load = useCallback(
     async (q?: TeachersQuery) => {
+      const now = Date.now();
+      if (lastFetchRef.current && now - lastFetchRef.current < 300) return;
+      lastFetchRef.current = now;
       setLoading(true);
       setError(null);
       try {

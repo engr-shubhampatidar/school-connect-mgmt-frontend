@@ -226,7 +226,7 @@ export default function TeacherAttendancePage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
             <div>
               <p className="text-[12px] text-slate-600">Class & Section</p>
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-[24px] font-[600]">
                 {klass.name}
                 {klass.section ? ` -Section ${klass.section}` : ""}
               </h2>
@@ -254,10 +254,10 @@ export default function TeacherAttendancePage() {
           <div className="flex items-start justify-between p-6">
             <div>
               <h2 className="text-lg font-semibold text-slate-900">
-                Student Attendance
+                Student List
               </h2>
               <p className="text-sm text-slate-500">
-                Total Students ({filteredStudents.length})
+                Mark attendance for{" "}{filteredStudents.length}{" "}students
               </p>
             </div>
 

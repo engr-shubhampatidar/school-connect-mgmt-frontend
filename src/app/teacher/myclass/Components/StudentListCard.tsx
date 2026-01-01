@@ -56,7 +56,7 @@ export default function StudentListCard({
     router.push(`/teacher/attendance/${id}`);
   };
   return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-6">
         <div>

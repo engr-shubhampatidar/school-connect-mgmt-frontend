@@ -21,7 +21,7 @@ export default function AttendanceTodayCard({
 }: AttendanceTodayCardProps) {
   const router = useRouter();
   return (
-    <div className="w-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white p-6 ">
       {/* Header */}
       <div>
         <h2 className="text-lg font-semibold text-slate-900">

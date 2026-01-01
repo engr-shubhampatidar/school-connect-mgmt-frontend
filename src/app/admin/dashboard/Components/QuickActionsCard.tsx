@@ -19,7 +19,7 @@ export default function QuickActionsCard({
   actions,
 }: QuickActionsCardProps) {
   return (
-    <div className="w-full max-w-sm rounded-xl border bg-white p-6 shadow-sm">
+    <div className="w-full max-w-sm rounded-xl border border-[#D7E3FC] bg-white p-6">
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
@@ -33,12 +33,7 @@ export default function QuickActionsCard({
             key={index}
             onClick={action.onClick}
             className={`flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-sm font-medium transition
-              ${
-                action.active
-                  ? "border-blue-200 bg-blue-100 text-blue-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }
-            `}
+              border-slate-200 bg-white text-slate-600 hover:bg-[#D7E3FC]`}
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-slate-700">
               {action.icon}
