@@ -2,6 +2,15 @@
 import React from "react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "../ui/table";
 import { Student } from "../../lib/adminApi";
 
 type Props = {
@@ -37,40 +46,38 @@ export default function StudentsTable({
   if (loading) {
     return (
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto">
-            <thead className="sticky top-0 bg-white">
-              <tr>
-                <th className="text-left py-2">Name</th>
-                <th className="text-left py-2">Roll No</th>
-                <th className="text-left py-2">Class</th>
-                <th className="text-left py-2">Created</th>
-                <th className="text-left py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: pageSize }).map((_, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-3">
-                    <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-28 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-8 w-20 animate-pulse rounded bg-slate-200" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader className="sticky top-0 bg-white">
+            <TableRow>
+              <TableHead className="text-left py-2">Name</TableHead>
+              <TableHead className="text-left py-2">Roll No</TableHead>
+              <TableHead className="text-left py-2">Class</TableHead>
+              <TableHead className="text-left py-2">Created</TableHead>
+              <TableHead className="text-left py-2">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: pageSize }).map((_, i) => (
+              <TableRow key={i} className="border-t">
+                <TableCell className="py-3">
+                  <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="h-4 w-20 animate-pulse rounded bg-slate-200" />
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="h-4 w-28 animate-pulse rounded bg-slate-200" />
+                </TableCell>
+                <TableCell className="py-3">
+                  <div className="h-8 w-20 animate-pulse rounded bg-slate-200" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </Card>
     );
   }
@@ -103,58 +110,59 @@ export default function StudentsTable({
 
   return (
     <Card>
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead className="sticky top-0 bg-white">
-            <tr>
-              <th className="text-left py-2">Name</th>
-              <th className="text-left py-2">Roll No</th>
-              <th className="text-left py-2">Class</th>
-              <th className="text-left py-2">Created</th>
-              <th className="text-left py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((s) => (
-              <tr key={s.id} className="border-t hover:bg-slate-50">
-                <td className="py-3">{s.name}</td>
-                <td className="py-3">{s.rollNo ?? "-"}</td>
-                <td className="py-3">
-                  {typeof s.class === "string"
-                    ? s.class
-                    : s.class
-                    ? `${s.class.name}${
-                        s.class.section ? ` - ${s.class.section}` : ""
-                      }`
-                    : "-"}
-                </td>
-                <td className="py-3">
-                  {new Intl.DateTimeFormat(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }).format(new Date(s.createdAt))}
-                </td>
-                <td className="py-3">
-                  <div className="flex gap-2">
-                    <Button variant="ghost" onClick={() => onView?.(s.id)}>
-                      View
-                    </Button>
-                    <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
-                      Edit
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader className="sticky top-0 bg-white">
+          <TableRow>
+            <TableHead className="text-left py-2">Name</TableHead>
+            <TableHead className="text-left py-2">Roll No</TableHead>
+            <TableHead className="text-left py-2">Class</TableHead>
+            <TableHead className="text-left py-2">Created</TableHead>
+            <TableHead className="text-right py-2">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {students.map((s) => (
+            <TableRow key={s.id} className="border-t hover:bg-slate-50">
+              <TableCell className="py-3">{s.name}</TableCell>
+              <TableCell className="py-3">{s.rollNo ?? "-"}</TableCell>
+              <TableCell className="py-3">
+                {typeof s.class === "string"
+                  ? s.class
+                  : s.class
+                  ? `${s.class.name}${
+                      s.class.section ? ` - ${s.class.section}` : ""
+                    }`
+                  : "-"}
+              </TableCell>
+              <TableCell className="py-3">
+                {new Intl.DateTimeFormat(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                }).format(new Date(s.createdAt))}
+              </TableCell>
+              <TableCell className="py-3 text-right">
+                <div className="flex gap-2 justify-end">
+                  <Button variant="ghost" onClick={() => onView?.(s.id)}>
+                    View
+                  </Button>
+                  <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
+                    Edit
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+
+        <TableCaption>
+          Showing {students.length} of {total ?? students.length}
+        </TableCaption>
+      </Table>
 
       <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-slate-600">
-          Showing {students.length} of {total ?? students.length}
-        </div>
+        <div />
         <div className="flex items-center gap-2">
           <Button
             onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
