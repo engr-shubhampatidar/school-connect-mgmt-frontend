@@ -315,6 +315,8 @@ export type ClassItem = {
   name: string;
   section?: string | null;
   createdAt?: string;
+  classTeacherId?: string | null;
+  classTeacherName?: string | null;
 };
 
 export type ClassesResponse = {
@@ -394,6 +396,31 @@ export async function createClass(payload: {
     payload
   );
   return res.data;
+}
+
+// Fetch available teachers for assignment
+export async function fetchAvailableTeachers(): Promise<Teacher[]> {
+  try {
+    const res = await API.get(`${ADMIN_API.TEACHERS}/available`);
+    const data = res.data as unknown;
+    if (Array.isArray(data)) return data as Teacher[];
+    const d =
+      data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+    if (Array.isArray(d.teachers)) return d.teachers as Teacher[];
+    if (Array.isArray(d.items)) return d.items as Teacher[];
+    return [];
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Assign a teacher to a class
+export async function assignTeacherToClass(
+  classId: string,
+  teacherId: string
+): Promise<void> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/assign-teacher`;
+  await API.post(url, { teacherId });
 }
 
 export type Subject = {

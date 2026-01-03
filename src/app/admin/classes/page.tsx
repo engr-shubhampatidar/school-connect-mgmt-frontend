@@ -70,6 +70,8 @@ export default function AdminClassesPage() {
         onRetry={() => void load({ page, pageSize })}
         onPageChange={(p) => setPage(p)}
         onEdit={(id) => console.log("edit class", id)}
+        onAssignTeacher={() => void load({ page, pageSize })}
+        onChangeTeacher={() => void load({ page, pageSize })}
       />
     </div>
   );
