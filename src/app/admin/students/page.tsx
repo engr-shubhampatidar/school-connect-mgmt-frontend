@@ -88,7 +88,7 @@ export default function AdminStudentsPage() {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Students</h1>

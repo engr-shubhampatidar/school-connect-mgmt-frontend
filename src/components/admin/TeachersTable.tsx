@@ -4,6 +4,12 @@ import Card from "../ui/Card";
 import Button from "../ui/Button";
 import TeacherDetailsDrawer from "./TeacherDetailsDrawer";
 import { Teacher } from "../../lib/adminApi";
+import Image from "next/image";
+
+// TeachersTable
+// - Renders the teachers list with loading skeleton and empty state
+// - Handles pagination controls and delegates edit/resend actions via callbacks
+// - Shows a details drawer when a teacher row is opened
 
 type Props = {
   teachers: Teacher[];
@@ -33,8 +39,8 @@ export default function TeachersTable({
     Math.ceil((total || teachers.length) / pageSize)
   );
 
-  // Drawer has been extracted to a separate component using shadcn Drawer.
-  // Table no longer controls drawer state; consumers should render TeacherDetailsDrawer.
+  // Drawer state is local: open a teacher's details from the table row.
+  // The actual drawer component is a separate file (`TeacherDetailsDrawer`).
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -91,7 +97,9 @@ export default function TeachersTable({
       </Card>
     );
   }
+  // Empty state when there are no teachers to show
   if (!teachers || teachers.length === 0) {
+    // Main table rendering
     return (
       <Card>
         <div className="text-center">
@@ -107,45 +115,79 @@ export default function TeachersTable({
   }
 
   return (
-    <Card>
-      <div className="overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead className="sticky top-0 bg-white">
+    <div className="rounded-lg bg-white border border-[#D7E3FC] ">
+      <div className="overflow-x-auto ">
+        <table className="w-full table-auto ">
+          <thead className="sticky top-0  ">
             <tr>
-              <th className="text-left py-2">Name</th>
-              <th className="text-left py-2">Email</th>
-              <th className="text-left py-2">Phone</th>
-              <th className="text-left py-2">Actions</th>
+              <th className="text-left py-4 pl-6 w-48 hidden lg:table-cell">
+                Id No.
+              </th>
+              <th className="text-left py-4 ">Teacher Name</th>
+              <th className="text-left py-4 hidden lg:table-cell">
+                Assigned Class
+              </th>
+              <th className="text-left py-4 hidden lg:table-cell">Subject</th>
+              <th className="text-right py-4 pr-10">Actions</th>
             </tr>
           </thead>
           <tbody>
             {teachers.map((t) => (
-              <tr key={t.id} className="border-t hover:bg-slate-50">
+              <tr
+                key={t.id}
+                className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
+              >
+                <td className="py-3 hidden lg:table-cell p-6">{"ad-01234"}</td>
                 <td className="py-3">
                   <div className="flex items-center gap-3">
                     <button
                       aria-label="View teacher details"
                       title="View details"
                       onClick={() => openDrawer(t.id)}
-                      className="rounded p-1 hover:bg-slate-100"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-slate-600"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zM9 8a1 1 0 112 0v5a1 1 0 11-2 0V8zm1-3a1.25 1.25 0 100 2.5A1.25 1.25 0 0010 5z" />
-                      </svg>
+                      <div className="font-medium text-slate-900 flex items-center gap-3 cursor-pointer">
+                        <div className="w-12 h-12">
+                          <Image
+                            src={
+                              "https://i.pinimg.com/736x/2a/bd/c4/2abdc427589317e312e55100ac612ace.jpg"
+                            }
+                            alt="Avatar"
+                            width={72}
+                            height={72}
+                            className="rounded-full h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col text-left">
+                          <div className="text-[14px]">
+                            {t.user?.fullName ?? t.name ?? "-"}
+                          </div>
+                          <div className="text-[12px] text-[#737373]">
+                            {t.user?.email ?? t.email ?? "-"}
+                          </div>
+                        </div>
+                      </div>
                     </button>
-                    <div className="truncate font-medium text-slate-900">
-                      {t.name ?? "-"}
-                    </div>
                   </div>
                 </td>
-                <td className="py-3">{t.email ?? "-"}</td>
-                <td className="py-3">{t.phone ?? "-"}</td>
-                <td className="py-3">
+                <td className="py-3 hidden lg:table-cell">
+                  {t.classTeacher?.name
+                    ? `${t.classTeacher.name}${
+                        t.classTeacher.section
+                          ? " - " + t.classTeacher.section
+                          : ""
+                      }`
+                    : t.classes && t.classes.length
+                    ? `${t.classes[0].className}${
+                        t.classes[0].classSection
+                          ? " - " + t.classes[0].classSection
+                          : ""
+                      }`
+                    : "-"}
+                </td>
+                <td className="py-3 hidden lg:table-cell">
+                  {t.subjects ?? "-"}
+                </td>
+                <td className="py-3 flex justify-end pr-6">
                   <div className="flex gap-2">
                     <Button
                       variant="ghost"
@@ -175,7 +217,8 @@ export default function TeachersTable({
         </table>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      {/* Pagination and summary */}
+      <div className="mt-4 flex items-center justify-between px-6 pb-4">
         <div className="text-sm text-slate-600">
           Showing {teachers.length} of {total ?? teachers.length}
         </div>
@@ -198,8 +241,7 @@ export default function TeachersTable({
         </div>
       </div>
 
-      {/* Drawer has been moved to a separate component: TeacherDetailsDrawer.
-          Consumers should import and control it externally. */}
+      {/* Details drawer: displays the selected teacher and exposes edit/resend callbacks */}
       <TeacherDetailsDrawer
         isOpen={isDrawerOpen}
         teacher={selectedTeacher}
@@ -207,7 +249,7 @@ export default function TeachersTable({
         onEdit={(id: string) => onEdit?.(id)}
         onResendInvite={(id: string) => onResendInvite?.(id)}
       />
-    </Card>
+    </div>
   );
 }
 

@@ -1,6 +1,20 @@
 "use client";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { fetchTeachers, Teacher, TeachersQuery } from "../../../lib/adminApi";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
+import {
+  fetchTeachers,
+  // fetchClasses,
+  fetchSubjects,
+  Teacher,
+  TeachersQuery,
+  // ClassItem,
+  Subject,
+} from "../../../lib/adminApi";
 import TeachersFilterBar, {
   TeachersFilters,
 } from "../../../components/admin/TeachersFilterBar";
@@ -19,12 +33,21 @@ export default function AdminTeachersPage() {
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
-  const [filters, setFilters] = useState<TeachersFilters>({});
-
   const [creatingOpen, setCreatingOpen] = useState(false);
+  const [filters, setFilters] = useState<TeachersFilters>({});
 
   const controllerRef = useRef<AbortController | null>(null);
   const lastFetchRef = useRef<number | null>(null);
+  const hasMountedRef = useRef<boolean>(false);
+  // const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const fetchedRelatedRef = useRef<boolean>(false);
+
+  // stable memoized subject options so child components receive a stable reference
+  const subjectOptions = useMemo(
+    () => subjects.map((s) => ({ id: s.id, name: s.name })),
+    [subjects]
+  );
 
   const load = useCallback(
     async (q?: TeachersQuery) => {
@@ -62,6 +85,9 @@ export default function AdminTeachersPage() {
     [page, pageSize]
   );
 
+  // Effect: load teachers on mount and when filters/page change.
+  // Uses `controllerRef` to cancel in-flight requests and `lastFetchRef`
+  // to debounce rapid successive calls.
   useEffect(() => {
     const q: TeachersQuery = { ...filters, page, pageSize };
     void load(q);
@@ -73,6 +99,33 @@ export default function AdminTeachersPage() {
       }
     };
   }, [filters, page, pageSize, load]);
+
+  // After teachers are fetched, load related data (classes, subjects) once.
+  useEffect(() => {
+    if (loading) return; // wait until teachers request completes
+    if (!teachers || teachers.length === 0) return; // require teachers present
+    if (fetchedRelatedRef.current) return; // run only once
+    fetchedRelatedRef.current = true;
+
+    let mounted = true;
+    (async () => {
+      try {
+        const [subjResp] = await Promise.all([
+          // fetchClasses({ pageSize: 1000 }),
+          fetchSubjects({ pageSize: 1000 }),
+        ]);
+        if (!mounted) return;
+        // setClasses(clsResp.classes ?? []);
+        setSubjects(subjResp.subjects ?? []);
+        // place further dependent API calls here if needed
+      } catch (e) {
+        // ignore or optionally set error state for related loads
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [loading, teachers]);
 
   const handleApply = useCallback((f: TeachersFilters) => {
     setFilters(f);
@@ -106,6 +159,7 @@ export default function AdminTeachersPage() {
             onCreated={() => {
               void load({ ...filters, page, pageSize });
             }}
+            subjectsProp={subjectOptions}
           />
         </div>
       </div>
@@ -187,6 +241,7 @@ export default function AdminTeachersPage() {
           initial={filters}
           onApply={handleApply}
           onClear={handleClear}
+          subjectOptions={subjectOptions}
         />
       </div>
 

@@ -82,6 +82,12 @@ export async function fetchStudents(
 
 export type Teacher = {
   id: string;
+  user?: {
+    id?: string;
+    fullName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
   name: string;
   email: string;
   phone?: string | null;
