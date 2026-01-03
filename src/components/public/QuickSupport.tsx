@@ -7,7 +7,7 @@ export default function QuickSupport() {
     <section className="flex flex-col justify-center items-center mb-[100px] px-24">
       <div className="min-w-full flex items-center justify-center flex-col">
         <h1 className="text-[#021034] text-[32px] font-[600] font-semibold">
-          Quick Answer & Support
+          Quick Answer & Support 
         </h1>
         <p className="text-[#021034] text-[15px] font-[500] mt-2 text-center">
           Everything You Need to Know Before Getting Started

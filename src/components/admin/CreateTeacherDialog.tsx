@@ -73,12 +73,15 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onCreated?: () => void;
+  // optional subjects provided by parent to avoid duplicate API calls
+  subjectsProp?: { id: string; name: string }[];
 };
 
 export default function CreateTeacherDialog({
   open,
   onClose,
   onCreated,
+  subjectsProp,
 }: Props) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -117,43 +120,11 @@ export default function CreateTeacherDialog({
       setClassesLoading(true);
       setClassesError(null);
       try {
-        const [sRes, classesArr] = await Promise.allSettled([
-          API.get(ADMIN_API.SUBJECTS),
-          fetchClassesWithTeacher(),
-        ]);
-
-        if (!mounted) return;
-
-        // subjects
-        if (sRes.status === "fulfilled") {
-          const sdata = (sRes.value as { data: unknown }).data;
-          const normalize = (arr: unknown[]) =>
-            arr.map((it) => {
-              if (it && typeof it === "object") {
-                const o = it as Record<string, unknown>;
-                return {
-                  id: String(
-                    o.id ?? o._id ?? o.uuid ?? o.value ?? o.key ?? o.name ?? ""
-                  ),
-                  name: String(o.name ?? o.title ?? o.value ?? ""),
-                };
-              }
-              return { id: String(it ?? ""), name: String(it ?? "") };
-            });
-          setSubjects(
-            Array.isArray(sdata)
-              ? normalize(sdata as unknown[])
-              : Array.isArray((sdata as Record<string, unknown>).items)
-              ? normalize((sdata as Record<string, unknown>).items as unknown[])
-              : []
-          );
-        } else {
-          setSubjects([]);
-        }
-
-        // classes
-        if (classesArr.status === "fulfilled") {
-          const fetched = classesArr.value as ClassWithTeacher[];
+        // If parent provided subjects, use them and only fetch classes.
+        if (subjectsProp && Array.isArray(subjectsProp)) {
+          setSubjects(subjectsProp);
+          const fetched = await fetchClassesWithTeacher();
+          if (!mounted) return;
           setClassesWithTeacher(fetched || []);
           if (!Array.isArray(fetched) || fetched.length === 0) {
             setClasses([
@@ -175,8 +146,76 @@ export default function CreateTeacherDialog({
             setClasses(opts);
           }
         } else {
-          setClasses([]);
-          setClassesError("Unable to load classes. Please try again.");
+          // no subjects provided: fetch subjects and classes as before
+          const [sRes, classesArr] = await Promise.allSettled([
+            API.get(ADMIN_API.SUBJECTS),
+            fetchClassesWithTeacher(),
+          ]);
+
+          if (!mounted) return;
+
+          // subjects
+          if (sRes.status === "fulfilled") {
+            const sdata = (sRes.value as { data: unknown }).data;
+            const normalize = (arr: unknown[]) =>
+              arr.map((it) => {
+                if (it && typeof it === "object") {
+                  const o = it as Record<string, unknown>;
+                  return {
+                    id: String(
+                      o.id ??
+                        o._id ??
+                        o.uuid ??
+                        o.value ??
+                        o.key ??
+                        o.name ??
+                        ""
+                    ),
+                    name: String(o.name ?? o.title ?? o.value ?? ""),
+                  };
+                }
+                return { id: String(it ?? ""), name: String(it ?? "") };
+              });
+            setSubjects(
+              Array.isArray(sdata)
+                ? normalize(sdata as unknown[])
+                : Array.isArray((sdata as Record<string, unknown>).items)
+                ? normalize(
+                    (sdata as Record<string, unknown>).items as unknown[]
+                  )
+                : []
+            );
+          } else {
+            setSubjects([]);
+          }
+
+          // classes
+          if (classesArr.status === "fulfilled") {
+            const fetched = classesArr.value as ClassWithTeacher[];
+            setClassesWithTeacher(fetched || []);
+            if (!Array.isArray(fetched) || fetched.length === 0) {
+              setClasses([
+                { id: "", name: "No classes available", disabled: true },
+              ]);
+            } else {
+              const opts = fetched.map((c) => {
+                const label = c.classSection
+                  ? `${c.className} - ${c.classSection}`
+                  : c.className;
+                return {
+                  id: c.classId,
+                  name: c.classTeacher
+                    ? `${label} — Assigned to ${c.classTeacher.fullName}`
+                    : label,
+                  disabled: Boolean(c.classTeacher),
+                };
+              });
+              setClasses(opts);
+            }
+          } else {
+            setClasses([]);
+            setClassesError("Unable to load classes. Please try again.");
+          }
         }
       } catch (err) {
         if (!mounted) return;
@@ -190,7 +229,7 @@ export default function CreateTeacherDialog({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [subjectsProp]);
 
   const onSubmit = async (values: CreateTeacherValues) => {
     // prevent assigning to already-assigned classes

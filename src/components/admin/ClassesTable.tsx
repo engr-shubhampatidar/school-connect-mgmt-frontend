@@ -107,6 +107,7 @@ export default function ClassesTable({
               <tr key={c.id} className="border-t hover:bg-slate-50">
                 <td className="py-3">{c.name}</td>
                 <td className="py-3">{c.section ?? "-"}</td>
+
                 <td className="py-3">
                   <div className="flex gap-2">
                     <Button variant="ghost" onClick={() => onEdit?.(c.id)}>
