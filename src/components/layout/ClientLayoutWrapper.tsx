@@ -11,7 +11,13 @@ export default function ClientLayoutWrapper({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const hideNavbar = pathname === "/admin/login" || pathname === "/register-school" || pathname === "/teacher/login" || pathname === "/student/login" || pathname === "/";
+  const hideNavbar =
+    pathname === "/admin/login" ||
+    pathname === "/register-school" ||
+    pathname === "/teacher/login" ||
+    pathname === "/student/login" ||
+    pathname === "/" ||
+    pathname === "/login";
 
   return (
     <div className="flex">
