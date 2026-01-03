@@ -225,6 +225,11 @@ export default function AdminDashboardPage() {
                 message: "There was a problem, please",
                 variant: "error",
               },
+              {
+                title: "Please check the marked fields",
+                message: "There was a problem, please",
+                variant: "error",
+              },
             ]}
           />
         </section>

@@ -85,7 +85,10 @@ export default function CreateStudentDialog({
         name: values.name,
         classId: values.classId,
         email: values.email ?? undefined,
-        photoUrl: values.photoUrl ?? undefined,
+        photoUrl:
+          values.photoUrl && values.photoUrl.trim() !== ""
+            ? values.photoUrl
+            : "https://i.pinimg.com/736x/ce/30/bc/ce30bc4a449d4926ad1dd3164dc5c46f.jpg",
       });
 
       toast({ title: "Student created successfully", type: "success" });

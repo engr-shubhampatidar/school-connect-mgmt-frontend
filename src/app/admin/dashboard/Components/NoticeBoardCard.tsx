@@ -18,20 +18,20 @@ const variantStyles = {
   success: {
     container: "border-green-200 bg-green-50",
     icon: "text-green-600",
-    title: "text-green-700",
-    message: "text-green-600",
+    title: "text-[#051643]",
+    message: "text-[#051643]",
   },
   info: {
     container: "border-emerald-200 bg-emerald-50",
     icon: "text-emerald-600",
-    title: "text-emerald-700",
-    message: "text-emerald-600",
+    title: "text-[#051643]",
+    message: "text-[#051643]",
   },
   error: {
     container: "border-red-200 bg-red-50",
     icon: "text-red-600",
-    title: "text-red-700",
-    message: "text-red-600",
+    title: "text-[#051643]",
+    message: "text-[#051643]",
   },
 };
 
@@ -67,10 +67,10 @@ export default function NoticeBoardCard({
               </div>
 
               <div>
-                <h4 className={`text-sm font-medium ${styles.title}`}>
+                <h4 className={`text-sm font-[600] ${styles.title}`}>
                   {notice.title}
                 </h4>
-                <p className={`text-sm ${styles.message}`}>{notice.message}</p>
+                <p className={`text-sm font-[400] ${styles.message}`}>{notice.message}</p>
               </div>
             </div>
           );

@@ -39,6 +39,7 @@ type StudentProfile = {
   section?: string | null;
   photoUrl?: string | null;
   profile?: Profile | null;
+  status?: string | null;
 };
 
 type Props = {
@@ -209,6 +210,12 @@ export default function StudentDetailsDrawer({
                       <div className="text-xs text-slate-500">Roll No</div>
                       <div className="mt-1 font-medium text-slate-900">
                         {renderOrDash(data.rollNo)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-slate-500">Status</div>
+                      <div className="mt-1 font-medium text-slate-900">
+                        {renderOrDash(data.status)}
                       </div>
                     </div>
                   </div>
