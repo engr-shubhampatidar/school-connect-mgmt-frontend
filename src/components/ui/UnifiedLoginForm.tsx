@@ -94,25 +94,6 @@ export default function UnifiedLoginForm({ defaultRole = "admin" }: Props) {
             <h2 className="text-xl font-semibold">{cfg.title}</h2>
             <p className="text-sm text-slate-500">School Management System</p>
           </div>
-          <div
-            className="flex gap-2"
-            role="tablist"
-            aria-label="Role selection"
-          >
-            {(["admin", "teacher", "student"] as Role[]).map((r) => (
-              <button
-                key={r}
-                role="tab"
-                aria-selected={role === r}
-                onClick={() => setRole(r)}
-                className={`px-3 py-1 rounded ${
-                  role === r ? "bg-sky-600 text-white" : "bg-slate-100"
-                }`}
-              >
-                {r[0].toUpperCase() + r.slice(1)}
-              </button>
-            ))}
-          </div>
         </div>
 
         <Form onSubmit={form.handleSubmit(onSubmit)}>
