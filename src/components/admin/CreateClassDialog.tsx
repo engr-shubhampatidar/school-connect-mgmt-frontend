@@ -10,13 +10,21 @@ import { Input } from "../ui/Input";
 import { useToast } from "../ui/use-toast";
 import { createClass } from "../../lib/adminApi";
 
-const createClassSchema = z.object({
-  name: z.string().min(1, "Class name is required"),
-  section: z
-    .string()
-    .optional()
-    .transform((v) => (v ? v.trim() : undefined)),
-});
+const createClassSchema = z
+  .object({
+    number: z
+      .string()
+      .min(1, "Class number is required")
+      .regex(/^\d{1,2}$/, "Class number must be 1 or 2 digits"),
+    section: z
+      .string()
+      .optional()
+      .transform((v) => (v ? v.trim().toUpperCase() : undefined))
+      .refine((v) => v === undefined || /^[A-Z]$/.test(v), {
+        message: "Section must be a single letter A–Z",
+      }),
+  })
+  .required();
 
 type CreateClassValues = z.infer<typeof createClassSchema>;
 
@@ -34,16 +42,22 @@ export default function CreateClassDialog({ open, onClose, onCreated }: Props) {
     resolver: zodResolver(
       createClassSchema
     ) as unknown as Resolver<CreateClassValues>,
-    defaultValues: { name: "", section: "" },
+    defaultValues: { number: "", section: "" },
   });
 
   if (!open) return null;
 
+  const handleCancel = () => {
+    form.reset();
+    onClose();
+  };
+
   const onSubmit = async (values: CreateClassValues) => {
     setLoading(true);
     try {
+      // Send only numeric class number and uppercase section to backend
       await createClass({
-        name: values.name,
+        name: values.number,
         section: values.section ?? undefined,
       });
       toast({ title: "Class created", type: "success" });
@@ -91,26 +105,47 @@ export default function CreateClassDialog({ open, onClose, onCreated }: Props) {
           <div className="mt-4">
             <Form onSubmit={form.handleSubmit(onSubmit)}>
               <FormField>
-                <FormLabel>Class Name</FormLabel>
-                <Input {...form.register("name")} placeholder="e.g. Grade 5" />
+                <FormLabel>Class</FormLabel>
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 rounded-l-md bg-slate-100 text-slate-700 border border-r-0">
+                    Class
+                  </span>
+                  <Input
+                    {...form.register("number")}
+                    placeholder="e.g. 5"
+                    inputMode="numeric"
+                    className="rounded-l-none"
+                  />
+                </div>
                 <FormMessage>
-                  {form.formState.errors.name?.message as React.ReactNode}
+                  {form.formState.errors.number?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 
               <FormField>
                 <FormLabel>Section</FormLabel>
-                <Input
-                  {...form.register("section")}
-                  placeholder="Optional section (A, B...)"
-                />
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 rounded-l-md bg-slate-100 text-slate-700 border border-r-0">
+                    Section
+                  </span>
+                  <Input
+                    {...form.register("section")}
+                    placeholder="Optional (A)"
+                    onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                      const el = e.currentTarget as HTMLInputElement;
+                      el.value = el.value.toUpperCase().slice(0, 1);
+                      form.setValue("section", el.value);
+                    }}
+                    className="rounded-l-none"
+                  />
+                </div>
                 <FormMessage>
                   {form.formState.errors.section?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 
               <div className="mt-4 flex items-center justify-end gap-2">
-                <Button variant="ghost" onClick={onClose} type="button">
+                <Button variant="ghost" onClick={handleCancel} type="button">
                   Cancel
                 </Button>
                 <Button type="submit" disabled={loading}>

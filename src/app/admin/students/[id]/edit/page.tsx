@@ -78,7 +78,8 @@ function EditStudentProfile() {
       try {
         const res = await API.get(`/api/admin/students/${id}/profile`);
         if (!mounted) return;
-        const data = res.data ?? {};
+        const resData = res.data ?? {};
+        const data = (resData && (resData.profile ?? resData)) as any;
         reset({
           dob: data.dob ?? "",
           addressLine1: data.addressLine1 ?? "",

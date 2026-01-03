@@ -7,7 +7,7 @@ import {
   IndianRupee,
   ClipboardCheck,
   BookOpen,
-  ClipboardList
+  ClipboardList,
 } from "lucide-react";
 
 export const adminNav = [
@@ -30,10 +30,10 @@ export const adminNav = [
     label: "Classes",
     href: "/admin/classes",
     icon: School,
-  }
+  },
 ];
 export const managementNav = [
-   {
+  {
     label: "Fees & Finance",
     href: "/admin/fees",
     icon: IndianRupee,
@@ -47,7 +47,7 @@ export const managementNav = [
     label: "Reports & Analytics",
     href: "/admin/reports",
     icon: ClipboardList,
-  }
+  },
 ];
 
 export const teacherNav = [
@@ -73,14 +73,14 @@ export const teacherNav = [
   },
   {
     label: "Attendance history",
-    href: "/teacher/attendance-history",
+    href: "/teacher/class/attendance-history",
     icon: ClipboardCheck,
   },
   {
     label: "Assignments",
     href: "/teacher/assignments",
     icon: GraduationCap,
-  }
+  },
 ];
 
 export const studentNav = [
@@ -88,5 +88,5 @@ export const studentNav = [
     label: "Dashboard",
     href: "/student/dashboard",
     icon: LayoutDashboard,
-  },  
+  },
 ];
