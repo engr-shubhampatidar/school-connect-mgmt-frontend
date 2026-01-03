@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { fetchClasses, ClassItem, ClassesQuery } from "../../../lib/adminApi";
 import ClassesTable from "../../../components/admin/ClassesTable";
 import Button from "../../../components/ui/Button";
+import Timetable from "../../../components/admin/Timetable";
 import CreateClassDialog from "../../../components/admin/CreateClassDialog";
 
 export default function AdminClassesPage() {
@@ -37,6 +38,7 @@ export default function AdminClassesPage() {
   }, [load, page, pageSize]);
 
   const [creatingOpen, setCreatingOpen] = useState(false);
+  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -48,8 +50,21 @@ export default function AdminClassesPage() {
           </p>
         </div>
 
-        <div>
+        <div className="flex items-center gap-3">
           <Button onClick={() => setCreatingOpen(true)}>Add Class</Button>
+          <select
+            value={selectedClassId ?? ""}
+            onChange={(e) => setSelectedClassId(e.target.value || null)}
+            className="ml-2 p-2 border rounded"
+          >
+            <option value="">Select class to view timetable</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+                {c.section ? ` - ${c.section}` : ""}
+              </option>
+            ))}
+          </select>
           <CreateClassDialog
             open={creatingOpen}
             onClose={() => setCreatingOpen(false)}
@@ -73,6 +88,11 @@ export default function AdminClassesPage() {
         onAssignTeacher={() => void load({ page, pageSize })}
         onChangeTeacher={() => void load({ page, pageSize })}
       />
+      {selectedClassId && (
+        <div className="mt-6">
+          <Timetable classId={selectedClassId} />
+        </div>
+      )}
     </div>
   );
 }

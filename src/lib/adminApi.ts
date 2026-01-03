@@ -485,3 +485,70 @@ export async function createSubject(payload: { name: string; code: string }) {
   const res = await API.post<{ id: string }>(ADMIN_API.SUBJECTS, payload);
   return res.data;
 }
+
+/* Timetable API helpers */
+export type TimetableEntryDto = {
+  id: string;
+  classId: string;
+  subjectId: string;
+  teacherId?: string | null;
+  dayOfWeek: number; // 1..7
+  startTime: string; // 'HH:MM'
+  endTime: string; // 'HH:MM'
+  room?: string | null;
+  subjectName?: string;
+  teacherName?: string;
+};
+
+export type CreateTimetableEntryDto = {
+  subjectId: string;
+  teacherId?: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  room?: string;
+};
+
+export type UpdateTimetableEntryDto = {
+  teacherId?: string | null;
+  dayOfWeek?: number;
+  startTime?: string;
+  endTime?: string;
+  room?: string | null;
+};
+
+export async function fetchTimetable(
+  classId: string
+): Promise<TimetableEntryDto[]> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/timetable`;
+  const res = await API.get<TimetableEntryDto[]>(url);
+  return res.data || [];
+}
+
+export async function createTimetableEntry(
+  classId: string,
+  payload: CreateTimetableEntryDto
+): Promise<TimetableEntryDto> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/timetable`;
+  const res = await API.post<TimetableEntryDto>(url, payload);
+  return res.data;
+}
+
+export async function updateTimetableEntry(
+  classId: string,
+  teId: string,
+  payload: UpdateTimetableEntryDto
+): Promise<TimetableEntryDto> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/timetable/${teId}`;
+  const res = await API.put<TimetableEntryDto>(url, payload);
+  return res.data;
+}
+
+export async function deleteTimetableEntry(
+  classId: string,
+  teId: string
+): Promise<{ message: string }> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/timetable/${teId}/delete`;
+  const res = await API.post(url);
+  return res.data;
+}
