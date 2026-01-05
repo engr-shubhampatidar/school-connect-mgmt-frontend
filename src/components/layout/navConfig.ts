@@ -7,6 +7,7 @@ import {
   IndianRupee,
   ClipboardCheck,
   BookOpen,
+  FileMinus,
   ClipboardList,
 } from "lucide-react";
 
@@ -31,6 +32,11 @@ export const adminNav = [
     href: "/admin/classes",
     icon: School,
   },
+  {
+    label: "Subjects",
+    href: "/admin/subjects",
+    icon: FileMinus,
+  }
 ];
 export const managementNav = [
   {

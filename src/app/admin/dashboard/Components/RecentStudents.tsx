@@ -8,6 +8,15 @@ type Student = {
   id: string;
   name: string;
   createdAt: string;
+  // class can be a string or an object with name/section (matches API shape)
+  class?:
+    | string
+    | null
+    | {
+        id?: string;
+        name: string;
+        section?: string | null;
+      };
   email?: string | null;
   photoUrl?: string | null;
 };
@@ -145,9 +154,16 @@ export default function RecentStudents({
               {/* Text */}
               <div>
                 <p className="text-sm font-medium text-slate-900">
-                  {student.name.toUpperCase()}
+                  {"New Student Admitted"}
                 </p>
-                <p className="text-sm text-slate-500">{student.email}</p>
+                <p className="text-sm text-slate-500">
+                  {student.name} was added to{" "}
+                  {student.class
+                    ? typeof student.class === "string"
+                      ? student.class
+                      : student.class.name
+                    : "-"}
+                </p>
               </div>
             </div>
 

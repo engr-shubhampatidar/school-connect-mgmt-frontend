@@ -55,30 +55,25 @@ export default function StudentsFilterBar({
     return () => clearTimeout(t);
   }, [search, klass, status, onApply]);
 
-  const handleApply = () =>
-    onApply({ search: search.trim(), classId: klass, status });
-
-  const handleClear = () => {
-    setSearch("");
-    setKlass("");
-    setStatus("");
-  };
-
   return (
     <Card>
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
-        <div className="flex-1">
-          <label className="sr-only">Search students</label>
-          <Input
-            placeholder="Search by name"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex-1 w-1/2">
+          <div className="lg:w-90 flex-1">
+            <label className="sr-only">Search students</label>
+            <Input
+              className="bg-[#F5F9FF]"
+              placeholder="Search by name"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div className="w-48">
+        <div className="w-28">
           <label className="sr-only">Class</label>
           <Select
+            className="bg-[#F5F9FF]"
             options={
               classOptions.length
                 ? classOptions
@@ -90,9 +85,10 @@ export default function StudentsFilterBar({
           />
         </div>
 
-        <div className="w-48">
+        <div className="w-28">
           <label className="sr-only">Status</label>
           <Select
+            className="bg-[#F5F9FF]"
             options={[
               { id: "", name: "Any status" },
               { id: "active", name: "Active" },
@@ -103,12 +99,19 @@ export default function StudentsFilterBar({
             placeholder="Any status"
           />
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button onClick={handleApply}>Apply Filters</Button>
-          <Button variant="ghost" onClick={handleClear}>
-            Clear
-          </Button>
+        <div className="w-28">
+          <label className="sr-only">Status</label>
+          <Select
+            className="bg-[#F5F9FF]"
+            options={[
+              { id: "", name: "Any status" },
+              { id: "active", name: "Active" },
+              { id: "inactive", name: "Inactive" },
+            ]}
+            value={status}
+            onChange={(v) => setStatus(v)}
+            placeholder="Fee status"
+          />
         </div>
       </div>
     </Card>

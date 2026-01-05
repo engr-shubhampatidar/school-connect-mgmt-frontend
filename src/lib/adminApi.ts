@@ -407,7 +407,7 @@ export async function createClass(payload: {
 // Fetch available teachers for assignment
 export async function fetchAvailableTeachers(): Promise<Teacher[]> {
   try {
-    const res = await API.get(`${ADMIN_API.TEACHERS}/available`);
+    const res = await API.get(`${ADMIN_API.TEACHERS}/not-class-teachers`);
     const data = res.data as unknown;
     if (Array.isArray(data)) return data as Teacher[];
     const d =

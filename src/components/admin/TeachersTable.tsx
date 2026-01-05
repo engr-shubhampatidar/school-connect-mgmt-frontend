@@ -5,6 +5,7 @@ import Button from "../ui/Button";
 import TeacherDetailsDrawer from "./TeacherDetailsDrawer";
 import { Teacher } from "../../lib/adminApi";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 // TeachersTable
 // - Renders the teachers list with loading skeleton and empty state
@@ -43,6 +44,7 @@ export default function TeachersTable({
   // The actual drawer component is a separate file (`TeacherDetailsDrawer`).
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const router = useRouter();
 
   function openDrawer(id: string) {
     const t = teachers.find((x) => x.id === id) ?? null;
@@ -123,7 +125,7 @@ export default function TeachersTable({
               <th className="text-left py-4 pl-6 w-48 hidden lg:table-cell">
                 Id No.
               </th>
-              <th className="text-left py-4 ">Teacher Name</th>
+              <th className="text-left py-4 px-4">Teacher Name</th>
               <th className="text-left py-4 hidden lg:table-cell">
                 Assigned Class
               </th>
@@ -138,7 +140,7 @@ export default function TeachersTable({
                 className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
               >
                 <td className="py-3 hidden lg:table-cell p-6">{"ad-01234"}</td>
-                <td className="py-3">
+                <td className="p-3">
                   <div className="flex items-center gap-3">
                     <button
                       aria-label="View teacher details"
@@ -202,12 +204,10 @@ export default function TeachersTable({
                     <Button
                       variant="ghost"
                       onClick={() => {
-                        const name = t.name ?? "-";
-                        window.alert(`Resend Invite clicked for ${name}`);
-                        onResendInvite?.(t.id);
+                       router.push(`/admin/teachers/profile/${t.id}`);
                       }}
                     >
-                      Resend Invite
+                      Veiw Profile
                     </Button>
                   </div>
                 </td>

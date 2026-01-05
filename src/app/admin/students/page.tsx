@@ -91,14 +91,14 @@ export default function AdminStudentsPage() {
     <div className="mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Students</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Manage student records, search, and filter.
+          <h1 className="text-[24px] font-[600] text-[#021034]">Total Students</h1>
+          <p className="mt-1 text-[14px] text-[#737373]">
+            Manage, Student Profiles, status and Enrollment
           </p>
         </div>
 
         <div>
-          <Button onClick={() => setCreatingOpen(true)}>Add Student</Button>
+          <Button variant="dark"  onClick={() => setCreatingOpen(true)}>+ Add Student</Button>
           <CreateStudentDialog
             open={creatingOpen}
             classes={classes}
