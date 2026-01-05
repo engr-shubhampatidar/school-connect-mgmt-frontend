@@ -50,6 +50,8 @@ export default function ClassesTable({
     1,
     Math.ceil((total || classes.length) / pageSize)
   );
+const [openRowId, setOpenRowId] = useState<string | null>(null);
+
 
   if (loading) {
     return (
@@ -126,13 +128,21 @@ export default function ClassesTable({
                 <TableRow key={c.id} className="border-t hover:bg-slate-50">
                   <TableCell className="py-4 align-middle max-w-xs">
                     <div className="flex flex-col">
-                      <div className="font-medium text-slate-900 truncate">
+                      <div
+                        onClick={() => setOpenRowId(openRowId === c.id ? null : c.id)}
+                        className="font-medium text-slate-900 truncate cursor-pointer"
+                      >
                         {c.name}
                       </div>
                       <div className="text-sm text-slate-500 truncate">
                         {c.section ? `Section ${c.section}` : "-"}
                       </div>
                     </div>
+                    {openRowId === c.id && (
+                      <div className="mt-2 text-xs text-slate-600">
+                       {c.classTeacherName}
+                      </div>
+                    )}
                   </TableCell>
 
                   <TableCell className="py-4 align-middle">

@@ -145,9 +145,11 @@ export default function RecentStudents({
               {/* Text */}
               <div>
                 <p className="text-sm font-medium text-slate-900">
-                  {student.name.toUpperCase()}
+                  {"New Student Admitted"}
                 </p>
-                <p className="text-sm text-slate-500">{student.email}</p>
+                <p className="text-sm text-slate-500">
+                  {student.name} was added to {student.className}
+                </p>
               </div>
             </div>
 

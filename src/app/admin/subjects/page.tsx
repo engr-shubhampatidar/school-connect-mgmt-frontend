@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchSubjects, Subject, SubjectsQuery } from "../../../lib/adminApi";
 import Button from "../../../components/ui/Button";
 import AddSubjectDialog from "../../../components/admin/AddSubjectDialog";
@@ -10,7 +10,6 @@ export default function AdminSubjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
-
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
