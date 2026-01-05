@@ -4,6 +4,7 @@ import { fetchClasses, ClassItem, ClassesQuery } from "../../../lib/adminApi";
 import ClassesTable from "../../../components/admin/ClassesTable";
 import Button from "../../../components/ui/Button";
 import Timetable from "../../../components/admin/Timetable";
+import ClassSubjectsManager from "../../../components/admin/ClassSubjectsManager";
 import CreateClassDialog from "../../../components/admin/CreateClassDialog";
 
 export default function AdminClassesPage() {
@@ -89,8 +90,13 @@ export default function AdminClassesPage() {
         onChangeTeacher={() => void load({ page, pageSize })}
       />
       {selectedClassId && (
-        <div className="mt-6">
-          <Timetable classId={selectedClassId} />
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Timetable classId={selectedClassId} />
+          </div>
+          <div>
+            <ClassSubjectsManager classId={selectedClassId} />
+          </div>
         </div>
       )}
     </div>
