@@ -327,6 +327,7 @@ export type ClassItem = {
 
 export type ClassesResponse = {
   classes: ClassItem[];
+  groups?: unknown[];
   total?: number;
   page?: number;
   pageSize?: number;
@@ -345,12 +346,63 @@ export async function fetchClasses(
   if (query.search) params.search = query.search;
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
-  const res = await API.get<ClassesResponse>(ADMIN_API.CLASSES, { params });
+  // Use the endpoint that includes class teacher info
+  const res = await API.get<any>(ADMIN_API.CLASSES_WITH_TEACHER, { params });
   const data = res.data as unknown;
   const d =
     data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
-  const classes: ClassItem[] = (d.classes ?? d.items ?? []) as ClassItem[];
+  // Normalize possible array shapes: raw array, { items: [] }, { classes: [] }
+  let rawItems: unknown[] = [];
+  if (Array.isArray(data)) rawItems = data as unknown[];
+  else if (Array.isArray(d.items)) rawItems = d.items as unknown[];
+  else if (Array.isArray(d.classes)) rawItems = d.classes as unknown[];
+  else rawItems = (d.classes ?? d.items ?? []) as unknown[];
+
+  let classes: ClassItem[];
+  let groups: unknown[] | undefined = undefined;
+
+  // If API returned grouped grade objects with `sections`, derive a flat list for callers
+  const first = rawItems && rawItems.length > 0 ? rawItems[0] : null;
+  if (first && typeof first === "object" && Array.isArray((first as Record<string, any>).sections)) {
+    groups = rawItems as unknown[];
+    classes = (groups as any[]).flatMap((g) => {
+      const grade = g as Record<string, any>;
+      const gradeName = grade.gradeName ?? grade.name ?? "";
+      const secs = Array.isArray(grade.sections) ? grade.sections : [];
+      return secs.map((s: any, idx: number) => {
+        const sid = s.id ?? s.classId ?? `${gradeName}-${s.section ?? idx}`;
+        return {
+          id: String(sid),
+          name: `${gradeName}${s.sectionLabel ? ` - ${s.sectionLabel}` : s.section ? ` - ${s.section}` : ""}`,
+          section: s.section ?? null,
+          createdAt: undefined,
+          classTeacherId: s.classTeacherId ?? null,
+          classTeacherName: s.classTeacherName ?? null,
+        } as ClassItem;
+      });
+    });
+  } else {
+    classes = (rawItems || []).map((it) => {
+      const obj = it && typeof it === "object" ? (it as Record<string, any>) : {};
+      const id = (obj.classId ?? obj.id ?? obj._id ?? "") as string;
+      const name = (obj.className ?? obj.name ?? "") as string;
+      const section = (obj.classSection ?? obj.section ?? null) as string | null;
+      const ct = obj.classTeacher ?? obj.class_teacher ?? null;
+      const classTeacherId = ct && typeof ct === "object" ? (ct.teacherId ?? ct.id ?? ct._id ?? null) : null;
+      const classTeacherName = ct && typeof ct === "object" ? (ct.fullName ?? ct.name ?? null) : (obj.classTeacherName ?? null);
+
+      return {
+        id: String(id),
+        name: String(name),
+        section,
+        createdAt: (obj.createdAt ?? undefined) as string | undefined,
+        classTeacherId: classTeacherId ?? null,
+        classTeacherName: classTeacherName ?? null,
+      } as ClassItem;
+    });
+  }
+
   const total: number | undefined =
     (d.total as number | undefined) ??
     (d.totalCount as number | undefined) ??
@@ -364,6 +416,7 @@ export async function fetchClasses(
 
   return {
     classes,
+    groups,
     total,
     page,
     pageSize,
