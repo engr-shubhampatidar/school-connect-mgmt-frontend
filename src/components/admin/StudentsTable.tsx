@@ -12,6 +12,7 @@ import {
   TableCaption,
 } from "../ui/table";
 import { Student } from "../../lib/adminApi";
+import Image from "next/image";
 
 type Props = {
   students: Student[];
@@ -109,57 +110,107 @@ export default function StudentsTable({
   }
 
   return (
-    <Card>
-      <Table>
-        <TableHeader className="sticky top-0 bg-white">
-          <TableRow>
-            <TableHead className="text-left py-2">Name</TableHead>
-            <TableHead className="text-left py-2">Roll No</TableHead>
-            <TableHead className="text-left py-2">Class</TableHead>
-            <TableHead className="text-left py-2">Created</TableHead>
-            <TableHead className="text-right py-2">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {students.map((s) => (
-            <TableRow key={s.id} className="border-t hover:bg-slate-50">
-              <TableCell className="py-3">{s.name}</TableCell>
-              <TableCell className="py-3">{s.rollNo ?? "-"}</TableCell>
-              <TableCell className="py-3">
-                {typeof s.class === "string"
-                  ? s.class
-                  : s.class
-                  ? `${s.class.name}${
-                      s.class.section ? ` - ${s.class.section}` : ""
-                    }`
-                  : "-"}
-              </TableCell>
-              <TableCell className="py-3">
-                {new Intl.DateTimeFormat(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                }).format(new Date(s.createdAt))}
-              </TableCell>
-              <TableCell className="py-3 text-right">
-                <div className="flex gap-2 justify-end">
-                  <Button variant="ghost" onClick={() => onView?.(s.id)}>
-                    View
-                  </Button>
-                  <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
-                    Edit
-                  </Button>
-                </div>
-              </TableCell>
+    <div className="rounded-lg bg-white border border-[#D7E3FC] ">
+      <div className="overflow-x-auto ">
+        <Table className="w-full table-auto">
+          <TableHeader className="sticky top-0  ">
+            <TableRow>
+              <TableHead className="text-left py-4 pl-6 w-48 hidden lg:table-cell">
+                Roll No.
+              </TableHead>
+              <TableHead className="text-left py-4 px-4">Name</TableHead>
+              <TableHead className="text-left py-4 hidden lg:table-cell">
+                Class & Section
+              </TableHead>
+              <TableHead className="text-left py-4 hidden lg:table-cell">
+                Created
+              </TableHead>
+              <TableHead className="text-left py-4 hidden lg:table-cell">
+                Fees Status
+              </TableHead>
+              <TableHead className="text-right py-4 pr-10">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
+          </TableHeader>
 
-        <TableCaption>
-          Showing {students.length} of {total ?? students.length}
-        </TableCaption>
-      </Table>
+          <TableBody>
+            {students.map((s) => (
+              <TableRow
+                key={s.id}
+                className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
+              >
+                <TableCell className="py-3 hidden lg:table-cell p-6">
+                  {s.rollNo ?? "-"}
+                </TableCell>
+
+                <TableCell className="p-3">
+                  <div className="font-medium text-slate-900 flex items-center gap-3 cursor-pointer">
+                    <div className="w-12 h-12">
+                      <Image
+                        src={
+                          "https://i.pinimg.com/736x/2a/bd/c4/2abdc427589317e312e55100ac612ace.jpg"
+                        }
+                        alt="Avatar"
+                        width={72}
+                        height={72}
+                        className="rounded-full h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <div className="text-[14px]">{s.name ?? "-"}</div>
+                      <div className="text-[12px] text-[#737373]">
+                        Id-{s.id.slice(0, 8) ?? "-"}
+                      </div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-3 hidden lg:table-cell">
+                  <div className=" flex">
+                    <div className="border border-[#D7E3FC] max-w-full px-2 py-1 rounded-full">
+                      {typeof s.class === "string"
+                        ? s.class
+                        : s.class
+                        ? `${s.class.name}${
+                            s.class.section ? ` - ${s.class.section}` : ""
+                          }`
+                        : "-"}
+                    </div>
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-3 hidden lg:table-cell">
+                  {new Intl.DateTimeFormat(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  }).format(new Date(s.createdAt))}
+                </TableCell>
+                <TableCell className="py-3 hidden lg:table-cell">
+                  <div className=" flex">
+                    <div className="border border-[#16A34A] bg-[#DCFCE7] text-[12px] font-[600] max-w-full px-2 py-1 rounded-full">
+                      paid
+                    </div>
+                  </div>
+                </TableCell>
+
+                <TableCell className="py-3 flex justify-end pr-6">
+                  <div className="flex gap-2">
+                    <Button variant="ghost" onClick={() => onView?.(s.id)}>
+                      View
+                    </Button>
+                    <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
+                      Edit
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+
+          <TableCaption>
+            Showing {students.length} of {total ?? students.length}
+          </TableCaption>
+        </Table>
+      </div>
 
       <div className="mt-4 flex items-center justify-between">
         <div />
@@ -181,6 +232,6 @@ export default function StudentsTable({
           </Button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
