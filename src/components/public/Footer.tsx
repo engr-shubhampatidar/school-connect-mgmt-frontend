@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="max-w-full mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold">[Your Brand Name]</h2>
+            <h2 className="text-lg font-semibold">School ERPs</h2>
             <p className="text-sm text-gray-400">
               Smart Institute Management Platform
             </p>

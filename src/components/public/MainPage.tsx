@@ -1,6 +1,14 @@
-import React from "react";
+"use client";
+import React, {useState} from "react";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 export default function MainPage() {
+  
+  const [imageLoaded, setImageLoaded] = React.useState("/images/admin_dashboard.png");
+
+
+
+
   return (
     <>
       <section className="bg-[#021034] flex flex-col items-center justify-center w-full rounded-[15px] mb-[124px] px-5">
@@ -17,19 +25,19 @@ export default function MainPage() {
           </p>
         </div>
         <div className="flex justify-around items-center hidden md:flex backdrop-blur-sm bg-white/10 border border-[#55689B]/20 text-white gap-[10px] p-[8px] rounded-[15px] mb-10">
-          <p className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
+          <p onMouseOver={()=> setImageLoaded("/images/Student_dashboard.jpg")} className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
             {" "}
             Student dashboard
           </p>
-          <p className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
+          <p onMouseOver={()=> setImageLoaded("/images/Admin_dashboard.png")} className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
             {" "}
             Admin dashboard
           </p>
-          <p className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
+          <p onMouseOver={() => setImageLoaded("/images/Teacher_dashboard.jpg")} className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
             {" "}
             Teacher dashboard
           </p>
-          <p className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
+          <p onMouseOver={()=> setImageLoaded("/images/Student_dashboard.jpg")} className="py-[5px] px-[15px] text-[16px] font-[500] rounded-[10px] hover:bg-[#D7E3FC] hover:text-[#051643] font-semibold cursor-pointer">
             {" "}
             Parent dashboard
           </p>
@@ -71,7 +79,15 @@ export default function MainPage() {
               </div>
 
               {/* Right Placeholder Image */}
-              <div className="h-[260px] w-full rounded-l-2xl bg-gray-200 md:h-[320px]" />
+              <div className="h-[260px] w-full rounded-l-2xl bg-red-200 md:h-[320px] overflow-hidden">
+                <Image
+                  src={imageLoaded}
+                  alt="Benefit Image"
+                  width={600}
+                  height={400}
+                  className="object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>

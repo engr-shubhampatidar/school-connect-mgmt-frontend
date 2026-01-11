@@ -1,10 +1,11 @@
-import { Edit2, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import React from "react";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
 import ClassOverviewHeader, {
   ClassDashboardDetails,
 } from "./ClassOverviewHeader";
+import AddSubjectToClassDialog from "./AddSubjectToClassDialog";
 
 // Types
 interface ClassMeta {
@@ -19,7 +20,6 @@ interface ClassMeta {
 import SubjectAllocationTable, {
   ClassSubjectAllocation,
 } from "./SubjectAllocationTable";
-import { Badge } from "../ui";
 import TimetableList, { ClassTimetableEntry } from "./TimetableList";
 
 // Mock data
@@ -47,6 +47,7 @@ interface Props {
   details?: ClassDashboardDetails | null;
   isLoadingDetails?: boolean;
   detailsError?: string | null;
+  classId?: string;
 }
 
 export default function ClassOverview({
@@ -60,7 +61,9 @@ export default function ClassOverview({
   details,
   isLoadingDetails,
   detailsError,
+  classId,
 }: Props) {
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   return (
     <div className="space-y-6">
       <ClassOverviewHeader
@@ -75,9 +78,22 @@ export default function ClassOverview({
           <h3 className="text-[24px] font-semibold ">
             Class & Subject Allocation
           </h3>
-          <Button variant="dark" className="flex items-center gap-2">
+          <Button
+            onClick={() => {
+              console.log("clicked");
+              setIsDialogOpen((prev) => !prev);
+            }}
+            variant="dark"
+            className="flex items-center gap-2"
+          >
             <Plus size={14} /> Add Subject to Class
           </Button>
+          <AddSubjectToClassDialog
+            open={isDialogOpen}
+            classId={classId ?? details?.id}
+            onClose={() => setIsDialogOpen(false)}
+            onSuccess={() => setIsDialogOpen(false)}
+          />
         </div>
         <div className="">
           <SubjectAllocationTable

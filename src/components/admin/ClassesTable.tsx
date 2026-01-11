@@ -9,10 +9,17 @@ import {
   TableRow,
   TableHead,
   TableCell,
-  TableCaption,
 } from "../ui/table";
 import { ClassItem } from "../../lib/adminApi";
 import AssignTeacherModal from "./AssignTeacherModal";
+import { ChevronDown, ChevronRight, CornerDownRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { id } from "zod/locales";
+
+// ClassesTable
+// - Renders the classes list with loading skeleton and empty state
+// - Handles pagination controls and delegates edit/assign/change actions via callbacks
+// - Supports expandable rows to show sections within each class
 
 type Props = {
   classes: ClassItem[];
@@ -37,7 +44,6 @@ export default function ClassesTable({
   pageSize = 10,
   onRetry,
   onPageChange,
-  onEdit,
   onAssignTeacher,
   onChangeTeacher,
 }: Props) {
@@ -50,18 +56,62 @@ export default function ClassesTable({
     1,
     Math.ceil((total || classes.length) / pageSize)
   );
-const [openRowId, setOpenRowId] = useState<string | null>(null);
+  const [openRow, setOpenRow] = useState<number | null>(null);
+  const router = useRouter();
 
+  // Normalize incoming `classes` prop into `data` array matching the provided UI shape
+  const data = (classes || []).map((it: any) => {
+    // If already in grouped shape
+    if (it && Array.isArray(it.sections)) {
+      return {
+        grade: it.gradeName ?? it.grade ?? it.name ?? "",
+        sectionsCount: it.sections.length,
+        students:
+          typeof it.totalStudents === "number" ? it.totalStudents : undefined,
+        status: it.status ?? "Active",
+        sections: it.sections.map((s: any) => ({
+          id: s.classId ?? s.id ?? "",
+          classId: s.classId ?? s.id ?? "",
+          name: s.sectionLabel ?? s.section ?? s.name ?? "",
+          teacher: s.classTeacherName ?? s.classTeacher ?? s.teacher ?? null,
+          students: s.totalStudents ?? s.students ?? 0,
+        })),
+      };
+    }
+
+    // Fallback: flat class item -> create one-grade with one section
+    return {
+      grade: it.gradeName ?? it.name ?? "",
+      sectionsCount: it.section ? 1 : 0,
+      students: undefined,
+      status: it.classTeacherName ? "Assigned" : "Not Assigned",
+      sections: [
+        {
+          name: it.sectionLabel ?? it.section ?? "",
+          teacher: it.classTeacherName ?? null,
+          students: 0,
+        },
+      ],
+    };
+  });
 
   if (loading) {
     return (
       <Card>
-        <Table>
-          <TableHeader className="sticky top-0 bg-white">
+        <Table className="w-full table-auto">
+          <TableHeader className="sticky top-0">
             <TableRow>
-              <TableHead className="text-left py-2">Class Name</TableHead>
-              <TableHead className="text-left py-2">Class Teacher</TableHead>
-              <TableHead className="text-right py-2">Action</TableHead>
+              <TableHead className="text-left py-4 pl-6 w-48 hidden lg:table-cell">
+                Actions
+              </TableHead>
+              <TableHead className="text-left py-4 px-4">Class Name</TableHead>
+              <TableHead className="text-left py-4 hidden lg:table-cell">
+                Sections
+              </TableHead>
+              <TableHead className="text-left py-4 hidden lg:table-cell">
+                Students
+              </TableHead>
+              <TableHead className="text-right py-4 pr-10">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -112,99 +162,137 @@ const [openRowId, setOpenRowId] = useState<string | null>(null);
 
   return (
     <div className="overflow-x-auto">
-      <Card>
+      <div className="bg-white rounded-lg border border-[#D7E3FC]">
         <div className="overflow-x-auto">
-          <Table>
-            <TableHeader className="sticky top-0 bg-white">
-              <TableRow>
-                <TableHead className="text-left py-2">Class Name</TableHead>
-                <TableHead className="text-left py-2">Class Teacher</TableHead>
-                <TableHead className="text-right py-2">Action</TableHead>
+          <Table className="w-full table-auto">
+            <TableHeader className="sticky top-0">
+              <TableRow className="border-b border-[#D7E3FC]">
+                <TableHead className="text-left py-4 pl-6 w-48">
+                  Actions
+                </TableHead>
+                <TableHead className="text-left py-4 px-4">
+                  Class Name
+                </TableHead>
+                <TableHead className="text-left py-4 hidden lg:table-cell">
+                  Sections
+                </TableHead>
+                <TableHead className="text-left py-4 hidden lg:table-cell">
+                  Students
+                </TableHead>
+                <TableHead className="text-right py-4 pr-10">Status</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
-              {classes.map((c) => (
-                <TableRow key={c.id} className="border-t hover:bg-slate-50">
-                  <TableCell className="py-4 align-middle max-w-xs">
-                    <div className="flex flex-col">
-                      <div
-                        onClick={() => setOpenRowId(openRowId === c.id ? null : c.id)}
-                        className="font-medium text-slate-900 truncate cursor-pointer"
-                      >
-                        {c.name}
-                      </div>
-                      <div className="text-sm text-slate-500 truncate">
-                        {c.section ? `Section ${c.section}` : "-"}
-                      </div>
-                    </div>
-                    {openRowId === c.id && (
-                      <div className="mt-2 text-xs text-slate-600">
-                       {c.classTeacherName}
-                      </div>
-                    )}
-                  </TableCell>
-
-                  <TableCell className="py-4 align-middle">
-                    {c.classTeacherName ? (
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-sm font-medium text-slate-700">
-                          {c.classTeacherName
-                            .split(" ")
-                            .map((s) => s[0])
-                            .slice(0, 2)
-                            .join("")}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <div className="text-sm font-medium text-slate-900 truncate">
-                            {c.classTeacherName}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            Class Teacher
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-slate-500">Not Assigned</div>
-                    )}
-                  </TableCell>
-
-                  <TableCell className="py-4 text-right">
-                    <div className="flex justify-end">
-                      {c.classTeacherName ? (
-                        <Button
-                          variant="ghost"
-                          className="px-3 py-1.5 text-sm"
-                          onClick={() => {
-                            setModalClassId(c.id);
-                            setModalAction("change");
-                            setModalOpen(true);
-                          }}
+              {data.map((item, index) => {
+                const isOpen = openRow === index;
+                return (
+                  <React.Fragment key={index}>
+                    <TableRow
+                      className={`bord border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50 ${
+                        isOpen ? "bg-blue-50" : ""
+                      }`}
+                    >
+                      <TableCell className="py-3 p-6 ">
+                        <button
+                        className="cursor-pointer"
+                          onClick={() => setOpenRow(isOpen ? null : index)}
                         >
-                          Change Teacher
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="pill"
-                          className="px-3 py-1.5 text-sm"
-                          onClick={() => {
-                            setModalClassId(c.id);
-                            setModalAction("assign");
-                            setModalOpen(true);
-                          }}
-                        >
-                          Assign Teacher
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                          {isOpen ? (
+                            <ChevronDown className="w-5 h-5 text-blue-600" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-gray-600" />
+                          )}
+                        </button>
+                      </TableCell>
+
+                      <TableCell className="p-3">
+                        <div className="font-medium text-slate-900">
+                          Grade: {item.grade}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="py-3 hidden lg:table-cell">
+                        <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-700">
+                          {item.sectionsCount}
+                        </span>
+                      </TableCell>
+
+                      <TableCell className="py-3 hidden lg:table-cell">
+                        {item.students ?? "-"}
+                      </TableCell>
+
+                      <TableCell className="py-3 flex justify-end pr-6">
+                        <div className="inline-block px-3 py-1 rounded-full border border-[#D7E3FC] text-sm text-[#021034] font-[600]">
+                          {item.status}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+
+                    {isOpen && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="p-0">
+                          <div className="m-4 rounded-lg bg-[#D7E3FC]">
+                            <p className="font-semibold text-[#021034] text-[16px] font-[600] p-4 border-b border-[#FFFFFF] flex items-center gap-2">
+                              <CornerDownRight color="#475569" /> Section in Grade: {item.grade}
+                            </p>
+
+                            <Table>
+                              <TableHeader>
+                                <TableRow className="hover:bg-[#D7E3FC]">
+                                  <TableHead className="text-left  px-4">
+                                    Sections Name
+                                  </TableHead>
+                                  <TableHead className="text-left  px-4">
+                                    Assigned Teacher
+                                  </TableHead>
+                                  <TableHead className="text-left  px-4">
+                                    Student Count
+                                  </TableHead>
+                                  <TableHead className="text-right  pr-10">
+                                    Action
+                                  </TableHead>
+                                </TableRow>
+                              </TableHeader>
+
+                              <TableBody>
+                                {item.sections.map((sec: any, i: number) => (
+                                  <TableRow
+                                    key={i}
+                                    className="border-t border-[#FFFFFF] text-[#021034] text-[14px] font-[500] hover:bg-[#D7E3FC]"
+                                  >
+                                    <TableCell className="p-3">
+                                      {sec.name}
+                                    </TableCell>
+                                    <TableCell className="p-3">
+                                      {sec.teacher ?? "-"}
+                                    </TableCell>
+                                    <TableCell className="p-3">
+                                      {sec.students}
+                                    </TableCell>
+                                    <TableCell className=" text-right" >
+                                      <Button
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const id = sec.classId ?? sec.id ?? "";
+                                          if (id) router.push(`/admin/classes/${id}/overview`);
+                                        }}
+                                      >
+                                        overview
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
-
-            <TableCaption>
-              Showing {classes.length} of {total ?? classes.length}
-            </TableCaption>
           </Table>
         </div>
 
@@ -230,7 +318,7 @@ const [openRowId, setOpenRowId] = useState<string | null>(null);
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
       {modalClassId && (
         <AssignTeacherModal
           open={modalOpen}
