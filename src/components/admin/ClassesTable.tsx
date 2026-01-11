@@ -13,6 +13,13 @@ import {
 import { ClassItem } from "../../lib/adminApi";
 import AssignTeacherModal from "./AssignTeacherModal";
 import { ChevronDown, ChevronRight, CornerDownRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { id } from "zod/locales";
+
+// ClassesTable
+// - Renders the classes list with loading skeleton and empty state
+// - Handles pagination controls and delegates edit/assign/change actions via callbacks
+// - Supports expandable rows to show sections within each class
 
 type Props = {
   classes: ClassItem[];
@@ -50,6 +57,7 @@ export default function ClassesTable({
     Math.ceil((total || classes.length) / pageSize)
   );
   const [openRow, setOpenRow] = useState<number | null>(null);
+  const router = useRouter();
 
   // Normalize incoming `classes` prop into `data` array matching the provided UI shape
   const data = (classes || []).map((it: any) => {
@@ -62,6 +70,8 @@ export default function ClassesTable({
           typeof it.totalStudents === "number" ? it.totalStudents : undefined,
         status: it.status ?? "Active",
         sections: it.sections.map((s: any) => ({
+          id: s.classId ?? s.id ?? "",
+          classId: s.classId ?? s.id ?? "",
           name: s.sectionLabel ?? s.section ?? s.name ?? "",
           teacher: s.classTeacherName ?? s.classTeacher ?? s.teacher ?? null,
           students: s.totalStudents ?? s.students ?? 0,
@@ -260,8 +270,16 @@ export default function ClassesTable({
                                     <TableCell className="p-3">
                                       {sec.students}
                                     </TableCell>
-                                    <TableCell className="text-right text-sm text-gray-600 hover:text-gray-500 cursor-pointer p-3">
-                                      View Profile
+                                    <TableCell className=" text-right" >
+                                      <Button
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const id = sec.classId ?? sec.id ?? "";
+                                          if (id) router.push(`/admin/classes/${id}/overview`);
+                                        }}
+                                      >
+                                        overview
+                                      </Button>
                                     </TableCell>
                                   </TableRow>
                                 ))}

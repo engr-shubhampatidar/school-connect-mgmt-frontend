@@ -101,7 +101,7 @@ export default function SubjectAllocationTable({
                 </TableCell>
                 <TableCell className="py-3">{room}</TableCell>
                 <TableCell className="py-3">
-                  <Badge variant={s.teacherId ? "success" : "warning"}>
+                  <Badge  variant={s.teacherId ? "success" : "warning"}>
                     {s.teacherId ? "Active" : "Pending"}
                   </Badge>
                 </TableCell>
@@ -113,6 +113,7 @@ export default function SubjectAllocationTable({
                       onClick={() => console.log("replace", s.id)}
                     >
                       <Edit2 size={14} />
+                      Replace
                     </Button>
                     <Button
                       variant="ghost"
@@ -120,6 +121,7 @@ export default function SubjectAllocationTable({
                       onClick={() => console.log("delete", s.id)}
                     >
                       <Trash2 size={14} />
+                      Delete
                     </Button>
                   </div>
                 </TableCell>
