@@ -101,7 +101,7 @@ export default function SubjectAllocationTable({
                 </TableCell>
                 <TableCell className="py-3">{room}</TableCell>
                 <TableCell className="py-3">
-                  <Badge  variant={s.teacherId ? "success" : "warning"}>
+                  <Badge variant={s.teacherId ? "success" : "warning"}>
                     {s.teacherId ? "Active" : "Pending"}
                   </Badge>
                 </TableCell>
