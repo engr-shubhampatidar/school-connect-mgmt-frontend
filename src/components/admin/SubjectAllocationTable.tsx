@@ -10,7 +10,7 @@ import {
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
-import { Edit2, Trash2, Plus } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 
 export interface ClassSubjectAllocation {
   id: string;
@@ -95,7 +95,6 @@ export default function SubjectAllocationTable({
                   ) : (
                     <div className="flex items-center gap-3 text-slate-500">
                       <Avatar name={undefined} size={32} />
-                      {/* <div className="text-sm">?</div> */}
                     </div>
                   )}
                 </TableCell>

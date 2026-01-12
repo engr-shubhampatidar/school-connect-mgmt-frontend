@@ -48,6 +48,7 @@ interface Props {
   isLoadingDetails?: boolean;
   detailsError?: string | null;
   classId?: string;
+  onReloadSubjects?: () => void;
 }
 
 export default function ClassOverview({
@@ -62,6 +63,7 @@ export default function ClassOverview({
   isLoadingDetails,
   detailsError,
   classId,
+  onReloadSubjects,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   return (
@@ -92,7 +94,10 @@ export default function ClassOverview({
             open={isDialogOpen}
             classId={classId ?? details?.id}
             onClose={() => setIsDialogOpen(false)}
-            onSuccess={() => setIsDialogOpen(false)}
+            onSuccess={() => {
+              setIsDialogOpen(false);
+              onReloadSubjects?.();
+            }}
           />
         </div>
         <div className="">
