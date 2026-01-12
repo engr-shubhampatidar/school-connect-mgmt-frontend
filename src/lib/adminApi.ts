@@ -436,13 +436,102 @@ export type ClassWithTeacher = {
 };
 
 export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
-  const res = await API.get<ClassWithTeacher[]>(ADMIN_API.CLASSES_WITH_TEACHER);
+  const res = await API.get<any>(ADMIN_API.CLASSES_WITH_TEACHER);
   const data = res.data as unknown;
-  if (Array.isArray(data)) return data as ClassWithTeacher[];
-  const d =
-    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+
+  // If API returned a flat array of ClassWithTeacher objects
+  if (Array.isArray(data) && data.length > 0) {
+    // detect grouped shape (grade objects with `sections`) and flatten below
+    const first = data[0];
+    if (first && typeof first === "object" && Array.isArray((first as Record<string, any>).sections)) {
+      const groups = data as any[];
+      const flat: ClassWithTeacher[] = groups.flatMap((g) => {
+        const gradeName = g.gradeName ?? g.name ?? "";
+        const secs = Array.isArray(g.sections) ? g.sections : [];
+        return secs.map((s: any) => {
+          const classId = s.classId ?? s.id ?? "";
+          const classSection = s.section ?? s.sectionLabel ?? "";
+          const className = gradeName || s.className || s.name || "";
+          const teacher =
+            s.classTeacher || s.classTeacherName || s.class_teacher
+              ? // normalize teacher object
+                (s.classTeacher && typeof s.classTeacher === "object"
+                  ? {
+                      teacherId: s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
+                      fullName: s.classTeacher.fullName ?? s.classTeacher.name ?? String(s.classTeacherName ?? "") ,
+                      email: s.classTeacher.email ?? null,
+                      phone: s.classTeacher.phone ?? null,
+                    }
+                  : {
+                      teacherId: s.teacherId ?? "",
+                      fullName: String(s.classTeacherName ?? s.classTeacher ?? ""),
+                      email: null,
+                      phone: null,
+                    })
+              : null;
+
+          return {
+            classId: String(classId),
+            className: String(className),
+            classSection: String(classSection ?? ""),
+            classTeacher: teacher,
+          } as ClassWithTeacher;
+        });
+      });
+      return flat;
+    }
+
+    // If it's already the expected flat list of ClassWithTeacher, return as-is
+    return data as ClassWithTeacher[];
+  }
+
+  const d = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
   if (Array.isArray(d.items)) return d.items as ClassWithTeacher[];
   if (Array.isArray(d.classes)) return d.classes as ClassWithTeacher[];
+
+  // Handle grouped response under a top-level object containing grades
+  // e.g. { grades: [ { gradeName, sections: [...] }, ... ] }
+  const groups = Array.isArray(d.grades)
+    ? d.grades
+    : Array.isArray(d.groups)
+    ? d.groups
+    : null;
+  if (Array.isArray(groups) && groups.length > 0) {
+    const flat: ClassWithTeacher[] = (groups as any[]).flatMap((g) => {
+      const gradeName = g.gradeName ?? g.name ?? "";
+      const secs = Array.isArray(g.sections) ? g.sections : [];
+      return secs.map((s: any) => {
+        const classId = s.classId ?? s.id ?? "";
+        const classSection = s.section ?? s.sectionLabel ?? "";
+        const className = gradeName || s.className || s.name || "";
+        const teacher =
+          s.classTeacher || s.classTeacherName || s.class_teacher
+            ? (s.classTeacher && typeof s.classTeacher === "object"
+                ? {
+                    teacherId: s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
+                    fullName: s.classTeacher.fullName ?? s.classTeacher.name ?? String(s.classTeacherName ?? ""),
+                    email: s.classTeacher.email ?? null,
+                    phone: s.classTeacher.phone ?? null,
+                  }
+                : {
+                    teacherId: s.teacherId ?? "",
+                    fullName: String(s.classTeacherName ?? s.classTeacher ?? ""),
+                    email: null,
+                    phone: null,
+                  })
+            : null;
+
+        return {
+          classId: String(classId),
+          className: String(className),
+          classSection: String(classSection ?? ""),
+          classTeacher: teacher,
+        } as ClassWithTeacher;
+      });
+    });
+    return flat;
+  }
+
   return [];
 }
 

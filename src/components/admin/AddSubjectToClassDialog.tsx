@@ -6,7 +6,9 @@ import DefaultSelect from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
 import SuccessModal from "@/components/ui/SuccessModal";
 import { useParams } from "next/navigation";
-import { getAccessToken, getToken } from "@/lib/auth";
+import API from "@/lib/axios";
+import { ADMIN_API } from "@/lib/api-routes";
+import axios from "axios";
 
 type Subject = { id: string; name: string };
 
@@ -35,34 +37,15 @@ function AddSubjectToClassDialog({
   const [successOpen, setSuccessOpen] = useState(false);
 
   useEffect(() => {
-    let ctrl = new AbortController();
+    let cancelled = false;
     const fetchSubjectsAndTeachers = async () => {
       if (!open) return;
       setLoading(true);
       setLoadingTeachers(true);
       setError(null);
       try {
-        const token = getAccessToken() || getToken("admin");
-        if (!token) {
-          setError("Missing authentication token");
-          setLoading(false);
-          setLoadingTeachers(false);
-          return;
-        }
-
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // fetch subjects
-        const subjRes = await fetch(
-          `https://school-connect-mgmt-backend.vercel.app/api/admin/subjects`,
-          {
-            signal: ctrl.signal,
-            headers,
-          }
-        );
-        if (!subjRes.ok)
-          throw new Error(`Failed to load subjects (${subjRes.status})`);
-        const subjData = await subjRes.json();
+        const subjRes = await API.get(ADMIN_API.SUBJECTS);
+        const subjData = subjRes.data;
         const subjList = Array.isArray(subjData)
           ? subjData
           : Array.isArray(subjData?.items)
@@ -72,19 +55,10 @@ function AddSubjectToClassDialog({
           id: s.id,
           name: s.name || s.title || s.subjectName || "Unnamed Subject",
         }));
-        setSubjects(normalizedSubjects);
+        if (!cancelled) setSubjects(normalizedSubjects);
 
-        // fetch teachers
-        const teachRes = await fetch(
-          `https://school-connect-mgmt-backend.vercel.app/api/admin/teachers`,
-          {
-            signal: ctrl.signal,
-            headers,
-          }
-        );
-        if (!teachRes.ok)
-          throw new Error(`Failed to load teachers (${teachRes.status})`);
-        const teachData = await teachRes.json();
+        const teachRes = await API.get(ADMIN_API.TEACHERS);
+        const teachData = teachRes.data;
         const teachList = Array.isArray(teachData)
           ? teachData
           : Array.isArray(teachData?.items)
@@ -99,18 +73,29 @@ function AddSubjectToClassDialog({
             [t.firstName, t.lastName].filter(Boolean).join(" ") ||
             "Unnamed Teacher",
         }));
-        setTeachers(normalizedTeachers);
-      } catch (err: any) {
-        if (err.name === "AbortError") return;
-        setError(err.message || "Failed to fetch subjects/teachers");
+        if (!cancelled) setTeachers(normalizedTeachers);
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          setError(
+            err.response?.data?.message ?? err.message ?? "Failed to fetch"
+          );
+        } else if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to fetch");
+        }
       } finally {
-        setLoading(false);
-        setLoadingTeachers(false);
+        if (!cancelled) {
+          setLoading(false);
+          setLoadingTeachers(false);
+        }
       }
     };
 
     fetchSubjectsAndTeachers();
-    return () => ctrl.abort();
+    return () => {
+      cancelled = true;
+    };
   }, [open, resolvedClassId]);
 
   const handleSubmit = async () => {
@@ -122,33 +107,24 @@ function AddSubjectToClassDialog({
     setSubmitting(true);
     setError(null);
     try {
-      const token = getAccessToken() || getToken("admin");
-      if (!token) {
-        setError("Missing authentication token");
-        setSubmitting(false);
-        return;
-      }
-
-      const res = await fetch(
-        `https://school-connect-mgmt-backend.vercel.app/api/admin/classes/${resolvedClassId}/subjects`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ subjectId: selected }),
-        }
-      );
-      if (!res.ok) {
-        const errBody = await res.text();
-        throw new Error(errBody || `Request failed (${res.status})`);
-      }
+      const payload: any = { subjectId: selected };
+      if (selectedTeacher) payload.teacherId = selectedTeacher;
+      const url = `${ADMIN_API.CLASSES}/${resolvedClassId}/subjects`;
+      const resp = await API.post(url, payload);
       setSuccessOpen(true);
       setSelected("");
+      setSelectedTeacher("");
       onSuccess?.();
-    } catch (err: any) {
-      setError(err.message || "Failed to add subject");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message ?? err.message ?? "Failed to add subject"
+        );
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to add subject");
+      }
     } finally {
       setSubmitting(false);
     }

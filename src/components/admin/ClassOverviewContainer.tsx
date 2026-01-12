@@ -63,6 +63,20 @@ export default function ClassOverviewContainer() {
     };
   }, [clsId]);
 
+  const reloadSubjects = async () => {
+    if (!clsId) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await API.get(`/api/admin/classes/${clsId}/subjects`);
+      setItems(res.data ?? []);
+    } catch (e) {
+      setError("Failed to load subjects. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!clsId) {
       setDetails(null);
@@ -142,6 +156,7 @@ export default function ClassOverviewContainer() {
       details={details}
       isLoadingDetails={isLoadingDetails}
       detailsError={detailsError}
+      onReloadSubjects={reloadSubjects}
     />
   );
 }

@@ -7,7 +7,6 @@ import API from "../lib/axios";
 import { PUBLIC_API } from "../lib/api-routes";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
-import Card from "./ui/Card";
 import {
   Form,
   FormField,
@@ -121,84 +120,205 @@ export function RegisterSchoolForm() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <h2 className="text-2xl font-semibold">Register School</h2>
-      <p className="text-sm text-slate-600">
-        Create an account for your school.
-      </p>
+    <div className="w-full max-w-full px-12">
+      <div className="w-full max-w-full bg-[#FFFFFF] border border-[#D7E3FC] rounded-lg">
+        <div className="h-[8px] w-full bg-[#1E40AF] rounded-t-lg"></div>
+        <div className="w-full max-w-full p-8">
+          <Form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-6 ">
+              <h2 className="text-2xl font-semibold">
+                Administrator Information
+              </h2>
+              <p className="text-sm text-slate-600">
+                You are registering as the primary administrator for this
+                school.{" "}
+              </p>
+              <FormField>
+                <FormLabel>What is your Full name?</FormLabel>
+                <FormControl>
+                  <Input {...form.register("name")} placeholder="Full Name" />
+                </FormControl>
+                <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+              </FormField>
+              <FormField>
+                <FormLabel>
+                  What email address should be used for this account?
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    {...form.register("email")}
+                    placeholder="You'll use this email to log in"
+                    type="email"
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.email?.message}
+                </FormMessage>
+              </FormField>
+              <FormField>
+                <FormLabel>What is your mobile phone number?</FormLabel>
+                <FormControl>
+                  <Input
+                    {...form.register("contact")}
+                    placeholder="(555)12358645"
+                    type="Number"
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.contact?.message}
+                </FormMessage>
+              </FormField>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField>
+                  <FormLabel>Create a password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...form.register("password")}
+                      placeholder="Create a Strong Password"
+                      type="password"
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {form.formState.errors.password?.message}
+                  </FormMessage>
+                </FormField>
+                <FormField>
+                  <FormLabel>Confirm your password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Confirm your Strong Password"
+                      type="password"
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {/* {form.formState.errors.email?.message} */}
+                  </FormMessage>
+                </FormField>
+              </div>
+            </div>
 
-      <Form onSubmit={form.handleSubmit(onSubmit)}>
-        <FormField>
-          <FormLabel>School Name</FormLabel>
-          <FormControl>
-            <Input {...form.register("name")} placeholder="Acme High School" />
-          </FormControl>
-          <FormMessage>{form.formState.errors.name?.message}</FormMessage>
-        </FormField>
+            <div className="space-y-6 ">
+              <h2 className="text-2xl font-semibold">School Information</h2>
+              <p className="text-sm text-slate-600">
+                Fill your school information.
+              </p>
 
-        <FormField>
-          <FormLabel>Email</FormLabel>
-          <FormControl>
-            <Input
-              {...form.register("email")}
-              placeholder="admin@school.edu"
-              type="email"
-            />
-          </FormControl>
-          <FormMessage>{form.formState.errors.email?.message}</FormMessage>
-        </FormField>
+              <FormField>
+                <FormLabel>
+                  What is the name of your school or institution?
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    // {...form.register("name")}
+                    placeholder="Acme High School"
+                  />
+                </FormControl>
+                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+              </FormField>
 
-        <FormField>
-          <FormLabel>Password</FormLabel>
-          <FormControl>
-            <Input
-              {...form.register("password")}
-              placeholder="Strong password"
-              type="password"
-            />
-          </FormControl>
-          <FormMessage>{form.formState.errors.password?.message}</FormMessage>
-        </FormField>
+              <FormField>
+                <FormLabel>
+                  Which board or curriculum does your school follow?
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Select Board/Curriculum" />
+                </FormControl>
+                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+              </FormField>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField>
+                  <FormLabel>What city is the school located in?</FormLabel>
+                  <FormControl>
+                    <Input placeholder="City" type="text" />
+                  </FormControl>
+                  <FormMessage>
+                    {/* {form.formState.errors.password?.message} */}
+                  </FormMessage>
+                </FormField>
+                <FormField>
+                  <FormLabel>What state is the school located in?</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...form.register("address")}
+                      placeholder="State"
+                      type="text"
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {/* {form.formState.errors.email?.message} */}
+                  </FormMessage>
+                </FormField>
+              </div>
 
-        <FormField>
-          <FormLabel>Address</FormLabel>
-          <FormControl>
-            <Input {...form.register("address")} placeholder="123 Main St" />
-          </FormControl>
-          <FormMessage>{form.formState.errors.address?.message}</FormMessage>
-        </FormField>
+              <FormField>
+                <FormLabel>Logo URL</FormLabel>
+                <FormControl>
+                  <Input
+                    {...form.register("logoUrl")}
+                    placeholder="https://.../logo.png"
+                  />
+                </FormControl>
+                <FormMessage>
+                  {form.formState.errors.logoUrl?.message}
+                </FormMessage>
+              </FormField>
+            </div>
 
-        <FormField>
-          <FormLabel>Contact Number</FormLabel>
-          <FormControl>
-            <Input {...form.register("contact")} placeholder="(555) 555-5555" />
-          </FormControl>
-          <FormMessage>{form.formState.errors.contact?.message}</FormMessage>
-        </FormField>
+            <div className="space-y-6 ">
+              <h2 className="text-2xl font-semibold">Academic Setup</h2>
+              <p className="text-sm text-slate-600">
+                Fill your school information.
+              </p>
 
-        <FormField>
-          <FormLabel>Logo URL</FormLabel>
-          <FormControl>
-            <Input
-              {...form.register("logoUrl")}
-              placeholder="https://.../logo.png"
-            />
-          </FormControl>
-          <FormMessage>{form.formState.errors.logoUrl?.message}</FormMessage>
-        </FormField>
+              <FormField>
+                <FormLabel>
+                  Select the academic year for this registration
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    // {...form.register("name")}
+                    placeholder="Academic year 2024-2025"
+                  />
+                </FormControl>
+                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+              </FormField>
 
-        <div>
-          <Button
-            type="submit"
-            disabled={!form.formState.isValid || loading}
-            className="w-full"
-          >
-            {loading ? "Registering..." : "Register School"}
-          </Button>
+              <FormField>
+                <FormLabel>
+                  Preferred language for system communication
+                </FormLabel>
+                <FormControl>
+                  <Input placeholder="Select Language" />
+                </FormControl>
+                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+              </FormField>
+              <FormField>
+                <FormLabel>Timezone</FormLabel>
+                <FormControl>
+                  <Input placeholder="Automatically detected based on your location" />
+                </FormControl>
+                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+              </FormField>
+            </div>
+
+            <div>
+              <Button
+                type="submit"
+                // disabled={!form.formState.isValid || loading}
+                className="w-full"
+                variant="dark"
+              >
+                {loading ? "Registering..." : "Continue"}
+              </Button>
+            </div>
+            <p className="text-center text-slate-400 text-sm">
+              By continuing, you confirm that the information provided is
+              accurate to the best of your knowledge.
+            </p>
+          </Form>
         </div>
-        <p>Already Registered? <a href="/admin/login" className="text-blue-600">Login here</a></p>
-      </Form>
-    </Card>
+      </div>
+    </div>
   );
 }
 

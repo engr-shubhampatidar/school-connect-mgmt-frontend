@@ -88,14 +88,7 @@ export default function UnifiedLoginForm({ defaultRole = "admin" }: Props) {
 
   return (
     <div className="w-full max-w-[420px] mx-auto">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold">{cfg.title}</h2>
-            <p className="text-sm text-slate-500">School Management System</p>
-          </div>
-        </div>
-
+      <div className="">
         <Form onSubmit={form.handleSubmit(onSubmit)}>
           {cfg.fields.map((f: any) => (
             <FormField key={f.name}>
