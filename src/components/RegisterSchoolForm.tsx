@@ -120,9 +120,9 @@ export function RegisterSchoolForm() {
   };
 
   return (
-    <div className="w-full max-w-full px-12">
+    <div className="w-full max-w-full flex md:items-center md:px-8">
       <div className="w-full max-w-full bg-[#FFFFFF] border border-[#D7E3FC] rounded-lg">
-        <div className="h-[8px] w-full bg-[#1E40AF] rounded-t-lg"></div>
+        <div className="h-[8px] hidden md:flex w-full bg-[#1E40AF] rounded-t-lg"></div>
         <div className="w-full max-w-full p-8">
           <Form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="space-y-6 ">

@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { Phone, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 type NavItem = {
   label: string;
@@ -21,63 +24,85 @@ export default function Navbar({
   ],
   phoneNumber = "+91 79749 18244",
 }: NavbarProps) {
+  const [open, setOpen] = useState(false);
+
   return (
     <>
-      <div className="w-full bg-[#081a3d] py-3 px-20">
-        <div className="relative mx-auto max-w-8xl rounded-lg bg-white py-3 text-center text-sm font-medium text-[#081a3d]">
-          {/* Left Decoration */}
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:block">
-            <div className="space-y-1">
-              <span className="block h-[2px] w-8 rotate-12 bg-[#081a3d]/30" />
-              <span className="block h-[2px] w-8 rotate-12 bg-[#081a3d]/30" />
-              <span className="block h-[2px] w-8 rotate-12 bg-[#081a3d]/30" />
-            </div>
-          </div>
-
-          {/* Text */}
-          <span>{"Join Our Personalized Nutrition Demo For Free"}</span>
-
-          {/* Right Decoration */}
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:block">
-            <div className="space-y-1">
-              <span className="block h-[2px] w-8 -rotate-12 bg-[#081a3d]/30" />
-              <span className="block h-[2px] w-8 -rotate-12 bg-[#081a3d]/30" />
-              <span className="block h-[2px] w-8 -rotate-12 bg-[#081a3d]/30" />
-            </div>
-          </div>
+      {/* Top Banner */}
+      <div className="w-full bg-[#051643] p-2">
+        <div className="bg-[#FFFFFF] rounded-[6px] w-full py-[10px] px-20px flex items-center justify-center">
+          <p className="text-[12px] font-[500] md:text-[16px]">
+            🚀 Get Started Today — Digitize your institute with ease.
+          </p>
         </div>
       </div>
-      <header className="w-full border-b bg-white px-20">
-        <div className="mx-auto flex max-w-8xl items-center justify-between px-6 py-4">
+
+      {/* Main Navbar */}
+      <header className="w-full border-b bg-white px-4 md:px-20">
+        <div className="mx-auto flex max-w-8xl items-center justify-between py-4">
           {/* Logo */}
-          <div className="text-xl font-extrabold leading-tight">
+          <div className="text-sm md:text-xl font-extrabold leading-tight">
             <span className="block">MAXUSE</span>
             <span className="block text-sm font-semibold tracking-wide">
               INSTITUTE.
             </span>
           </div>
 
-          {/* Navigation */}
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-[56px] text-[16px] font-[600] text-[#021034]">
             {navItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="hover:text-blue-600 transition-colors"
+                className="hover:text-blue-600 transition"
               >
                 {item.label}
               </Link>
             ))}
-            {/* Call Button */}
+
             <a
               href={`tel:${phoneNumber}`}
-              className="flex items-center gap-2 rounded-md border border-blue-200 px-[12px] py-[10px] text-sm font-semibold text-[#002B6B] hover:bg-blue-50 transition"
+              className="flex items-center gap-2 rounded-md border border-blue-200 px-3 py-2 text-sm font-semibold text-[#002B6B] hover:bg-blue-50 transition"
             >
               <Phone size={16} />
               {phoneNumber}
             </a>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setOpen(!open)}
+            className="md:hidden text-[#021034] "
+          >
+            {open ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
+
+        {/* Mobile Menu */}
+        {open && (
+          <div className="md:hidden border-t bg-white px-4 pb-4">
+            <nav className="flex flex-col gap-4 pt-4 text-sm font-semibold text-[#021034]">
+              {navItems.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="hover:text-blue-600"
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              <a
+                href={`tel:${phoneNumber}`}
+                className="flex items-center gap-2 rounded-md border border-blue-200 px-3 py-2 text-sm font-semibold text-[#002B6B]"
+              >
+                <Phone size={16} />
+                {phoneNumber}
+              </a>
+            </nav>
+          </div>
+        )}
       </header>
     </>
   );

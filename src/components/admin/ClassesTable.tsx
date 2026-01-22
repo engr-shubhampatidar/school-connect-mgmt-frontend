@@ -272,6 +272,7 @@ export default function ClassesTable({
                                     </TableCell>
                                     <TableCell className=" text-right" >
                                       <Button
+                                       className="cursor-pointer"
                                         variant="ghost"
                                         onClick={() => {
                                           const id = sec.classId ?? sec.id ?? "";
