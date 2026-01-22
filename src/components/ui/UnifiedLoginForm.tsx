@@ -87,7 +87,7 @@ export default function UnifiedLoginForm({ defaultRole = "admin" }: Props) {
   const cfg = (loginConfig as any)[role];
 
   return (
-    <div className="w-full max-w-[420px] mx-auto">
+    <div className="w-full  mx-auto">
       <div className="">
         <Form onSubmit={form.handleSubmit(onSubmit)}>
           {cfg.fields.map((f: any) => (
@@ -109,6 +109,7 @@ export default function UnifiedLoginForm({ defaultRole = "admin" }: Props) {
           <div className="mt-4">
             <Button
               type="submit"
+              variant="dark"
               className="w-full bg-[#021034]"
               disabled={!form.formState.isValid || form.formState.isSubmitting}
             >

@@ -31,8 +31,9 @@ export default function Page() {
           height={800}
           className="hidden h-screen lg:flex"
         />
-        <div className="flex flex-col bg-white h-screen items-center justify-center ">
-          <div className="flex  w-full full flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex w-full flex-col items-center justify-between pb-2  px-4 sm:px-6 lg:px-8">
+          <div className="h-16"></div>
+          <div className="flex flex-col items-center justify-center">
             <div className="mb-4">
               <Image
                 src="/images/Avatar.png"
@@ -46,8 +47,8 @@ export default function Page() {
                 {role === "admin"
                   ? " Admin Portal"
                   : role === "teacher"
-                  ? " Teacher Portal"
-                  : " Student Portal"}
+                    ? " Teacher Portal"
+                    : " Student Portal"}
               </h1>
               <p className="mt-1 text-sm text-slate-500 text-center">
                 Secure access for Admins, Teachers and Students.
@@ -55,38 +56,37 @@ export default function Page() {
             </div>
 
             <div className="mb-4" role="tablist" aria-label="Login role">
-              <div className="flex gap-2 bg-[#EEF4FF] p-1 rounded-lg">
+              <div className="flex gap-2 bg-[#EEF4FF] p-1 rounded-lg w-fit">
                 {(["admin", "teacher", "student"] as const).map((r) => {
                   const active = role === r;
                   return (
-                    <Button
+                    <button
                       key={r}
                       onClick={() => setRole(r)}
-                      variant={active ? "pill" : "ghost"}
                       className={`px-3 py-1.5 text-sm ${
-                        active ? "shadow-sm" : ""
+                        active ? "shadow-sm bg-white rounded-lg" : ""
                       }`}
                       aria-selected={active}
                       role="tab"
                     >
                       {r[0].toUpperCase() + r.slice(1)}
-                    </Button>
+                    </button>
                   );
                 })}
               </div>
             </div>
 
-            <div className="w-full">
+            <div className="w-full flex flex-col items-center justify-center ">
               <UnifiedLoginForm key={role} defaultRole={role} />
-            </div>
-            <div className="flex items-center justify-center flex-col gap-2 mt-5">
-              <p>Having trouble logging in?</p>
-              <a href="#" className="text-blue-600 hover:underline text-sm ">
-                Contact Support
-              </a>
+              <div className="flex items-center justify-center flex-col gap-2 mt-5">
+                <p>Having trouble logging in?</p>
+                <a href="#" className="text-blue-600 hover:underline text-sm ">
+                  Contact Support
+                </a>
+              </div>
             </div>
           </div>
-          <p className=" text-center text-sm text-slate-500 sticky bottom-0  mt-44">
+          <p className=" text-center text-sm text-slate-500 sticky bottom-0 ">
             © 2024 Maxuse Technologies. All rights reserved.
           </p>
         </div>
