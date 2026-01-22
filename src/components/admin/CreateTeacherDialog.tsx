@@ -372,14 +372,14 @@ export default function CreateTeacherDialog({
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/40" onClick={onClose} />
         <div className="relative w-full max-w-2xl p-4 max-h-[90vh]">
-          <Card>
+          <div className="rounded-lg">
             <div className=" max-h-[80vh]">
-              <div className="flex items-start sticky top-0 bg-white justify-between gap-4">
+              <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg p-4 justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">
+                  <h3 className="text-lg font-semibold text-white">
                     Create Teacher
                   </h3>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-white">
                     Add a teacher and configure assignments.
                   </p>
                 </div>
@@ -387,269 +387,274 @@ export default function CreateTeacherDialog({
                   <button
                     aria-label="close"
                     onClick={onClose}
-                    className="text-slate-500 hover:text-slate-700"
+                    className="text-white hover:text-white/80"
                   >
                     ✕
                   </button>
                 </div>
               </div>
+              <div className="p-5 bg-white overflow-hidden rounded-b-lg">
+                <div className=" space-y-4 bg-white rounded-lg">
+                  <div className="overflow-auto max-h-[60vh] rounded-t-lg p-4">
+                    <Card className="p-4 rounded-t-lg">
+                      <h4 className="text-sm font-medium">Basic Info</h4>
+                      <p className="text-xs text-slate-500">
+                        Full name, email and phone number.
+                      </p>
+                      <div className="mt-3 space-y-3">
+                        <Form onSubmit={form.handleSubmit(onSubmit)}>
+                          <FormField>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...form.register("fullName")}
+                                placeholder="Full name"
+                              />
+                            </FormControl>
+                            <FormMessage>
+                              {
+                                form.formState.errors.fullName
+                                  ?.message as React.ReactNode
+                              }
+                            </FormMessage>
+                          </FormField>
 
-              <div className="mt-4 space-y-4">
-                <div className="overflow-auto max-h-[60vh]">
-                  <Card className="p-4">
-                    <h4 className="text-sm font-medium">Basic Info</h4>
-                    <p className="text-xs text-slate-500">
-                      Full name, email and phone number.
-                    </p>
-                    <div className="mt-3 space-y-3">
-                      <Form onSubmit={form.handleSubmit(onSubmit)}>
-                        <FormField>
-                          <FormLabel>Full Name</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...form.register("fullName")}
-                              placeholder="Full name"
-                            />
-                          </FormControl>
-                          <FormMessage>
-                            {
-                              form.formState.errors.fullName
-                                ?.message as React.ReactNode
-                            }
-                          </FormMessage>
-                        </FormField>
+                          <FormField>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...form.register("email")}
+                                placeholder="teacher@example.com"
+                              />
+                            </FormControl>
+                            <FormMessage>
+                              {
+                                form.formState.errors.email
+                                  ?.message as React.ReactNode
+                              }
+                            </FormMessage>
+                          </FormField>
 
-                        <FormField>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...form.register("email")}
-                              placeholder="teacher@example.com"
-                            />
-                          </FormControl>
-                          <FormMessage>
-                            {
-                              form.formState.errors.email
-                                ?.message as React.ReactNode
-                            }
-                          </FormMessage>
-                        </FormField>
+                          <FormField>
+                            <FormLabel>Phone</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...form.register("phone")}
+                                placeholder="Optional phone"
+                              />
+                            </FormControl>
+                            <FormMessage>
+                              {
+                                form.formState.errors.phone
+                                  ?.message as React.ReactNode
+                              }
+                            </FormMessage>
+                          </FormField>
+                        </Form>
+                      </div>
+                    </Card>
 
-                        <FormField>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...form.register("phone")}
-                              placeholder="Optional phone"
-                            />
-                          </FormControl>
-                          <FormMessage>
-                            {
-                              form.formState.errors.phone
-                                ?.message as React.ReactNode
-                            }
-                          </FormMessage>
-                        </FormField>
-                      </Form>
-                    </div>
-                  </Card>
+                    <Separator />
 
-                  <Separator />
-
-                  <Card className="p-4">
-                    <h4 className="text-sm font-medium">Subject Speciality</h4>
-                    <p className="text-xs text-slate-500">
-                      Subjects this teacher is qualified to teach
-                    </p>
-                    <div className="mt-3">
-                      <MultiSelect
-                        options={subjects}
-                        value={form.watch("subjects") ?? []}
-                        onChange={(v) => form.setValue("subjects", v)}
-                        placeholder="Select subjects"
-                      />
-                      <FormMessage>
-                        {
-                          (
-                            (form.formState.errors as Record<string, unknown>)
-                              .subjects as Record<string, unknown> | undefined
-                          )?.message as React.ReactNode
-                        }
-                      </FormMessage>
-                    </div>
-                  </Card>
-
-                  <Separator />
-
-                  <Card className="p-4">
-                    <h4 className="text-sm font-medium">
-                      Class Teacher (Optional)
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Responsible for attendance and announcements
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          {...form.register("isClassTeacher")}
+                    <Card className="p-4">
+                      <h4 className="text-sm font-medium">
+                        Subject Speciality
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Subjects this teacher is qualified to teach
+                      </p>
+                      <div className="mt-3">
+                        <MultiSelect
+                          options={subjects}
+                          value={form.watch("subjects") ?? []}
+                          onChange={(v) => form.setValue("subjects", v)}
+                          placeholder="Select subjects"
                         />
-                        <span className="text-sm">
-                          Make this teacher a Class Teacher
-                        </span>
-                      </label>
+                        <FormMessage>
+                          {
+                            (
+                              (form.formState.errors as Record<string, unknown>)
+                                .subjects as Record<string, unknown> | undefined
+                            )?.message as React.ReactNode
+                          }
+                        </FormMessage>
+                      </div>
+                    </Card>
 
-                      {form.watch("isClassTeacher") && (
-                        <div>
-                          <Select
-                            options={classOptions}
-                            value={form.watch("classTeacher") ?? ""}
-                            onChange={(v) => form.setValue("classTeacher", v)}
-                            placeholder={
-                              classesLoading
-                                ? "Loading classes..."
-                                : "Select class"
-                            }
+                    <Separator />
+
+                    <Card className="p-4">
+                      <h4 className="text-sm font-medium">
+                        Class Teacher (Optional)
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Responsible for attendance and announcements
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            {...form.register("isClassTeacher")}
                           />
-                          {classesError && (
-                            <p className="text-xs text-destructive mt-1">
-                              {classesError}
-                            </p>
-                          )}
-                          <FormMessage>
-                            {
-                              (
-                                (
-                                  form.formState.errors as Record<
-                                    string,
-                                    unknown
-                                  >
-                                ).classTeacher as
-                                  | Record<string, unknown>
-                                  | undefined
-                              )?.message as React.ReactNode
-                            }
-                          </FormMessage>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
+                          <span className="text-sm">
+                            Make this teacher a Class Teacher
+                          </span>
+                        </label>
 
-                  <Separator />
-
-                  <Card className="p-4">
-                    <h4 className="text-sm font-medium">
-                      Teaching Assignments
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Define which subject this teacher teaches in which class
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {fields.map((f, idx) => (
-                        <div
-                          key={f.id}
-                          className="grid grid-cols-12 gap-2 items-center"
-                        >
-                          <div className="col-span-5">
+                        {form.watch("isClassTeacher") && (
+                          <div>
                             <Select
                               options={classOptions}
-                              value={
-                                form.watch(
-                                  `assignClassSubjects.${idx}.classId`
-                                ) ?? ""
-                              }
-                              onChange={(v: string) =>
-                                form.setValue(
-                                  `assignClassSubjects.${idx}.classId` as unknown as keyof CreateTeacherValues,
-                                  v
-                                )
-                              }
+                              value={form.watch("classTeacher") ?? ""}
+                              onChange={(v) => form.setValue("classTeacher", v)}
                               placeholder={
                                 classesLoading
                                   ? "Loading classes..."
                                   : "Select class"
                               }
                             />
+                            {classesError && (
+                              <p className="text-xs text-destructive mt-1">
+                                {classesError}
+                              </p>
+                            )}
+                            <FormMessage>
+                              {
+                                (
+                                  (
+                                    form.formState.errors as Record<
+                                      string,
+                                      unknown
+                                    >
+                                  ).classTeacher as
+                                    | Record<string, unknown>
+                                    | undefined
+                                )?.message as React.ReactNode
+                              }
+                            </FormMessage>
                           </div>
-                          <div className="col-span-5">
-                            {(() => {
-                              const availableSubjects = subjects.filter((s) =>
-                                (form.watch("subjects") ?? []).includes(s.id)
-                              );
-                              const opts =
-                                availableSubjects.length > 0
-                                  ? availableSubjects
-                                  : [{ id: "", name: "Not available" }];
-                              return (
-                                <Select
-                                  options={opts}
-                                  value={
-                                    form.watch(
-                                      `assignClassSubjects.${idx}.subjectId`
-                                    ) ?? ""
-                                  }
-                                  onChange={(v: string) =>
-                                    form.setValue(
-                                      `assignClassSubjects.${idx}.subjectId` as unknown as keyof CreateTeacherValues,
-                                      v
-                                    )
-                                  }
-                                  placeholder="Select subject (optional)"
-                                />
-                              );
-                            })()}
-                          </div>
-                          <div className="col-span-2 flex gap-2">
-                            <Button
-                              variant="ghost"
-                              onClick={() => remove(idx)}
-                              type="button"
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-
-                      <div>
-                        <Button
-                          type="button"
-                          onClick={() =>
-                            append({ classId: "", subjectId: undefined })
-                          }
-                        >
-                          + Assign Another Class
-                        </Button>
+                        )}
                       </div>
-                      <FormMessage>
-                        {
-                          (
-                            (form.formState.errors as Record<string, unknown>)
-                              .assignClassSubjects as
-                              | Record<string, unknown>
-                              | undefined
-                          )?.message as React.ReactNode
-                        }
-                      </FormMessage>
-                    </div>
-                  </Card>
-                </div>
+                    </Card>
 
-                <div className="mt-4 sticky bottom-0 bg-white flex items-center justify-end gap-2">
-                  <Button variant="ghost" onClick={onClose} type="button">
-                    Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={() => form.handleSubmit(onSubmit)()}
-                    disabled={loading}
-                  >
-                    {loading ? "Saving…" : "Create Teacher"}
-                  </Button>
+                    <Separator />
+
+                    <Card className="p-4">
+                      <h4 className="text-sm font-medium">
+                        Teaching Assignments
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Define which subject this teacher teaches in which class
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {fields.map((f, idx) => (
+                          <div
+                            key={f.id}
+                            className="grid grid-cols-12 gap-2 items-center"
+                          >
+                            <div className="col-span-5">
+                              <Select
+                                options={classOptions}
+                                value={
+                                  form.watch(
+                                    `assignClassSubjects.${idx}.classId`
+                                  ) ?? ""
+                                }
+                                onChange={(v: string) =>
+                                  form.setValue(
+                                    `assignClassSubjects.${idx}.classId` as unknown as keyof CreateTeacherValues,
+                                    v
+                                  )
+                                }
+                                placeholder={
+                                  classesLoading
+                                    ? "Loading classes..."
+                                    : "Select class"
+                                }
+                              />
+                            </div>
+                            <div className="col-span-5">
+                              {(() => {
+                                const availableSubjects = subjects.filter((s) =>
+                                  (form.watch("subjects") ?? []).includes(s.id)
+                                );
+                                const opts =
+                                  availableSubjects.length > 0
+                                    ? availableSubjects
+                                    : [{ id: "", name: "Not available" }];
+                                return (
+                                  <Select
+                                    options={opts}
+                                    value={
+                                      form.watch(
+                                        `assignClassSubjects.${idx}.subjectId`
+                                      ) ?? ""
+                                    }
+                                    onChange={(v: string) =>
+                                      form.setValue(
+                                        `assignClassSubjects.${idx}.subjectId` as unknown as keyof CreateTeacherValues,
+                                        v
+                                      )
+                                    }
+                                    placeholder="Select subject (optional)"
+                                  />
+                                );
+                              })()}
+                            </div>
+                            <div className="col-span-2 flex gap-2">
+                              <Button
+                                variant="ghost"
+                                onClick={() => remove(idx)}
+                                type="button"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div>
+                          <Button
+                            type="button"
+                            variant="dark"
+                            onClick={() =>
+                              append({ classId: "", subjectId: undefined })
+                            }
+                          >
+                            + Assign Another Class
+                          </Button>
+                        </div>
+                        <FormMessage>
+                          {
+                            (
+                              (form.formState.errors as Record<string, unknown>)
+                                .assignClassSubjects as
+                                | Record<string, unknown>
+                                | undefined
+                            )?.message as React.ReactNode
+                          }
+                        </FormMessage>
+                      </div>
+                    </Card>
+                  </div>
+
+                  <div className="mt-4 sticky bottom-0 bg-white flex items-center justify-end gap-2 rounded-b-lg ">
+                    <Button variant="ghost" onClick={onClose} type="button">
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="dark"
+                      onClick={() => form.handleSubmit(onSubmit)()}
+                      disabled={loading}
+                    >
+                      {loading ? "Saving…" : "Create Teacher"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
 
         {tempEmail || tempPassword ? (

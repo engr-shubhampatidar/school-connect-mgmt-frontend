@@ -58,6 +58,7 @@ export default function TeacherDashboardPage() {
     async function load() {
       try {
         const me = await getTeacherMe().catch(() => null);
+        const subjects = await fetch("")
         if (!mounted) return;
         if (me) setTeacher(me);
 

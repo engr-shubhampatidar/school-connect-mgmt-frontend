@@ -106,22 +106,21 @@ export default function SubjectAllocationTable({
                 </TableCell>
                 <TableCell className="py-3 text-right pr-4">
                   <div className="inline-flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      className="px-2 py-1"
+                    <button
+                      
+                      className="px-2 py-1 flex items-center gap-1"
                       onClick={() => console.log("replace", s.id)}
                     >
                       <Edit2 size={14} />
                       Replace
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="px-2 py-1 text-red-600"
+                    </button>
+                    <button 
+                      className="px-2 py-1 text-red-600 flex items-center gap-1"
                       onClick={() => console.log("delete", s.id)}
                     >
                       <Trash2 size={14} />
                       Delete
-                    </Button>
+                    </button>
                   </div>
                 </TableCell>
               </TableRow>

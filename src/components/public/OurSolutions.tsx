@@ -6,11 +6,11 @@ export default function OurSolutions() {
   return (
     <section className="flex flex-col justify-center items-center mb-[50px]">
       <div className="min-w-full flex items-center justify-center flex-col">
-        <p className="text-[12px] font-[500] text-[#021034] py-[3px] px-[8px] border border-[#D7E3FC] rounded-[10px]">Solutions</p>
-        <h1 className="text-[#021034] text-[32px] font-[600] font-semibold">
+        <p className="text-[10px] md:text-[12px] font-[500] text-[#021034] py-[3px] px-[8px] border border-[#D7E3FC] rounded-[10px]">Solutions</p>
+        <h1 className="text-[#021034] text-[16px] md:text-[32px] font-[600] font-semibold">
           Smart Solutions for Modern Educational Institutions
         </h1>
-        <p className="text-[#021034] text-[15px] font-[500] mt-2 text-center">
+        <p className="text-[#021034] text-[10px] md:text-[15px] font-[500] mt-2 text-center">
           Purpose-built tools to manage academics, operations, and growth
           efficiently.
         </p>

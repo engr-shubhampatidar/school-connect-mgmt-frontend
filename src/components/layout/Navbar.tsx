@@ -134,8 +134,8 @@ export default function Navbar() {
               })}
             </nav>
           </div>
-          <div className="mt-auto">
-            <div className="border-t-2 border-slate-100 pt-4 px-4 space-y-2">
+          <div className="mt-auto sticky bottom-0 ">
+            <div className="border-t-2 border-slate-100 pt-4 px-4 space-y-2 sticky bottom-0 bg-white">
               <div
                 className={`flex items-center ${
                   openSidebar ? "justify-start" : "justify-center py-2"

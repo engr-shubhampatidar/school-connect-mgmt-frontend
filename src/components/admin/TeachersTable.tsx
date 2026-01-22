@@ -202,6 +202,7 @@ export default function TeachersTable({
                       Edit
                     </Button>
                     <Button
+                    className="cursor-pointer"
                       variant="ghost"
                       onClick={() => {
                        router.push(`/admin/teachers/profile/${t.id}`);

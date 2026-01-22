@@ -1,6 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { Check, Clock } from "lucide-react";
 import { Badge } from "../ui";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "../ui/table";
 
 export interface ClassTimetableEntry {
   id: string;
@@ -123,25 +131,39 @@ export default function TimetableList({
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((t) => {
-            const start = parseTimeToDate(t.startTime, now);
-            const end = parseTimeToDate(t.endTime, now);
-            const isNow =
-              now >= start && now <= end && now.getDay() === t.dayOfWeek;
-            const isCompleted = now > end && now.getDay() === t.dayOfWeek;
+          <Table className="p-0">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Time</TableHead>
+                <TableHead>Subject</TableHead>
+                <TableHead>Teacher</TableHead>
+                <TableHead>Room</TableHead>
+                <TableHead className="text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((t) => {
+                const start = parseTimeToDate(t.startTime, now);
+                const end = parseTimeToDate(t.endTime, now);
+                const isNow =
+                  now >= start && now <= end && now.getDay() === t.dayOfWeek;
+                const isCompleted = now > end && now.getDay() === t.dayOfWeek;
 
-            return (
-              <div key={t.id} className="flex items-start gap-4">
-                <div className="w-24 text-sm font-semibold">
-                  {formatTime(t.startTime)} - {formatTime(t.endTime)}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="text-sm font-semibold">{t.subjectName}</div>
-                    <div className="text-sm text-slate-500">
+                return (
+                  <TableRow key={t.id}>
+                    <TableCell className="w-40 text-sm font-semibold">
+                      {formatTime(t.startTime)} - {formatTime(t.endTime)}
+                    </TableCell>
+                    <TableCell className="text-sm font-semibold">
+                      {t.subjectName}
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-500 ml-4">
                       {t.teacherName ?? ""}
-                    </div>
-                    <div className="ml-auto">
+                    </TableCell>
+                    <TableCell className="mt-1 text-sm text-slate-500">
+                      Room No. {t.room ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
                       {isNow ? (
                         <Badge variant="outline">
                           <Clock size={14} className="inline-block mr-1" /> Now
@@ -152,15 +174,12 @@ export default function TimetableList({
                           Completed
                         </Badge>
                       ) : null}
-                    </div>
-                  </div>
-                  <div className="mt-1 text-sm text-slate-500">
-                    {t.room ?? "—"}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>

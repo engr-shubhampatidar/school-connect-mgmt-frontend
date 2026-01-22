@@ -9,7 +9,7 @@ export default function RegisterPage() {
     <ToastProvider>
       <RegisterNavbar />
       <div className="min-h-full bg-slate-50 grid grid-cols-1 lg:grid-cols-2 ">
-        <div className="w-full flex items-center justify-center p-8 bg-[#EEF4FF]">
+        <div className="w-full hidden lg:flex items-center justify-center p-8 bg-[#EEF4FF]">
           <div className="w-full mx-auto rounded-xl border border-[#D7E3FC] text-white p-6 flex flex-col justify-between min-h-full">
             {/* Top Content */}
             <div className="space-y-4">
@@ -77,7 +77,7 @@ export default function RegisterPage() {
             </div>
           </div>
         </div>
-        <div className="w-full items-center justify-center flex bg-[#EEF4FF]">
+        <div className="w-full flex md:items-center bg-[#EEF4FF]">
           <RegisterSchoolForm />
         </div>
       </div>

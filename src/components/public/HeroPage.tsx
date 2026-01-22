@@ -36,13 +36,13 @@ export default function HeroPage() {
   }, [current]);
 
   return (
-    <section className="w-full flex justify-center py-5 mb-[92px] flex-col">
-      <div className="relative w-full min-w-full min-h-full overflow-hidden rounded-xl">
+    <section className="w-full flex justify-center md:py-5 mb-[92px] flex-col">
+      <div className="relative w-full min-w-full min-h-full overflow-hidden md:rounded-xl">
         <div
         onClick={() => {
           router.push("/register-school");
         }}
-          className={`flex rounded-xl ${
+          className={`flex md:rounded-xl ${
             transition ? "transition-transform duration-700 ease-in-out" : ""
           }`}
           style={{ transform: `translateX(-${current * 100}%)` }}
@@ -113,9 +113,9 @@ export default function HeroPage() {
           </div>
         </div>
       </section>
-      <div className="flex items-center justify-center mt-20">
+      <div className="flex items-center justify-center mt-10 md:mt-20">
         <div className="w-full border-t border-[#021034] "></div>
-        <div className="px-1 text-[#05164380] text-[20px] font-[600] min-w-[107px] text-center">
+        <div className="px-1 text-[#05164380] text-[10px] md:text-[20px] font-[600] min-w-[60px] md:min-w-[107px] text-center">
           <span>Trusted By</span>
         </div>
         <div className="w-full border-t border-[#021034]"></div>

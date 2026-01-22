@@ -33,12 +33,12 @@ export default function StudentInfoCard({
         </div>
       </div>
 
-      <div className="text-right">
+      <div className="text-center flex gap-6 items-center justify-center">
         <div className="text-sm text-slate-500">Roll No</div>
         <div className="font-medium text-slate-900">
-          {student?.rollNo ?? "-"}
+          {student?.rollNo ?? "XX-XX-0000"}
         </div>
-        <div className="mt-2 inline-flex items-center gap-2">
+        <div className=" inline-flex items-center gap-2">
           <div className="text-sm text-slate-500">Class</div>
           <div className="text-sm font-medium bg-slate-100 rounded px-2 py-0.5">
             {student?.className ?? "-"}

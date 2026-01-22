@@ -6,6 +6,7 @@ import ClassOverviewHeader, {
   ClassDashboardDetails,
 } from "./ClassOverviewHeader";
 import AddSubjectToClassDialog from "./AddSubjectToClassDialog";
+import AddTimetableDialog from "./AddTimetableDialog";
 
 // Types
 interface ClassMeta {
@@ -49,6 +50,7 @@ interface Props {
   detailsError?: string | null;
   classId?: string;
   onReloadSubjects?: () => void;
+  onReloadTimetable?: () => void;
 }
 
 export default function ClassOverview({
@@ -64,8 +66,11 @@ export default function ClassOverview({
   detailsError,
   classId,
   onReloadSubjects,
+  onReloadTimetable,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isTimetableDialogOpen, setIsTimetableDialogOpen] =
+    React.useState(false);
   return (
     <div className="space-y-6">
       <ClassOverviewHeader
@@ -86,7 +91,7 @@ export default function ClassOverview({
               setIsDialogOpen((prev) => !prev);
             }}
             variant="dark"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 cursor-pointer"
           >
             <Plus size={14} /> Add Subject to Class
           </Button>
@@ -114,9 +119,22 @@ export default function ClassOverview({
       <Card>
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Subject Time Timetable</h3>
-          <Button variant="default" className="flex items-center gap-2">
+          <Button
+            variant="dark"
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => setIsTimetableDialogOpen(true)}
+          >
             <Plus size={14} /> Add Timetable Entry
           </Button>
+          <AddTimetableDialog
+            open={isTimetableDialogOpen}
+            classId={classId ?? details?.id}
+            onClose={() => setIsTimetableDialogOpen(false)}
+            onSuccess={() => {
+              setIsTimetableDialogOpen(false);
+              onReloadTimetable?.();
+            }}
+          />
         </div>
 
         <div className="mt-4">
