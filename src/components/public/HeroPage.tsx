@@ -5,7 +5,11 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const images = ["/images/Hero1.png", "/images/Hero2.png", "/images/Hero3.png"];
+const images = [
+  "/images/MainImage1.jpg",
+  "/images/MainImage2.jpg",
+  "/images/MainImage3.jpg",
+];
 
 // clone first slide at end
 const slides = [...images, images[0]];
@@ -39,16 +43,47 @@ export default function HeroPage() {
     <section className="w-full flex justify-center md:py-5 mb-[92px] flex-col">
       <div className="relative w-full min-w-full min-h-full overflow-hidden md:rounded-xl">
         <div
-        onClick={() => {
-          router.push("/register-school");
-        }}
-          className={`flex md:rounded-xl ${
+          className={`md:flex md:rounded-xl hidden ${
             transition ? "transition-transform duration-700 ease-in-out" : ""
           }`}
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {slides.map((src, index) => (
             <div key={index} className="min-w-full min-h-full">
+              <div className="absolute w-full min-h-full flex items-center justify-start">
+                <div className="flex flex-col text-[#021034] lg:pl-[60px] md:pl-[40px]   lg:gap-5">
+                  <p className="text-[12px] lg:text-[16px] font-[500]">
+                    Smart Institute Management Platform
+                  </p>
+                  <h1 className="text-[48px] 2xl:text-[64px] font-semibold lg:max-w-[700px]  md:max-w-[500px] lg:leading-[56px] lg:mb-4">
+                    Smarter Tools for Student Success
+                  </h1>
+                  <p className="text-[16px] lg:text-[20px] font-[500] max-w-[500px]">
+                    Track attendance, performance, and academics with a modern,
+                    seamless student management system.
+                  </p>
+                  <div className="flex gap-4 mt-3">
+                    <button
+                      onClick={() => {
+                        router.push("/register-school");
+                      }}
+                      className="bg-[#021034] text-white px-4 py-2 rounded-[8px] lg:text-[16px] font-[600] flex items-center cursor-pointer"
+                    >
+                      Get Started
+                      <ArrowRight size={16} className="inline-block ml-2" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        router.push("/login");
+                      }}
+                      className="bg-transparent border border-[#021034] text-[#021034] px-4 py-2 rounded-[8px] lg:text-[16px] font-[600] flex items-center cursor-pointer"
+                    >
+                      Log In
+                      <ArrowRight size={16} className=" ml-2 inline-block" />
+                    </button>
+                  </div>
+                </div>
+              </div>
               <Image
                 src={src}
                 alt={`Hero ${index + 1}`}
@@ -60,9 +95,53 @@ export default function HeroPage() {
             </div>
           ))}
         </div>
+        <div className="flex w-full ">
+          <div className="absolute w-full min-h-full flex px-[10px] py-[20px] md:py-0 md:px-0  md:hidden">
+            <div className="flex flex-col text-[#021034] lg:pl-[60px] gap-[8px]">
+              <p className="text-[8px] lg:text-[16px] font-[500] px-[8px] py-[3px] border-[1px] border-[#D7E3FC] w-fit rounded-md">
+                Smart Institute Management Platform
+              </p>
+              <h1 className="text-[32px] font-semibold max-w-[340px] lg:leading-[56px] leading-[40px] lg:mb-4">
+                Smarter Tools for Student Success
+              </h1>
+              <p className="text-[12px] lg:text-[20px] font-[500] max-w-[500px]">
+                Track attendance, performance, and academics with a modern,
+                seamless student management system.
+              </p>
+              <div className="flex gap-4 mt-3">
+                <button
+                  onClick={() => {
+                    router.push("/register-school");
+                  }}
+                  className="bg-[#021034] text-white p-[8px] rounded-[8px] text-[11px] font-[600] flex items-center cursor-pointer"
+                >
+                  Get Started
+                  <ArrowRight size={16} className="inline-block ml-2" />
+                </button>
+                <button
+                  onClick={() => {
+                    router.push("/login");
+                  }}
+                  className="bg-transparent border border-[#021034] text-[#021034] p-[8px] rounded-[8px] text-[11px] font-[600] flex items-center cursor-pointer"
+                >
+                  Log In
+                  <ArrowRight size={16} className=" ml-2 inline-block" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <Image
+            src="/images/HeroMobile.png"
+            alt="Hero Mobile"
+            width={375}
+            height={600}
+            className="object-cover w-full h-full md:hidden"
+            priority
+          />
+        </div>
       </div>
       <section
-        className="mx-auto flex max-w-[1290px] items-center gap-[54px] rounded-2xl mt-[70px] hidden md:flex px-10 py-8 "
+        className="mx-auto flex max-w-[1290px] items-center gap-[54px] rounded-2xl mt-[70px] hidden lg:flex px-10 py-8 "
         style={{ height: 285 }}
       >
         {/* LEFT CONTENT */}

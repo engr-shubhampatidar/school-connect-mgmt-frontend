@@ -21,17 +21,25 @@ const passwordRegex = /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}/;
 
 const registerSchema = z.object({
   name: z.string().min(1, "School name is required"),
+  adminName: z.string().min(1, "Administrator name is required"),
   email: z.string().email("Invalid email address"),
+  mobile: z.string().min(1, "Mobile number is required"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(
       passwordRegex,
-      "Password must include uppercase, lowercase, number and special character"
+      "Password must include uppercase, lowercase, number and special character",
     ),
   address: z.string().optional().or(z.literal("")),
   contact: z.string().optional().or(z.literal("")),
   logoUrl: z.string().url("Invalid URL").optional().or(z.literal("")),
+  board: z.string().optional().or(z.literal("")),
+  city: z.string().optional().or(z.literal("")),
+  state: z.string().optional().or(z.literal("")),
+  academicYear: z.string().optional().or(z.literal("")),
+  language: z.string().optional().or(z.literal("")),
+  timezone: z.string().optional().or(z.literal("")),
 });
 
 type RegisterInput = z.infer<typeof registerSchema>;
@@ -45,11 +53,19 @@ export function RegisterSchoolForm() {
     mode: "onChange",
     defaultValues: {
       name: "",
+      adminName: "",
       email: "",
+      mobile: "",
       password: "",
       address: "",
       contact: "",
       logoUrl: "",
+      board: "",
+      city: "",
+      state: "",
+      academicYear: "",
+      language: "",
+      timezone: "",
     },
   });
 
@@ -58,11 +74,19 @@ export function RegisterSchoolForm() {
     try {
       const payload = {
         name: values.name,
+        adminName: values.adminName,
         email: values.email,
+        mobile: values.mobile,
         password: values.password,
         address: values.address || "",
         contact: values.contact || "",
         logoUrl: values.logoUrl || "",
+        board: values.board || "",
+        city: values.city || "",
+        state: values.state || "",
+        academicYear: values.academicYear || "",
+        language: values.language || "",
+        timezone: values.timezone || "",
       };
 
       await API.post(PUBLIC_API.REGISTER_SCHOOL, payload);
@@ -136,9 +160,14 @@ export function RegisterSchoolForm() {
               <FormField>
                 <FormLabel>What is your Full name?</FormLabel>
                 <FormControl>
-                  <Input {...form.register("name")} placeholder="Full Name" />
+                  <Input
+                    {...form.register("adminName")}
+                    placeholder="Full Name"
+                  />
                 </FormControl>
-                <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+                <FormMessage>
+                  {form.formState.errors.adminName?.message}
+                </FormMessage>
               </FormField>
               <FormField>
                 <FormLabel>
@@ -159,13 +188,13 @@ export function RegisterSchoolForm() {
                 <FormLabel>What is your mobile phone number?</FormLabel>
                 <FormControl>
                   <Input
-                    {...form.register("contact")}
+                    {...form.register("mobile") || {...form.register("contact")}}
                     placeholder="(555)12358645"
-                    type="Number"
+                    type="tel"
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.contact?.message}
+                  {form.formState.errors.mobile?.message}
                 </FormMessage>
               </FormField>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -209,11 +238,11 @@ export function RegisterSchoolForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    // {...form.register("name")}
+                    {...form.register("name")}
                     placeholder="Acme High School"
                   />
                 </FormControl>
-                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+                <FormMessage>{form.formState.errors.name?.message}</FormMessage>
               </FormField>
 
               <FormField>
@@ -221,15 +250,24 @@ export function RegisterSchoolForm() {
                   Which board or curriculum does your school follow?
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Select Board/Curriculum" />
+                  <Input
+                    {...form.register("board")}
+                    placeholder="Select Board/Curriculum"
+                  />
                 </FormControl>
-                {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
+                <FormMessage>
+                  {form.formState.errors.board?.message}
+                </FormMessage>
               </FormField>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField>
                   <FormLabel>What city is the school located in?</FormLabel>
                   <FormControl>
-                    <Input placeholder="City" type="text" />
+                    <Input
+                      {...form.register("city") || {...form.register("address")}}
+                      placeholder="City"
+                      type="text"
+                    />
                   </FormControl>
                   <FormMessage>
                     {/* {form.formState.errors.password?.message} */}
@@ -239,7 +277,7 @@ export function RegisterSchoolForm() {
                   <FormLabel>What state is the school located in?</FormLabel>
                   <FormControl>
                     <Input
-                      {...form.register("address")}
+                      {...form.register("state")}
                       placeholder="State"
                       type="text"
                     />
@@ -276,7 +314,7 @@ export function RegisterSchoolForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    // {...form.register("name")}
+                    {...form.register("academicYear")}
                     placeholder="Academic year 2024-2025"
                   />
                 </FormControl>
@@ -288,14 +326,20 @@ export function RegisterSchoolForm() {
                   Preferred language for system communication
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Select Language" />
+                  <Input
+                    {...form.register("language")}
+                    placeholder="Select Language"
+                  />
                 </FormControl>
                 {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
               </FormField>
               <FormField>
                 <FormLabel>Timezone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Automatically detected based on your location" />
+                  <Input
+                    {...form.register("timezone")}
+                    placeholder="Automatically detected based on your location"
+                  />
                 </FormControl>
                 {/* <FormMessage>{form.formState.errors.name?.message}</FormMessage> */}
               </FormField>

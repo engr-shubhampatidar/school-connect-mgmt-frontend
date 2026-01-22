@@ -38,7 +38,7 @@ export default function Navbar({
       </div>
 
       {/* Main Navbar */}
-      <header className="w-full border-b bg-white px-4 md:px-20">
+      <header className="w-full  bg-white px-4 md:px-20 sticky top-0 z-50">
         <div className="mx-auto flex max-w-8xl items-center justify-between py-4">
           {/* Logo */}
           <div className="text-sm md:text-xl font-extrabold leading-tight">
