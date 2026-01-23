@@ -24,7 +24,7 @@ export function StatCard({
 }: StatCardProps) {
   const progressText = progressLabel  ?? "~ Work in Progess";
   return (
-    <div className={`${className} rounded-lg border p-6`}>
+    <div className={`${className} rounded-lg border p-[16px]`}>
       <div className="flex items-center justify-between">
         <div className="text-sm text-slate-500">{label}</div>
         {IconComp ? (
