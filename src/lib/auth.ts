@@ -70,6 +70,15 @@ export function setAccessToken(token: string) {
 export function clearAuthTokens() {
   removeToken("admin");
   removeUser("admin");
+  removeToken("teacher");
+  removeUser("teacher");
+  removeToken("student");
+  removeUser("student");
+}
+
+export function logout(role: Role) {
+  removeToken(role);
+  removeUser(role);
 }
 
 const auth = {
@@ -82,6 +91,7 @@ const auth = {
   getAccessToken,
   setAccessToken,
   clearAuthTokens,
+  logout,
 };
 
 export default auth;

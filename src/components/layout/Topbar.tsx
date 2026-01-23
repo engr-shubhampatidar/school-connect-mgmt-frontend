@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUser, clearAuthTokens } from "../../lib/auth";
+import { getUser, logout, type Role } from "../../lib/auth";
 import { useRouter } from "next/navigation";
 export default function Topbar({
   onSearch,
@@ -20,13 +20,21 @@ export default function Topbar({
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Determine current role from pathname
+  const getCurrentRole = (): Role => {
+    if (pathname.startsWith("/admin")) return "admin";
+    if (pathname.startsWith("/teacher")) return "teacher";
+    if (pathname.startsWith("/student")) return "student";
+    return "admin"; // default
+  };
+
   const handleLogout = () => {
     try {
-      clearAuthTokens();
-      try {
-        localStorage.clear();
-      } catch {}
-    } finally {
+      const role = getCurrentRole();
+      logout(role);
+      router.push(`/${role}/login`);
+    } catch (error) {
+      console.error("Logout error:", error);
       router.push("/");
     }
   };
@@ -47,12 +55,13 @@ export default function Topbar({
 
   useEffect(() => {
     try {
-      const u = getUser("admin");
+      const role = getCurrentRole();
+      const u = getUser(role);
       setUser(u);
     } catch {
       setUser(null);
     }
-  }, []);
+  }, [pathname]);
 
   return (
     <div className="sticky top-0 z-10">
