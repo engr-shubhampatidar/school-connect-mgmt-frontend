@@ -49,6 +49,12 @@ API.interceptors.response.use(
       }
     }
 
+    // Forbidden: user is authenticated but not authorized for this resource
+    if (error.response.status === 403) {
+      console.error("Access forbidden: Insufficient permissions");
+      // You could redirect to an error page or show a toast notification here
+    }
+
     // Propagate original response data so callers can map field errors
     return Promise.reject(error);
   }

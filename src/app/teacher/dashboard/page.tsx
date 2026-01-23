@@ -10,7 +10,6 @@ import {
   type TeacherClass,
   type TeacherMe,
 } from "../../../lib/teacherApi";
-import { getToken } from "../../../lib/auth";
 import StatCard from "@/components/admin/StatCard";
 import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
 import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
@@ -49,11 +48,6 @@ export default function TeacherDashboardPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!getToken("teacher")) {
-      router.push("/teacher/login");
-      return;
-    }
-
     let mounted = true;
     async function load() {
       try {

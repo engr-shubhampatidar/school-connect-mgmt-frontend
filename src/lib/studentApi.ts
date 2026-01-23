@@ -35,6 +35,12 @@ studentApi.interceptors.response.use(
         window.location.href = "/student/login";
       }
     }
+    
+    // Forbidden: user is authenticated but not authorized for this resource
+    if (error?.response?.status === 403) {
+      console.error("Access forbidden: Insufficient permissions");
+    }
+    
     return Promise.reject(error);
   }
 );

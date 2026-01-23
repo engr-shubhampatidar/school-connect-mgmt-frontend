@@ -34,6 +34,7 @@ TAPI.interceptors.response.use(
   (res) => res,
   (error: AxiosError) => {
     if (!error.response) return Promise.reject(new Error("Network error"));
+    
     if (error.response.status === 401) {
       try {
         removeToken("teacher");
@@ -42,6 +43,12 @@ TAPI.interceptors.response.use(
         window.location.href = "/teacher/login";
       }
     }
+    
+    // Forbidden: user is authenticated but not authorized for this resource
+    if (error.response.status === 403) {
+      console.error("Access forbidden: Insufficient permissions");
+    }
+    
     return Promise.reject(error);
   }
 );
