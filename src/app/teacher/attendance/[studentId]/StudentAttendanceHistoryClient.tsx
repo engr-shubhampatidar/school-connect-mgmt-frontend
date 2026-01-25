@@ -64,9 +64,9 @@ export default function StudentAttendanceHistoryClient({
 
   useEffect(() => {
     if (!getToken("teacher")) {
-      if (typeof window !== "undefined")
-        window.location.href = "/teacher/login";
-      return;
+      // if (typeof window !== "undefined")
+      //   window.location.href = "/login";
+      // return;
     }
 
     const effectiveStudentId = studentId ?? params?.studentId ?? null;
@@ -125,7 +125,7 @@ export default function StudentAttendanceHistoryClient({
           })
           .filter((r) => r.date)
           .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
 
         const final = date ? normalized : normalized.slice(0, 7);

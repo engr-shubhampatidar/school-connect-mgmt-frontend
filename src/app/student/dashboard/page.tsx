@@ -1,19 +1,13 @@
 "use client";
 import React from "react";
-import StudentAuthGuard from "../../../components/student/AuthGuard";
 import studentApi from "../../../lib/studentApi";
-import { Card } from "../../../components/ui/Card";
-import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+// import Image from "next/image";
+// import AttendanceSummary from "./components/AttendanceSummary";
 
 export default function Page() {
-  return (
-    <StudentAuthGuard>
-      <Inner />
-    </StudentAuthGuard>
-  );
+  return <Inner />;
 }
 
 function Inner() {
@@ -56,125 +50,218 @@ function Inner() {
   return (
     <div className="p-6">
       <div>
-        
-        {/* Class Item */}
-        {[1, 2, 3, 4, 5].map((_, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between px-6 py-4 border-b border-blue-200 last:border-b-0"
-          >
-            {/* Left */}
-            <div className="space-y-2">
-              <p className="font-medium text-[#021034]">Mathematics</p>
+        <section className="pl-2">
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <h1 className="text-[20px] lg:text-[24px] text-[#021034] font-[600]">
+                Welcome, Student
+              </h1>
+              <p className="mt-1 text-[12px] lg:text-sm text-[#737373]">
+                View Your Attendance and Result updates.
+              </p>
+            </div>
+          </div>
+        </section>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+          {/* Class Item */}
+          <div className=" col-span-2 border border-[#D7E3FC] grid rounded-xl bg-white w-full mr-6">
+            {[1, 2, 3, 4, 5].map((_, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between px-[8px] py-[16px] lg:px-6 py-6 border-b border-[#D7E3FC] last:border-b-0"
+              >
+                {/* Left */}
+                <div className="space-y-2">
+                  <p className="font-medium text-[#021034]">Mathematics</p>
 
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  ⏱ <span>8:00–8:30</span>
+                  <div className="flex items-center gap-2 lg:gap-4 text-sm text-[#737373]">
+                    <div className="flex items-center gap-1">
+                      ⏱ <span>8:00–8:30</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      👥 <span>Dr.dhima rao</span>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-1">
-                  👥 <span>Dr.dhima rao</span>
+                {/* Right */}
+                <div className="rounded-full border border-[#D7E3FC] bg-blue-50 px-4 py-1 text-xs font-semibold text-[#021034]">
+                  Room 204
                 </div>
               </div>
-            </div>
-
-            {/* Right */}
-            <div className="rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-xs font-semibold text-[#021034]">
-              Room 204
-            </div>
+            ))}
           </div>
-        ))}
-        <div className="w-full max-w-full bg-white rounded-xl border border-blue-200 p-[20px]">
-        {/* Title */}
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Uploaded Documents
-        </h2>
+          {/* <div className="w-full max-w-full flex justify-center items-center">
+            <AttendanceSummary
+              presentDays={85}
+              absentDays={5}
+              monthlyPercentage={96}
+            />
+          </div> */}
+        </div>
+        {/* <div className="w-full min-w-full rounded-xl border border-[#D7E3FC] bg-white overflow-hidden mt-6">
+          <div className="flex items-start justify-between px-6 py-4">
+            <div>
+              <h2 className="text-lg font-semibold text-[#021034]">
+                Recent Updates
+              </h2>
+              <p className="text-sm text-[#737373]">
+                Check complete update at same time.
+              </p>
+            </div>
 
-        {/* Document Item */}
-        <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Aadhaar Card */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Aadhar Card</p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
+            <button className="text-sm text-[#737373] hover:text-blue-600 transition">
+              View all activity
+            </button>
           </div>
 
-          {/* Previous Marksheet */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
+          <div className="border-t border-[#D7E3FC]" />
+
+          <div className="flex items-start justify-between px-6 py-4 border-b border-[#D7E3FC]">
+            <div className="flex gap-3">
+              <span className="mt-1 h-4 w-4 rounded-full border border-[#D7E3FC] flex items-center justify-center text-[10px] text-blue-600">
+                i
+              </span>
               <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Previous Marksheet
+                <p className="text-sm font-medium text-[#021034]">
+                  Unit Test Schedule Released
                 </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
+                <p className="text-sm text-[#737373]">
+                  Mathematics and science test Scheduled for next week
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
+            <span className="text-xs text-[#737373] whitespace-nowrap">
+              2 min ago
+            </span>
           </div>
 
-          {/* Birth Certificate */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
+          <div className="flex items-start justify-between px-6 py-4 border-b border-[#D7E3FC]">
+            <div className="flex gap-3">
+              <span className="mt-1 h-4 w-4 rounded-full border border-[#D7E3FC] flex items-center justify-center text-[10px] text-blue-600">
+                i
+              </span>
               <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Birth Certificate
+                <p className="text-sm font-medium text-[#021034]">
+                  School Holiday On Friday
                 </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
+                <p className="text-sm text-[#737373]">
+                  Campus Closed for Independence Day Celebration
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
+            <span className="text-xs text-[#737373] whitespace-nowrap">
+              2 hours ago
+            </span>
           </div>
-
-          {/* Transfer Certificate */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
+          <div className="flex items-start justify-between px-6 py-4">
+            <div className="flex gap-3">
+              <span className="mt-1 h-4 w-4 rounded-full border border-[#D7E3FC] flex items-center justify-center text-[10px] text-blue-600">
+                i
+              </span>
               <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Transfer Certificate
+                <p className="text-sm font-medium text-[#021034]">
+                  Fees Due Reminder
                 </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
+                <p className="text-sm text-[#737373]">
+                  Next payment due by march 15th
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
+            <span className="text-xs text-[#737373] whitespace-nowrap">
+              Yesterday
+            </span>
           </div>
         </div>
-      </div>
+
+        <div className="w-full maxw-full bg-white rounded-xl border border-[#D7E3FC] p-[20px] mt-6">
+          <h2 className="text-lg font-semibold text-[#021034] mb-4">
+            Uploaded Documents
+          </h2>
+
+          <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
+                  📄
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#021034]">
+                    Aadhar Card
+                  </p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
+                    PDF
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
+                👁
+                <span>View</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
+                  📄
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#021034]">
+                    Previous Marksheet
+                  </p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
+                    PDF
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
+                👁
+                <span>View</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
+                  📄
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#021034]">
+                    Birth Certificate
+                  </p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
+                    PDF
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
+                👁
+                <span>View</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
+                  📄
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#021034]">
+                    Transfer Certificate
+                  </p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
+                    PDF
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
+                👁
+                <span>View</span>
+              </div>
+            </div>
+          </div>
+        </div> */}
       </div>
     </div>
   );

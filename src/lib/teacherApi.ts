@@ -38,9 +38,9 @@ TAPI.interceptors.response.use(
       try {
         removeToken("teacher");
       } catch {}
-      if (typeof window !== "undefined") {
-        window.location.href = "/teacher/login";
-      }
+      // if (typeof window !== "undefined") {
+      //   window.location.href = "/login";
+      // }
     }
     return Promise.reject(error);
   }
@@ -63,16 +63,6 @@ export async function loginTeacher(payload: {
     payload
   );
   const data = res.data ?? {};
-
-  // Expecting token in data.token or data.accessToken
-  let token: string | null = null;
-  if (data && typeof data === "object") {
-    const d = data as Record<string, unknown>;
-    if (typeof d.token === "string") token = d.token;
-    else if (typeof d.accessToken === "string") token = d.accessToken;
-  }
-
-  if (token) setToken("teacher", token);
   return data;
 }
 

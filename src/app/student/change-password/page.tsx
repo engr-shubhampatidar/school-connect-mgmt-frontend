@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import StudentAuthGuard from "../../../components/student/AuthGuard";
 import studentApi from "../../../lib/studentApi";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,9 +24,7 @@ type Form = z.infer<typeof schema>;
 
 export default function Page() {
   return (
-    <StudentAuthGuard>
       <Inner />
-    </StudentAuthGuard>
   );
 }
 
@@ -50,7 +47,7 @@ function Inner() {
         type: "success",
       });
       removeToken("student");
-      router.push("/student/login");
+      // router.push("/login");
     } catch (err: any) {
       toast({
         title: "Error",

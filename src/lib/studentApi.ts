@@ -26,14 +26,14 @@ studentApi.interceptors.request.use((config) => {
 studentApi.interceptors.response.use(
   (res) => res,
   (error) => {
-    // If unauthorized, remove student token and redirect to student login
+    // If unauthorized, remove student token and redirect to login
     if (error?.response?.status === 401) {
       try {
         removeToken("student");
       } catch {}
-      if (typeof window !== "undefined") {
-        window.location.href = "/student/login";
-      }
+      // if (typeof window !== "undefined") {
+      //   window.location.href = "/login";
+      // }
     }
     return Promise.reject(error);
   }

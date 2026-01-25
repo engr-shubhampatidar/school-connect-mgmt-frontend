@@ -17,6 +17,7 @@ export default function Topbar({
     email?: string;
     role?: string;
   } | null>(null);
+
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -25,6 +26,11 @@ export default function Topbar({
       clearAuthTokens();
       try {
         localStorage.clear();
+        // remove cookies
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       } catch {}
     } finally {
       router.push("/");
@@ -47,7 +53,12 @@ export default function Topbar({
 
   useEffect(() => {
     try {
-      const u = getUser("admin");
+      // Prefer admin profile, then teacher, then student when deciding which user to show
+      const u = pathname.startsWith("/admin")
+        ? getUser("admin")
+        : pathname.startsWith("/teacher")
+          ? getUser("teacher")
+          : getUser("student");
       setUser(u);
     } catch {
       setUser(null);
