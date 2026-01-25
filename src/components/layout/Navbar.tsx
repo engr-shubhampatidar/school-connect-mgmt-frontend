@@ -5,6 +5,7 @@ import { adminNav, studentNav, teacherNav, managementNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
 import { getUser } from "../../lib/auth";
+import { get } from "http";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,8 +15,12 @@ export default function Navbar() {
 
   const [userName] = useState<string | null>(() => {
     try {
-      const u = getUser("admin");
-      return (u && (u.fullName ?? u.name)) || null;
+      const u = pathname.startsWith("/admin")
+        ? getUser("admin")
+        : pathname.startsWith("/teacher")
+          ? getUser("teacher")
+          : getUser("student");
+      return (u && (u.school?.name ?? u.name)) || null;
     } catch {
       return null;
     }
@@ -70,7 +75,7 @@ export default function Navbar() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link key={item.href} href={item.href} prefetch={false}>
                     <div
                       className={`flex items-center rounded-md ${
                         pathname === item.href
@@ -105,7 +110,7 @@ export default function Navbar() {
               {managementNavItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Link key={item.href} href={item.href}>
+                  <Link key={item.href} href={item.href} prefetch={false}>
                     <div
                       className={`flex items-center rounded-md ${
                         pathname === item.href

@@ -32,7 +32,7 @@ function page() {
   useEffect(() => {
     // Redirect if not authenticated
     if (!getToken("teacher")) {
-      router.push("/teacher/login");
+      // router.push("/login");
       return;
     }
 

@@ -55,10 +55,10 @@ export default function TeacherAttendancePage() {
 
   useEffect(() => {
     if (!getToken("teacher")) {
-      // client side redirect if not authenticated
-      if (typeof window !== "undefined")
-        window.location.href = "/teacher/login";
-      return;
+      // // client side redirect if not authenticated
+      // if (typeof window !== "undefined")
+      //   window.location.href = "/login";
+      // return;
     }
     let mounted = true;
     async function load() {
@@ -71,14 +71,14 @@ export default function TeacherAttendancePage() {
             ? (r.class as unknown)
             : (res as unknown);
         const studentsArr = Array.isArray(
-          (r as Record<string, unknown> | null)?.students
+          (r as Record<string, unknown> | null)?.students,
         )
           ? ((r as Record<string, unknown>)!.students as unknown[])
           : Array.isArray(
-              (clsData as Record<string, unknown> | undefined)?.students
-            )
-          ? ((clsData as Record<string, unknown>)!.students as unknown[])
-          : [];
+                (clsData as Record<string, unknown> | undefined)?.students,
+              )
+            ? ((clsData as Record<string, unknown>)!.students as unknown[])
+            : [];
         setKlass(clsData as TeacherClass);
         const st = (studentsArr ?? []).map((s: unknown) => {
           const so = (s as Record<string, unknown>) ?? {};
@@ -130,13 +130,13 @@ export default function TeacherAttendancePage() {
               if (id) acc[id] = status;
               return acc;
             },
-            {} as Record<string, string>
+            {} as Record<string, string>,
           );
           setStudents((s) =>
             s.map((r) => ({
               ...r,
               status: (map[r.studentId] ?? "PRESENT") as AttendanceValue,
-            }))
+            })),
           );
           setAttendanceExists(true);
         } else {
@@ -172,7 +172,7 @@ export default function TeacherAttendancePage() {
 
   const setStatus = (studentId: string, status: StudentRow["status"]) => {
     setStudents((s) =>
-      s.map((r) => (r.studentId === studentId ? { ...r, status } : r))
+      s.map((r) => (r.studentId === studentId ? { ...r, status } : r)),
     );
   };
 
@@ -257,7 +257,7 @@ export default function TeacherAttendancePage() {
                 Student List
               </h2>
               <p className="text-sm text-slate-500">
-                Mark attendance for{" "}{filteredStudents.length}{" "}students
+                Mark attendance for {filteredStudents.length} students
               </p>
             </div>
 
@@ -374,8 +374,8 @@ export default function TeacherAttendancePage() {
               {submitting
                 ? "Saving…"
                 : attendanceExists
-                ? "Already marked"
-                : "Save Attendance"}
+                  ? "Already marked"
+                  : "Save Attendance"}
             </button>
           </div>
         </div>

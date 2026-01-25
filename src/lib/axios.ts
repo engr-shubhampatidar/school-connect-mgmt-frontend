@@ -44,9 +44,9 @@ API.interceptors.response.use(
       } catch {
         // ignore
       }
-      if (typeof window !== "undefined") {
-        window.location.href = "/admin/login";
-      }
+      // if (typeof window !== "undefined") {
+      //   window.location.href = "/login";
+      // }
     }
 
     // Propagate original response data so callers can map field errors

@@ -47,7 +47,6 @@ type RegisterInput = z.infer<typeof registerSchema>;
 export function RegisterSchoolForm() {
   const { toast } = useToast();
   const [loading, setLoading] = React.useState(false);
-
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -188,7 +187,9 @@ export function RegisterSchoolForm() {
                 <FormLabel>What is your mobile phone number?</FormLabel>
                 <FormControl>
                   <Input
-                    {...form.register("mobile") || {...form.register("contact")}}
+                    {...(form.register("mobile") || {
+                      ...form.register("contact"),
+                    })}
                     placeholder="(555)12358645"
                     type="tel"
                   />
@@ -264,7 +265,9 @@ export function RegisterSchoolForm() {
                   <FormLabel>What city is the school located in?</FormLabel>
                   <FormControl>
                     <Input
-                      {...form.register("city") || {...form.register("address")}}
+                      {...(form.register("city") || {
+                        ...form.register("address"),
+                      })}
                       placeholder="City"
                       type="text"
                     />

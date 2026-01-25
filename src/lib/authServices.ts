@@ -5,34 +5,56 @@ import { loginTeacher } from "./teacherApi";
 import studentApi from "./studentApi";
 import { setToken, setUser } from "./auth";
 
+type Role = "admin" | "teacher" | "student";
+
+function normalizeUser(respUser: any, role: Role) {
+  return {
+    id: respUser?.id ?? respUser?._id ?? null,
+    name:
+      respUser?.fullName ?? respUser?.name ?? respUser?.username ?? null,
+    email: respUser?.email ?? null,
+    role: respUser?.role ?? role,
+    school: respUser?.school ?? null,
+  };
+}
+
+function extractTokenFromData(data: any): { access?: string; refresh?: string } {
+  if (!data || typeof data !== "object") return {};
+  const d = data as Record<string, any>;
+  const access =
+    d.accessToken ?? d.token ?? d.access_token ?? d.data?.accessToken ?? null;
+  const refresh = d.refreshToken ?? d.refresh_token ?? d.data?.refreshToken ?? null;
+  return { access: typeof access === "string" ? access : undefined, refresh: typeof refresh === "string" ? refresh : undefined };
+}
+
+function handleLoginResponse(role: Role, data: any) {
+  try {
+    const { access, refresh } = extractTokenFromData(data ?? {});
+    if (access) setToken(role, access);
+    if (refresh) setToken(role, refresh, "refresh");
+
+    const respUser = data && typeof data === "object" ? (data.user ?? data.teacher ?? data.student ?? data) : null;
+    if (respUser && typeof respUser === "object") {
+      const userToStore = normalizeUser(respUser, role);
+      setUser(role, userToStore);
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return data;
+}
+
 export async function adminLogin(values: { email: string; password: string }) {
   const res = await API.post(ADMIN_API.LOGIN, values);
-  const { accessToken, refreshToken, user: respUser } = res.data ?? {};
-
-  if (accessToken) {
-    setToken("admin", accessToken);
-    if (respUser) {
-      const userToStore = {
-        id: respUser.id,
-        name: respUser.fullName ?? respUser.name,
-        email: respUser.email,
-        role: respUser.role,
-        school: respUser.school ?? null,
-      };
-      setUser("admin", userToStore);
-    }
-  }
-
-  return res.data;
+  return handleLoginResponse("admin", res.data ?? {});
 }
 
 export async function teacherLogin(values: {
   email: string;
   password: string;
 }) {
-  // loginTeacher already handles token storage for teacher
   const data = await loginTeacher(values);
-  return data;
+  return handleLoginResponse("teacher", data ?? {});
 }
 
 export async function studentLogin(values: {
@@ -43,9 +65,7 @@ export async function studentLogin(values: {
     identifier: values.rollNumber,
     password: values.password,
   });
-  const token = res.data?.accessToken as string | undefined;
-  if (token) setToken("student", token);
-  return res.data;
+  return handleLoginResponse("student", res.data ?? {});
 }
 
 export default {

@@ -1,15 +1,12 @@
 "use client";
 import React from "react";
-import StudentAuthGuard from "../../../components/student/AuthGuard";
 import studentApi from "../../../lib/studentApi";
 import { Card } from "../../../components/ui/Card";
 import Image from "next/image";
 
 export default function Page() {
   return (
-    <StudentAuthGuard>
       <Inner />
-    </StudentAuthGuard>
   );
 }
 

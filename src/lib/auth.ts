@@ -13,6 +13,11 @@ function profileKey(role: Role) {
 export function setToken(role: Role, token: string, tokenType = "access") {
   try {
     localStorage.setItem(keyFor(role, tokenType), token);
+    document.cookie = `token=${token}; path=/;`;
+    // store role in a cookie so server-side middleware can read it
+    document.cookie = `role=${role}; path=/;`;
+    console.log("Token set in cookie for role:", role);
+    console.log("Current cookies:", document.cookie);
   } catch {
     /* ignore storage errors (SSR or privacy settings) */
   }

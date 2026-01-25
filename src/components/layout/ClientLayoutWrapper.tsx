@@ -12,12 +12,10 @@ export default function ClientLayoutWrapper({
 }>) {
   const pathname = usePathname();
   const hideNavbar =
-    pathname === "/admin/login" ||
+    pathname === "/login" ||
     pathname === "/register-school" ||
-    pathname === "/teacher/login" ||
-    pathname === "/student/login" ||
     pathname === "/" ||
-    pathname === "/login";
+    pathname === "/unauthorized";
 
   return (
     <div className="flex">
