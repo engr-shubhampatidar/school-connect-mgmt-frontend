@@ -76,8 +76,6 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
-  const shortId = (id?: string) =>
-    id ? `${id.slice(0, 8)}...${id.slice(-4)}` : "-";
 
   return (
     <div className=" px-4 py-6 ">

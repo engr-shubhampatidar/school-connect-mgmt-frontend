@@ -15,6 +15,9 @@ import StatCard from "@/components/admin/StatCard";
 import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
 import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
 import TodayScheduleCard from "../dashboard/Components/TodayScheduleCard";
+import { usePathname } from "next/navigation";
+import { get } from "http";
+
 
 type ApiResponse = {
   class?: TeacherClass;
@@ -48,9 +51,12 @@ export default function TeacherDashboardPage() {
     toastRef.current = toast;
   }, [toast]);
 
+
+
+
   useEffect(() => {
     if (!getToken("teacher")) {
-      router.push("/teacher/login");
+      // router.push("/login");
       return;
     }
 

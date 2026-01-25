@@ -745,7 +745,7 @@ export default function CreateTeacherDialog({
                       onClick={() => {
                         try {
                           window.open(
-                            "/teacher/login",
+                            "/login",
                             "_blank",
                             "noopener,noreferrer"
                           );

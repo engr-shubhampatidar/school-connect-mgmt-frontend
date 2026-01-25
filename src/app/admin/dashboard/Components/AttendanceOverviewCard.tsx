@@ -31,10 +31,10 @@ export default function AttendanceOverviewCard({
   const periodOptions = [{ id: "monthly", name: "Monthly" }];
 
   const [selectedClass, setSelectedClass] = useState<string>(
-    classOptions[0].id
+    classOptions[0].id,
   );
   const [selectedPeriod, setSelectedPeriod] = useState<string>(
-    periodOptions[0].id
+    periodOptions[0].id,
   );
 
   return (
