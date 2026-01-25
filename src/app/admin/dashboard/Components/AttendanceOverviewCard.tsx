@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { fetchClasses } from "@/lib/adminApi";
 import {
   Select,
   SelectTrigger,
@@ -9,6 +10,16 @@ import {
   SelectGroup,
   SelectItem,
 } from "@/components/ui";
+import { Card } from "@/components/ui";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  // CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
 
 type AttendanceData = {
   month: string;
@@ -26,24 +37,115 @@ export default function AttendanceOverviewCard({
   subtitle = "Daily attendance metrics for the months",
   data,
 }: AttendanceOverviewCardProps) {
-  const maxValue = Math.max(...data.map((d) => d.value));
-  const classOptions = [{ id: "all", name: "All class" }];
+  const [classOptions, setClassOptions] = useState<
+    { id: string; name: string }[]
+  >([{ id: "all", name: "All class" }]);
   const periodOptions = [{ id: "monthly", name: "Monthly" }];
 
-  const [selectedClass, setSelectedClass] = useState<string>(
-    classOptions[0].id
-  );
+  const [selectedClass, setSelectedClass] = useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = useState<string>(
-    periodOptions[0].id
+    periodOptions[0].id,
   );
+  const [chartData, setChartData] = useState<AttendanceData[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const displayedData = chartData ?? data;
+  const computedMax = displayedData.length
+    ? Math.max(...displayedData.map((d) => d.value))
+    : 0;
+
+  React.useEffect(() => {
+    let mounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const payload: Record<string, unknown> =
+          selectedClass === "all"
+            ? { type: "ALL" }
+            : { type: "CLASS", classId: selectedClass };
+        // include selected period so backend can return appropriate aggregation
+        payload.period = selectedPeriod;
+
+        const res = await (
+          await import("@/lib/axios")
+        ).default.post("/api/admin/attendance/graph", payload);
+        // Response may be an array of { month, value } OR an object like
+        // { "Jan": 67, "Dec": 83, ... }. Normalize both shapes to
+        // AttendanceData[] in month order.
+        if (!mounted) return;
+
+        const dataRes = res.data;
+        if (Array.isArray(dataRes)) {
+          setChartData(dataRes as AttendanceData[]);
+        } else if (dataRes && typeof dataRes === "object") {
+          const monthOrder = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+
+          const normalized: AttendanceData[] = monthOrder.map((m) => ({
+            month: m,
+            value: Number((dataRes as Record<string, unknown>)[m] ?? 0),
+          }));
+
+          setChartData(normalized);
+        }
+      } catch (err: unknown) {
+        setError("Failed to load attendance data");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      mounted = false;
+    };
+  }, [selectedClass, selectedPeriod]);
+
+  // load classes once on mount
+  React.useEffect(() => {
+    let mounted = true;
+    (async function loadClasses() {
+      try {
+        const res = await fetchClasses();
+        if (!mounted) return;
+        const opts = [
+          { id: "all", name: "All class" },
+          ...res.classes.map((c) => ({
+            id: c.id ?? c.name,
+            name: c.section ? `${c.name} - ${c.section}` : c.name,
+          })),
+        ];
+        setClassOptions(opts);
+      } catch (e) {
+        // ignore; keep default option
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
-    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white p-6">
-      {/* Header */}
+    <Card className="w-full">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-[24px] font-[600] text-[#021034]">{title}</h2>
+          <p className="text-[14px] text-[#737373]">{subtitle}</p>
         </div>
 
         <div className="flex gap-2">
@@ -62,7 +164,11 @@ export default function AttendanceOverviewCard({
             </SelectContent>
           </Select>
 
-          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+          <Select
+            disabled
+            value={selectedPeriod}
+            onValueChange={setSelectedPeriod}
+          >
             <SelectTrigger className="rounded-md border px-3 py-1.5 text-sm text-slate-600">
               <SelectValue placeholder="Monthly" />
             </SelectTrigger>
@@ -79,22 +185,40 @@ export default function AttendanceOverviewCard({
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="mt-8 flex items-end justify-between gap-6">
-        {data.map((item) => (
-          <div key={item.month} className="flex flex-col items-center gap-2">
-            <div className="relative h-40 w-14 rounded-md">
-              <div
-                className="absolute bottom-0 w-full rounded-md bg-slate-900"
-                style={{
-                  height: `${(item.value / maxValue) * 100}%`,
-                }}
-              />
-            </div>
-            <span className="text-sm text-slate-500">{item.month}</span>
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
+
+      <div className=" h-56 mt-12 relative">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={displayedData.map((d) => ({
+              month: d.month,
+              attendance: d.value,
+            }))}
+            margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
+          >
+            {/* <CartesianGrid vertical={false} strokeDasharray="3 3" /> */}
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={8}
+              axisLine={false}
+              tickFormatter={(value) => String(value).slice(0, 3)}
+            />
+            <YAxis hide domain={[0, computedMax || 1]} />
+            <Tooltip
+              formatter={(value?: number) => [value ?? 0, "Attendance"]}
+              cursor={{ fill: "transparent" }}
+            />
+            <Bar dataKey="attendance" fill="#051643" radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/60">
+            <div className="text-sm text-slate-700">Loading...</div>
           </div>
-        ))}
+        )}
       </div>
-    </div>
+    </Card>
   );
 }
