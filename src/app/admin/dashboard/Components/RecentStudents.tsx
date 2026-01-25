@@ -106,7 +106,7 @@ export default function RecentStudents({
   }
 
   return (
-    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white p-4">
+    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white p-[16px]">
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
         <div>
