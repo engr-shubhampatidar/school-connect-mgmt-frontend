@@ -31,6 +31,8 @@ export default function Topbar({
           "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie =
           "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        cookieStore.set("token", "");
+        cookieStore.set("role", "");
       } catch {}
     } finally {
       router.push("/");

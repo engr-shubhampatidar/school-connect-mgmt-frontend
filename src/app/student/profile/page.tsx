@@ -111,11 +111,11 @@ function Inner() {
         </div>
         <div className="flex-1 gap-2 flex flex-col">
           <div className="text-[20px] lg:text-[24px] font-[600] text-[#021034]">
-            {me?.student?.name ?? "-"}
+            {me?.fullName ?? "-"}
           </div>
           <div className="text-[13px] lg:text-[14px] font-[400] text-[#737373]">
             Student ID:{" "}
-            <span className="text-[#021034]">{me?.student?.rollNo ?? "-"}</span>
+            <span className="text-[#021034]">{me?.id ?? "-"}</span>
           </div>
           <div className="flex gap-2">
             <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 border rounded-full border-[#D7E3FC] bg-[#F5F9FF]">
@@ -126,7 +126,7 @@ function Inner() {
                 : "Not Assigned"}
             </p>
             <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 flex items-center justify-center  rounded-full bg-[#DBEAFF] text-[#1E3A8A]">
-              {me?.student?.stream ?? "Not Assigned"}
+              {me?.stream ?? "Not Assigned"}
             </p>
             <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 flex items-center justify-center  rounded-full bg-[#F4E8FF] text-[#6930B3]">
               {me?.session ?? "2026-27"}
@@ -150,7 +150,7 @@ function Inner() {
             <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Full Name</p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.name ?? "-"}
+                {me?.name ?? "-"}
               </p>
             </div>
 
@@ -160,7 +160,7 @@ function Inner() {
                 Date of Birth
               </p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.dob ?? "-"}
+                {me?.dob ?? "-"}
               </p>
             </div>
 
@@ -168,7 +168,7 @@ function Inner() {
             <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Gender</p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.gender ?? "-"}
+                {me?.gender ?? "-"}
               </p>
             </div>
 
@@ -178,7 +178,7 @@ function Inner() {
                 Blood Group
               </p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.bloodGroup ?? "-"}
+                {me?.bloodGroup ?? "-"}
               </p>
             </div>
 
@@ -186,7 +186,7 @@ function Inner() {
             <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Category</p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.category ?? "-"}
+                {me?.category ?? "-"}
               </p>
             </div>
 
@@ -196,7 +196,7 @@ function Inner() {
                 Aadhaar Number
               </p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.aadhaar ?? "-"}
+                {me?.aadhaar ?? "-"}
               </p>
             </div>
 
@@ -204,7 +204,7 @@ function Inner() {
             <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Phone No.</p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.phone ?? me?.student?.phone ?? "-"}
+                {me?.phone ?? me?.phone ?? "-"}
               </p>
             </div>
 
@@ -214,7 +214,7 @@ function Inner() {
                 Email Address
               </p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {me?.student?.email ?? "-"}
+                {me?.email ?? "-"}
               </p>
             </div>
 

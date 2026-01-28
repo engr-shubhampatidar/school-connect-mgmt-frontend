@@ -13,7 +13,7 @@ export default function Testimonals() {
           their schools with Us
         </p>
       </div>
-      <div className="overflow-hidden flex gap-10 overflow-x-auto py-10 px-24">
+      <div className="grid grid-cols-1 gap-10 overflow-x-auto py-10 px-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-6 lg:px-20">
         <TestimonialCard
           quote="Before EduCore, I was staying back until 7 PM reconciling records. Now everything updates automatically. I can actually leave at a reasonable hour."
           name="Priya Sharma"
