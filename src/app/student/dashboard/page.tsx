@@ -3,8 +3,8 @@ import React from "react";
 import studentApi from "../../../lib/studentApi";
 import { useToast } from "../../../components/ui/use-toast";
 import { useRouter } from "next/navigation";
-// import Image from "next/image";
-// import AttendanceSummary from "./components/AttendanceSummary";
+import Image from "next/image";
+import AttendanceSummary from "./components/AttendanceSummary";
 
 export default function Page() {
   return <Inner />;
@@ -92,15 +92,15 @@ function Inner() {
               </div>
             ))}
           </div>
-          {/* <div className="w-full max-w-full flex justify-center items-center">
+          <div className="w-full max-w-full flex justify-center items-center">
             <AttendanceSummary
               presentDays={85}
               absentDays={5}
               monthlyPercentage={96}
             />
-          </div> */}
+          </div>
         </div>
-        {/* <div className="w-full min-w-full rounded-xl border border-[#D7E3FC] bg-white overflow-hidden mt-6">
+        <div className="w-full min-w-full rounded-xl border border-[#D7E3FC] bg-white overflow-hidden mt-6">
           <div className="flex items-start justify-between px-6 py-4">
             <div>
               <h2 className="text-lg font-semibold text-[#021034]">
@@ -261,7 +261,7 @@ function Inner() {
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
     </div>
   );

@@ -4,16 +4,16 @@ import { ArrowRight } from "lucide-react";
 
 export default function QuickSupport() {
   return (
-    <section className="flex flex-col justify-center items-center mb-[100px] px-24">
+    <section className="flex flex-col justify-center items-center mb-[100px] px-2">
       <div className="min-w-full flex items-center justify-center flex-col">
         <h1 className="text-[#021034] text-[32px] font-[600] font-semibold">
-          Quick Answer & Support 
+          Quick Answer & Support
         </h1>
         <p className="text-[#021034] text-[15px] font-[500] mt-2 text-center">
           Everything You Need to Know Before Getting Started
         </p>
       </div>
-      <div className="w-full flex  mt-8 gap-8">
+      <div className="w-full flex max-md:grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 px-2 md:px-20">
         <div className="w-full max-w-sm overflow-hidden rounded-2xl">
           {/* Image Section */}
           <div className="relative h-[364px] w-full">
@@ -42,57 +42,55 @@ export default function QuickSupport() {
             </button>
           </div>
         </div>
-        <div className="w-full max-w-full space-y-4 rounded-2xl px-6">
-      
-      {/* Item 1 - Open */}
-      <div className="rounded-xl bg-white p-6 border">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-blue-700">
-            Is the platform suitable for both schools and colleges?
-          </h3>
-          <span className="text-xl font-bold text-blue-700">−</span>
+        <div className="w-full max-w-full space-y-4 rounded-2xl px-2">
+          {/* Item 1 - Open */}
+          <div className="rounded-xl bg-white p-4 border">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-blue-700">
+                Is the platform suitable for both schools and colleges?
+              </h3>
+              <span className="text-xl font-bold text-blue-700">−</span>
+            </div>
+
+            <p className="mt-4 text-gray-600 text-sm leading-relaxed">
+              Yes. Our system is designed to support schools, colleges, coaching
+              institutes, and training centers with flexible modules that adapt
+              to different academic structures.
+            </p>
+          </div>
+
+          {/* Item 2 */}
+          <div className="rounded-xl bg-white p-4 flex items-center justify-between border">
+            <h3 className="text-lg font-medium text-blue-700">
+              Is the software cloud-based?
+            </h3>
+            <span className="text-xl font-bold text-blue-700">+</span>
+          </div>
+
+          {/* Item 3 */}
+          <div className="rounded-xl bg-white p-4 flex items-center justify-between border">
+            <h3 className="text-lg font-medium text-blue-700">
+              Can we customize features based on our institute’s needs?
+            </h3>
+            <span className="text-xl font-bold text-blue-700">+</span>
+          </div>
+
+          {/* Item 4 */}
+          <div className="rounded-xl bg-white p-4 flex items-center justify-between border">
+            <h3 className="text-lg font-medium text-blue-700">
+              Do you provide onboarding and training?
+            </h3>
+            <span className="text-xl font-bold text-blue-700">+</span>
+          </div>
+
+          {/* Item 5 */}
+          <div className="rounded-xl bg-white p-4 flex items-center justify-between border">
+            <h3 className="text-lg font-medium text-blue-700">
+              How do I pay and get started?
+            </h3>
+            <span className="text-xl font-bold text-blue-700">+</span>
+          </div>
         </div>
-
-        <p className="mt-4 text-gray-600 text-sm leading-relaxed">
-          Yes. Our system is designed to support schools, colleges, coaching
-          institutes, and training centers with flexible modules that adapt
-          to different academic structures.
-        </p>
-      </div>
-
-      {/* Item 2 */}
-      <div className="rounded-xl bg-white p-6 flex items-center justify-between border">
-        <h3 className="text-lg font-medium text-blue-700">
-          Is the software cloud-based?
-        </h3>
-        <span className="text-xl font-bold text-blue-700">+</span>
-      </div>
-
-      {/* Item 3 */}
-      <div className="rounded-xl bg-white p-6 flex items-center justify-between border"  >
-        <h3 className="text-lg font-medium text-blue-700">
-          Can we customize features based on our institute’s needs?
-        </h3>
-        <span className="text-xl font-bold text-blue-700">+</span>
-      </div>
-
-      {/* Item 4 */}
-      <div className="rounded-xl bg-white p-6 flex items-center justify-between border">
-        <h3 className="text-lg font-medium text-blue-700">
-          Do you provide onboarding and training?
-        </h3>
-        <span className="text-xl font-bold text-blue-700">+</span>
-      </div>
-
-      {/* Item 5 */}
-      <div className="rounded-xl bg-white p-6 flex items-center justify-between border">
-        <h3 className="text-lg font-medium text-blue-700">
-          How do I pay and get started?
-        </h3>
-        <span className="text-xl font-bold text-blue-700">+</span>
-      </div>
-
-    </div>
       </div>
     </section>
   );

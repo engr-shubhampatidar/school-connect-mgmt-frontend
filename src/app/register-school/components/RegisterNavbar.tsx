@@ -32,7 +32,6 @@ export default function RegisterNavbar() {
             </span>{" "}
             <Link
               href="/login"
-              prefetch={false}
               className="font-medium text-blue-300 hover:text-blue-200 underline underline-offset-4"
             >
               Log in

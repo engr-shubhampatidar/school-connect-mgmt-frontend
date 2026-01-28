@@ -75,7 +75,7 @@ export default function Navbar() {
               {navItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Link key={item.href} href={item.href} prefetch={false}>
+                  <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
                         pathname === item.href
@@ -110,7 +110,7 @@ export default function Navbar() {
               {managementNavItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Link key={item.href} href={item.href} prefetch={false}>
+                  <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
                         pathname === item.href

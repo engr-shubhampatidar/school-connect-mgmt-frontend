@@ -19,14 +19,14 @@ export default function Home() {
         <OurSolutions />
       </main>
 
-      {/* <Testimonals /> */}
-      {/* <div className="bg-gradient-to-b from-[#D7E3FC]/100 to-[#D7E3FC]/0">
+      <Testimonals />
+      <div className="bg-gradient-to-b from-[#D7E3FC]/100 to-[#D7E3FC]/0">
         <Pricing />
         <QuickSupport />
       </div>
-      <div className="">
+      <div>
         <Footer />
-      </div> */}
+      </div>
     </>
   );
 }

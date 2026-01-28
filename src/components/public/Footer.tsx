@@ -2,8 +2,8 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <section className="bg-[#021034] text-white py-8 px-24">
-      <div className="w-full text-white py-16">
+    <section className="bg-[#021034] text-white py-8 px-4 lg:px-24">
+      <div className="w-full text-white py-6 lg:py-16">
         <div className="max-w-full mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Brand Section */}
           <div className="space-y-4">
