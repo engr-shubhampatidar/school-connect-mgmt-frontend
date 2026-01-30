@@ -2,8 +2,6 @@
 import React from "react";
 import studentApi from "../../../lib/studentApi";
 import { useToast } from "../../../components/ui/use-toast";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import AttendanceSummary from "./components/AttendanceSummary";
 
 export default function Page() {
@@ -15,7 +13,6 @@ function Inner() {
   const [summary, setSummary] = React.useState<any>(null);
   const { toast } = useToast();
   const toastRef = React.useRef(toast);
-  const router = useRouter();
 
   React.useEffect(() => {
     toastRef.current = toast;

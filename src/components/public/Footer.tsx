@@ -1,4 +1,5 @@
 import React from "react";
+import { Instagram,Facebook, Twitter, Linkedin } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -15,16 +16,16 @@ export default function Footer() {
             {/* Social Icons */}
             <div className="flex gap-4 pt-2">
               <div className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm cursor-pointer">
-                f
+                <Facebook size={16} />
               </div>
               <div className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm cursor-pointer">
-                📸
+                <Instagram size={16} />
               </div>
               <div className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm cursor-pointer">
-                🐦
+                <Twitter size={16} />
               </div>
               <div className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm cursor-pointer">
-                in
+                <Linkedin size={16} />
               </div>
             </div>
           </div>

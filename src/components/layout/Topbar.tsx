@@ -19,6 +19,7 @@ export default function Topbar({
   } | null>(null);
 
   const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
