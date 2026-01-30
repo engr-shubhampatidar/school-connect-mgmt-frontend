@@ -15,7 +15,7 @@ export default function OurSolutions() {
           efficiently.
         </p>
       </div>
-      <div className="grid md:grid-cols-3 gap-4 rounded-lg mt-8 p-4 ">
+      <div className="grid grid-cols-1 gap-4 rounded-lg mt-8 p-4 md:grid-cols-3 md:gap-6 lg:gap-10 ">
         <div className="w-full overflow-hidden rounded-3xl bg-white shadow-lg">
           {/* Image */}
           <div className="relative h-[440px] w-full">

@@ -55,7 +55,6 @@ export default function Navbar({
                 key={item.label}
                 href={item.href}
                 className="hover:text-blue-600 transition"
-                prefetch={false}
               >
                 {item.label}
               </Link>
@@ -89,7 +88,6 @@ export default function Navbar({
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className="hover:text-blue-600"
-                  prefetch={false}
                 >
                   {item.label}
                 </Link>

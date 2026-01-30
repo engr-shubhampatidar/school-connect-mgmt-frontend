@@ -14,7 +14,12 @@ API.interceptors.request.use((config) => {
     const url = config.url ?? "";
     // attach token if calling admin API endpoints
     if (url.startsWith("/api/admin") || url.includes("/api/admin")) {
-      const token = getToken("admin");
+      let token = getToken("admin");
+      // fallback to cookie token if available
+      if (!token && typeof document !== "undefined") {
+        const m = document.cookie.match(/(?:^|; )token=([^;]+)/);
+        if (m) token = decodeURIComponent(m[1]);
+      }
       if (token) {
         config.headers = {
           ...((config.headers as AxiosRequestHeaders) ?? {}),

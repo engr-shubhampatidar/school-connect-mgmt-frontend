@@ -36,6 +36,11 @@ export const adminNav = [
     label: "Subjects",
     href: "/admin/subjects",
     icon: FileMinus,
+  },
+  {
+    label: "Announcements",
+    href: "/admin/announcement",
+    icon: ClipboardList,
   }
 ];
 export const managementNav = [
@@ -94,5 +99,10 @@ export const studentNav = [
     label: "Dashboard",
     href: "/student/dashboard",
     icon: LayoutDashboard,
+  },
+  {
+    label: "My Profile",
+    href: "/student/profile",
+    icon: GraduationCap,
   },
 ];

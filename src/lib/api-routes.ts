@@ -14,6 +14,7 @@ export const ADMIN_API = {
   CLASSES: "/api/admin/classes",
   CLASSES_WITH_TEACHER: "/api/admin/classes/with-class-teacher",
   SUBJECTS: "/api/admin/subjects",
+  ANNOUNCEMENTS: "/api/admin/announcements",
 };
 
 export const TEACHER_API = {

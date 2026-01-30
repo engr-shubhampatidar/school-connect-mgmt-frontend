@@ -3,7 +3,7 @@ import PricingCard from "./Components/PricingCard";
 
 export default function Pricing() {
   return (
-    <section className="flex flex-col justify-center items-center mb-[50px] w-full py-10 px-40 ">
+    <section className="flex flex-col justify-center items-center mb-[50px] w-full py-10 px-4 lg:px-20">
       <div className="min-w-full flex items-center justify-center flex-col">
         <p className="text-[12px] font-[500] text-[#021034] py-[3px] px-[8px] border border-slate-300 rounded-[10px]">
           Pricing Plans
@@ -16,7 +16,7 @@ export default function Pricing() {
           anytime as you grow.
         </p>
       </div>
-      <div className="flex gap-6 py-10">
+      <div className="grid grid-cols-1 gap-6 py-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-10">
         <PricingCard
           title="Starter"
           description="Best for: Tuition classes & small schools"
