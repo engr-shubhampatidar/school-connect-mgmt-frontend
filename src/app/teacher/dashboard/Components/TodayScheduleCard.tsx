@@ -19,7 +19,7 @@ export default function TodayScheduleCard({
   onViewWeek,
 }: TodayScheduleCardProps) {
   return (
-    <div className="w-full max-w-[600px] rounded-xl border border-[#D7E3FC] bg-white p-5">
+    <div className="w-full h-fit flex flex-col max-w-[600px] rounded-xl border border-[#D7E3FC] bg-white p-5">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-slate-900">
@@ -81,7 +81,7 @@ export default function TodayScheduleCard({
       {/* Footer */}
       <button
         onClick={onViewWeek}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#021034] px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
       >
         + View Full Week
       </button>

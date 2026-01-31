@@ -19,7 +19,7 @@ export const ADMIN_API = {
 
 export const TEACHER_API = {
   LOGIN: "/api/teacher/auth/login",
-  ME: "/api/teacher/me",
+  ME: "/api/teacher/dashboard",
   CLASS: "/api/teacher/class",
 };
 
