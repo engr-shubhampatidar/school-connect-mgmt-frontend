@@ -15,9 +15,6 @@ import StatCard from "@/components/admin/StatCard";
 import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
 import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
 import TodayScheduleCard from "../dashboard/Components/TodayScheduleCard";
-import { usePathname } from "next/navigation";
-import { get } from "http";
-
 
 type ApiResponse = {
   class?: TeacherClass;
@@ -36,23 +33,29 @@ type Student = {
   photoUrl?: string;
 };
 
+
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [teacher, setTeacher] = useState<TeacherMe | null>(null);
+  const [teacher, setTeacher] = useState<
+    | (TeacherMe & {
+        totalStudents?: number | null | string;
+        todayAttendanceStatus?: string | null | number;
+      })
+    | null
+  >(null);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
   const [students, setStudents] = useState<
     NonNullable<ApiResponse["students"]>
   >([]);
 
+
+
   const toastRef = React.useRef(toast);
   React.useEffect(() => {
     toastRef.current = toast;
   }, [toast]);
-
-
-
 
   useEffect(() => {
     if (!getToken("teacher")) {
@@ -64,9 +67,11 @@ export default function TeacherDashboardPage() {
     async function load() {
       try {
         const me = await getTeacherMe().catch(() => null);
-        const subjects = await fetch("")
+        // const subjects = await fetch("");
         if (!mounted) return;
-        if (me) setTeacher(me);
+        if (me) {
+          setTeacher(me);
+        }
 
         // getTeacherClass may return either { class, students } or raw class
         const raw = (await getTeacherClass()) as unknown;
@@ -151,8 +156,7 @@ export default function TeacherDashboardPage() {
                 Monday, October 23, 2026
               </p>
               <p className=" text-sm text-green-700 font-medium">
-                You are the class teacher of {klass.name}{" "}
-                {klass.section ? `- ${klass.section}` : ""}
+                You are the class teacher of {klass?.name} {klass?.section ? `- ${klass.section}` : ""}
               </p>
             </div>
           </div>
@@ -163,13 +167,13 @@ export default function TeacherDashboardPage() {
         <StatCard
           label="Total Students"
           progressLabel="+180 Last Month"
-          value={students.length}
+          value={teacher?.totalStudents }
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
         />
         <StatCard
           label="Attenadance"
-          value="Pandding"
+          value={teacher?.todayAttendanceStatus == "MARKED" ? "Submitted" : "Pending"}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={ClipboardCheck}
           progressLabel="+180 Last Month"

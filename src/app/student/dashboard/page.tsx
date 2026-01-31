@@ -1,3 +1,4 @@
+// ...existing code...
 "use client";
 import React from "react";
 import studentApi from "../../../lib/studentApi";
@@ -11,6 +12,7 @@ export default function Page() {
 function Inner() {
   const [me, setMe] = React.useState<any>(null);
   const [summary, setSummary] = React.useState<any>(null);
+  const [classTimings, setClassTimings] = React.useState<any[]>([]);
   const { toast } = useToast();
   const toastRef = React.useRef(toast);
 
@@ -44,6 +46,61 @@ function Inner() {
     // run once on mount — toast is referenced via ref to avoid re-running when its identity changes
   }, []);
 
+  // Load class timings once we have student's classId (GET /api/student/class/timing?classId=...)
+  React.useEffect(() => {
+    if (!me?.classId) return;
+    let mounted = true;
+    async function loadTimings() {
+      try {
+        const res = await studentApi.get("/api/student/class/timing", {
+          params: { classId: me.classId },
+        });
+        if (!mounted) return;
+        // API may return object with subjects array or an array directly
+        const data = res.data;
+        const subjects =
+          Array.isArray(data?.subjects) && data.subjects.length
+            ? data.subjects
+            : Array.isArray(data)
+            ? data
+            : data?.subjects
+            ? data.subjects
+            : [];
+        setClassTimings(subjects);
+      } catch (err: any) {
+        toastRef.current?.({
+          title: "Error",
+          description: err?.message ?? "Failed to load class timings",
+          type: "error",
+        });
+      }
+    }
+    loadTimings();
+    return () => {
+      mounted = false;
+    };
+  }, [me]);
+
+  const items =
+    classTimings.length > 0
+      ? classTimings
+      : [
+          {
+            subjectName: "Mathematics",
+            startTime: "8:00",
+            endTime: "8:30",
+            teacherName: "Dr.dhima rao",
+            room: "Room 204",
+          },
+          {
+            subjectName: "Science",
+            startTime: "8:30",
+            endTime: "9:00",
+            teacherName: "Ms. Jane",
+            room: "Room 205",
+          },
+        ];
+
   return (
     <div className="p-6">
       <div>
@@ -60,31 +117,43 @@ function Inner() {
           </div>
         </section>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+          <h1>Total classes</h1>
           {/* Class Item */}
           <div className=" col-span-2 border border-[#D7E3FC] grid rounded-xl bg-white w-full mr-6">
-            {[1, 2, 3, 4, 5].map((_, index) => (
+            {items.map((item: any, index: number) => (
               <div
                 key={index}
                 className="flex items-center justify-between px-[8px] py-[16px] lg:px-6 py-6 border-b border-[#D7E3FC] last:border-b-0"
               >
                 {/* Left */}
                 <div className="space-y-2">
-                  <p className="font-medium text-[#021034]">Mathematics</p>
+                  <p className="font-medium text-[#021034]">
+                    {item.subjectName || item.name || "Unknown Subject"}
+                  </p>
 
                   <div className="flex items-center gap-2 lg:gap-4 text-sm text-[#737373]">
                     <div className="flex items-center gap-1">
-                      ⏱ <span>8:00–8:30</span>
+                      ⏱{" "}
+                      <span>
+                        {item.startTime ?? "--"}{item.endTime ? `–${item.endTime}` : ""}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1">
-                      👥 <span>Dr.dhima rao</span>
+                      👥 <span>{item.teacherName ?? item.instructor ?? "—"}</span>
                     </div>
+
+                    {item.weekdays && Array.isArray(item.weekdays) && (
+                      <div className="flex items-center gap-1">
+                        📅 <span>{item.weekdays.join(", ")}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Right */}
                 <div className="rounded-full border border-[#D7E3FC] bg-blue-50 px-4 py-1 text-xs font-semibold text-[#021034]">
-                  Room 204
+                  {item.room ?? "—"}
                 </div>
               </div>
             ))}
@@ -158,104 +227,60 @@ function Inner() {
                 i
               </span>
               <div>
-                <p className="text-sm font-medium text-[#021034]">
-                  Fees Due Reminder
-                </p>
-                <p className="text-sm text-[#737373]">
-                  Next payment due by march 15th
-                </p>
+                <p className="text-sm font-medium text-[#021034]">Fees Due Reminder</p>
+                <p className="text-sm text-[#737373]">Next payment due by march 15th</p>
               </div>
             </div>
-            <span className="text-xs text-[#737373] whitespace-nowrap">
-              Yesterday
-            </span>
+            <span className="text-xs text-[#737373] whitespace-nowrap">Yesterday</span>
           </div>
         </div>
 
         <div className="w-full maxw-full bg-white rounded-xl border border-[#D7E3FC] p-[20px] mt-6">
-          <h2 className="text-lg font-semibold text-[#021034] mb-4">
-            Uploaded Documents
-          </h2>
+          <h2 className="text-lg font-semibold text-[#021034] mb-4">Uploaded Documents</h2>
 
           <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
-                  📄
-                </div>
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">📄</div>
                 <div>
-                  <p className="text-sm font-medium text-[#021034]">
-                    Aadhar Card
-                  </p>
-                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
-                    PDF
-                  </span>
+                  <p className="text-sm font-medium text-[#021034]">Aadhar Card</p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">PDF</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
-                👁
-                <span>View</span>
-              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">👁<span>View</span></div>
             </div>
 
             <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
-                  📄
-                </div>
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">📄</div>
                 <div>
-                  <p className="text-sm font-medium text-[#021034]">
-                    Previous Marksheet
-                  </p>
-                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
-                    PDF
-                  </span>
+                  <p className="text-sm font-medium text-[#021034]">Previous Marksheet</p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">PDF</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
-                👁
-                <span>View</span>
-              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">👁<span>View</span></div>
             </div>
 
             <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
-                  📄
-                </div>
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">📄</div>
                 <div>
-                  <p className="text-sm font-medium text-[#021034]">
-                    Birth Certificate
-                  </p>
-                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
-                    PDF
-                  </span>
+                  <p className="text-sm font-medium text-[#021034]">Birth Certificate</p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">PDF</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
-                👁
-                <span>View</span>
-              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">👁<span>View</span></div>
             </div>
 
             <div className="flex items-center justify-between border border-[#D7E3FC] rounded-lg p-4 bg-gray-50">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">
-                  📄
-                </div>
+                <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-[#D7E3FC]">📄</div>
                 <div>
-                  <p className="text-sm font-medium text-[#021034]">
-                    Transfer Certificate
-                  </p>
-                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">
-                    PDF
-                  </span>
+                  <p className="text-sm font-medium text-[#021034]">Transfer Certificate</p>
+                  <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-[#021034] border border-[#D7E3FC] rounded-full">PDF</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">
-                👁
-                <span>View</span>
-              </div>
+              <div className="flex items-center gap-2 text-[#737373] text-sm cursor-pointer hover:text-blue-600">👁<span>View</span></div>
             </div>
           </div>
         </div>
@@ -263,3 +288,4 @@ function Inner() {
     </div>
   );
 }
+// ...existing code...
