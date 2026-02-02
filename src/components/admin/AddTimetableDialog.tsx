@@ -9,7 +9,7 @@ import Input from "@/components/ui/Input";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 type Option = { id: string; name: string };
 
@@ -30,6 +30,7 @@ export default function AddTimetableDialog({
   onSuccess?: () => void;
 }) {
   const params = useParams?.() as any;
+  const router = useRouter?.();
   const resolvedClassId = classId || params?.classId || params?.id || "";
 
   const [subjects, setSubjects] = useState<Option[]>([]);
@@ -151,6 +152,9 @@ export default function AddTimetableDialog({
       await API.post(url, payload);
       setSuccessOpen(true);
       onSuccess?.();
+      // Optionally, refresh the page or data
+      router?.refresh?.();
+      
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message ?? err.message ?? "Failed to add timetable entry");

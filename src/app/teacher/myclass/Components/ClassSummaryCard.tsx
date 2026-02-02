@@ -30,7 +30,9 @@ export default function ClassSummaryCard({
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-xl font-semibold text-slate-900">
-              Class: {className}{"-"}{section}
+              Class: {className}
+              {"-"}
+              {section}
             </h2>
             <p className="mt-1 text-sm text-slate-500">{location}</p>
           </div>
@@ -50,7 +52,7 @@ export default function ClassSummaryCard({
       <div className="h-px bg-slate-200" />
 
       {/* Bottom Section */}
-      <div className="flex items-center sticky bottom-0 justify-between p-4">
+      <div className="flex items-center sticky bottom-0 justify-between p-[16px]">
         {showAlert ? (
           <div className="flex items-center gap-2 text-sm text-red-600">
             <AlertCircle className="h-4 w-4" />

@@ -78,9 +78,9 @@ export default function AdminDashboardPage() {
 
 
   return (
-    <div className=" px-4 py-6 ">
+    <div className=" px-6 py-6 ">
       <section>
-        <h3 className="text-2xl font-semibold pl-4">
+        <h3 className="text-[20px] text-[#021034] font-semibold pl-4">
           Welcomeback, {user?.name ?? "Admin"}
         </h3>
         <div className="text-sm text-slate-500">&nbsp;</div>

@@ -24,12 +24,12 @@ export default function AssignedSubjectsCard({
   onEnterMarks,
 }: AssignedSubjectsCardProps) {
   return (
-    <div className="w-full rounded-xl border border-[#D7E3FC] bg-white">
+    <div className="w-full rounded-[8px] border border-[#D7E3FC] bg-white">
       {/* Header */}
       <div className="flex items-start justify-between border-b p-6">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          <p className="text-sm text-slate-500">{subtitle}</p>
+          <h2 className="text-[24px] font-[600] text-[#021034]">{title}</h2>
+          <p className="text-[14px] font-[400] text-[#737373]">{subtitle}</p>
         </div>
 
         <button
@@ -45,10 +45,18 @@ export default function AssignedSubjectsCard({
         <table className="w-full text-left text-sm">
           <thead className="border-b text-slate-600">
             <tr>
-              <th className="px-6 py-3 font-medium">Class & Section</th>
-              <th className="px-6 py-3 font-medium">Subject Name</th>
-              <th className="px-6 py-3 font-medium">Student Count</th>
-              <th className="px-6 py-3 font-medium">Action</th>
+              <th className="px-6 py-3 font-[500] text-[14px] text-[#021034]">
+                Class & Section
+              </th>
+              <th className="px-6 py-3 font-[500] text-[14px] text-[#021034]">
+                Subject Name
+              </th>
+              <th className="px-6 py-3 font-[500] text-[14px] text-[#021034]">
+                Student Count
+              </th>
+              <th className="px-6 py-3 font-[500] text-[14px] text-[#021034] text-right">
+                Action
+              </th>
             </tr>
           </thead>
 
@@ -56,27 +64,27 @@ export default function AssignedSubjectsCard({
             {subjects.map((item, index) => (
               <tr key={index} className="border-b last:border-none">
                 <td className="px-6 py-4">
-                  <span className="rounded-md border px-2 py-1 text-xs font-medium text-slate-700">
+                  <span className="rounded-full border border-[#D7E3FC] px-[8px] py-[2px] text-[12px] font-[500] text-[#020617]">
                     {item.classSection}
                   </span>
                 </td>
 
-                <td className="px-6 py-4 font-medium text-slate-900">
+                <td className="px-6 py-4 font-[500] text-[14px] text-[#020617]">
                   {item.subjectName}
                 </td>
 
                 <td className="px-6 py-4">
-                  <div className="flex items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-2 text-[14px] text-[#737373] ">
                     <Users size={16} />
-                    {item.studentCount}
+                    <span className="text-[#020617] font-[500]">{item.studentCount}</span>
                   </div>
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 flex justify-end">
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => onViewStudents?.(item)}
-                      className="text-sm font-medium text-slate-500 hover:text-slate-700"
+                      className="text-sm font-medium text-[#737373] hover:text-slate-700"
                     >
                       View Students
                     </button>

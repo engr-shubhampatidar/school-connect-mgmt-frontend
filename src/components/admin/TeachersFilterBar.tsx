@@ -12,7 +12,9 @@ export type TeachersFilters = {
   // filter by teacher email
   email?: string;
   // filter by subject id/name
-  subject?: string;
+  subjectId?: string;
+  // filter by class id/name
+  classId?: string;
 };
 
 // Component props
@@ -25,6 +27,7 @@ type Props = {
   onClear: () => void;
   // optional subject options provided by parent to avoid duplicated API calls
   subjectOptions?: { id: string; name: string }[];
+  classOptions?: { id: string; name: string }[];
 };
 
 export default function TeachersFilterBar({
@@ -32,10 +35,12 @@ export default function TeachersFilterBar({
   onApply,
   onClear,
   subjectOptions,
+  classOptions,
 }: Props) {
   const [search, setSearch] = useState(initial?.search ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [subject, setSubject] = useState(initial?.subject ?? "");
+  const [subjectId, setSubjectId] = useState(initial?.subjectId ?? "");
+  const [classId, setClassId] = useState(initial?.classId ?? "");
 
   // Debounce applying filters when user types.
   // First render is ignored to avoid firing an apply on mount.
@@ -48,10 +53,13 @@ export default function TeachersFilterBar({
     const t = setTimeout(() => {
       // prefer `search` but fall back to `email` if provided
       const s = search.trim() || email.trim();
-      onApply({ search: s, email: email.trim(), subject });
+      const sub = subjectId;
+      const cls = classId;
+      console.log("suject filter", sub);
+      onApply({ search: s, email: email.trim(), subjectId: sub, classId: cls });
     }, 500);
     return () => clearTimeout(t);
-  }, [search, email, subject, onApply]);
+  }, [search, email, subjectId, classId, onApply]);
 
   // use subject options from prop if provided, otherwise default to single "All subjects"
   const subjectOpts =
@@ -59,16 +67,23 @@ export default function TeachersFilterBar({
       ? [{ id: "", name: "All subjects" }, ...subjectOptions]
       : [{ id: "", name: "All subjects" }];
 
-  // Manual apply/clear handlers used by the Apply/Clear buttons
-  const handleApply = () => {
-    const s = search.trim() || email.trim();
-    onApply({ search: s, email: email.trim(), subject });
-  };
+  const classOpts =
+    classOptions && classOptions.length > 0
+      ? [{ id: "", name: "All Classes" }, ...classOptions]
+      : [{ id: "", name: "All Classes" }];
+      
+
   const handleClear = () => {
     setSearch("");
     setEmail("");
-    setSubject("");
+    setSubjectId("");
+    setClassId("");
     onClear();
+  };
+
+  const handleApply = () => {
+    const s = search.trim() || email.trim();
+    onApply({ search: s, email: email.trim(), subjectId, classId });
   };
 
   return (
@@ -88,30 +103,31 @@ export default function TeachersFilterBar({
             />
           </div>
         </div>
-
-        <div className="w-28 ">
-          <label className="sr-only">All Classes</label>
-          <Select
-            className="bg-[#F5F9FF]"
-            options={subjectOpts}
-            value={subject}
-            onChange={(v) => setSubject(v)}
-            placeholder="All Classes"
-          />
-        </div>
-        <div className="w-28">
-          <label className="sr-only">Subject</label>
-          <Select
-            className="bg-[#F5F9FF]"
-            options={subjectOpts}
-            value={subject}
-            onChange={(v) => setSubject(v)}
-            placeholder="All subjects"
-          />
+        <div className="flex w-fit">
+          <div className=" flex">
+            <label className="sr-only">All Classes</label>
+            <Select
+              className="bg-[#F5F9FF]"
+              options={classOpts}
+              value={classId}
+              onChange={(c) => setClassId(c)}
+              placeholder="All Classes"
+            />
+          </div>
+          <div className="ml-4 flex">
+            <label className="sr-only">Subject</label>
+            <Select
+              className="bg-[#F5F9FF]"
+              options={subjectOpts}
+              value={subjectId}
+              onChange={(v) => setSubjectId(v)}
+              placeholder="All subjects"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* <Button onClick={handleApply}>Apply Filters</Button> */}
+          <Button onClick={handleApply}>Apply</Button>
           <Button variant="ghost" onClick={handleClear}>
             Reset
           </Button>

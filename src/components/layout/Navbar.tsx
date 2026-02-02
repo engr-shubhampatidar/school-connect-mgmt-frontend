@@ -48,7 +48,7 @@ export default function Navbar() {
           openSidebar ? "w-72" : "w-20"
         } h-screen sticky top-0 bg-white border-r border-slate-200  px-0  py-4 pt-0`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col min-h-full h-screen justify-between">
           <div>
             <div className="text-2xl font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
               {openSidebar ? (
