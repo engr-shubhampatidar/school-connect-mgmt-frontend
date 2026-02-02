@@ -1,4 +1,5 @@
 import { CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui";
 
 type ScheduleItem = {
   time: string;
@@ -19,20 +20,20 @@ export default function TodayScheduleCard({
   onViewWeek,
 }: TodayScheduleCardProps) {
   return (
-    <div className="w-full max-w-[600px] rounded-xl border border-[#D7E3FC] bg-white p-5">
+    <div className="w-full h-fit max-w-[600px] rounded-[8px] border border-[#D7E3FC] bg-white p-5">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">
+        <h2 className="text-[24px] font-[600] text-[#020617]">
           Today’s Schedule
         </h2>
 
-        <span className="rounded-lg border px-3 py-1.5 text-sm text-slate-600">
+        <span className="rounded-[8px] border px-[8px] py-[4px] text-[14px] font-[500]  text-[#020617]">
           {dayLabel}
         </span>
       </div>
 
       {/* Timeline */}
-      <div className="space-y-1 rounded-lg border">
+      <div className="rounded-[8px] border  ">
         {schedules.map((item, index) => {
           const isCurrent = item.status === "current";
           const isCompleted = item.status === "completed";
@@ -40,12 +41,12 @@ export default function TodayScheduleCard({
           return (
             <div
               key={index}
-              className={`relative flex rounded-t-lg gap-4 border-b p-4 last:border-none
-                ${isCurrent ? "bg-blue-100" : "bg-white"}
+              className={`relative flex  gap-4  p-[16px]  
+                ${isCurrent ? "bg-blue-100" : "bg-white rounded-[8px]"}
               `}
             >
               {/* Time */}
-              <div className="w-20 text-sm text-slate-500">{item.time}</div>
+              <div className={`w-20 text-[14px] font-[600] text-[#737373]  `}>{item.time}</div>
 
               {/* Timeline Indicator */}
               <div className="relative flex flex-col items-center">
@@ -56,19 +57,18 @@ export default function TodayScheduleCard({
               {/* Content */}
               <div className="flex flex-1 items-start justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className={`text-[14px] font-[600] text-[#020617] ${item.status === "completed" ? "line-through" : ""} `}>
                     {item.title}
                   </p>
-                  <p className="text-sm text-slate-500">{item.subtitle}</p>
+                  <p className="text-[14px] font-[400] text-[#737373]">{item.subtitle}</p>
                 </div>
-
                 {/* Status */}
                 {isCompleted && (
                   <CheckCircle size={18} className="text-green-600" />
                 )}
 
                 {isCurrent && (
-                  <span className="rounded-md bg-white px-3 py-1 text-xs font-medium text-blue-600">
+                  <span className="rounded-md bg-white px-[8px] py-[4px] text-[14px] font-[500] text-[#051643]">
                     Now
                   </span>
                 )}
@@ -79,12 +79,11 @@ export default function TodayScheduleCard({
       </div>
 
       {/* Footer */}
-      <button
-        onClick={onViewWeek}
-        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-      >
-        + View Full Week
-      </button>
+      <div className="flex w-full justify-center pt-4">
+        <Button onClick={onViewWeek} variant="dark" className="w-full">
+          + View Full Week
+        </Button>
+      </div>
     </div>
   );
 }

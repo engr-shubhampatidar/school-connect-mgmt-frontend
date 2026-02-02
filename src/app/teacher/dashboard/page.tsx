@@ -18,7 +18,6 @@ import TodayScheduleCard from "../dashboard/Components/TodayScheduleCard";
 import { usePathname } from "next/navigation";
 import { get } from "http";
 
-
 type ApiResponse = {
   class?: TeacherClass;
   students?: Array<{
@@ -51,9 +50,6 @@ export default function TeacherDashboardPage() {
     toastRef.current = toast;
   }, [toast]);
 
-
-
-
   useEffect(() => {
     if (!getToken("teacher")) {
       // router.push("/login");
@@ -64,7 +60,7 @@ export default function TeacherDashboardPage() {
     async function load() {
       try {
         const me = await getTeacherMe().catch(() => null);
-        const subjects = await fetch("")
+        const subjects = await fetch("");
         if (!mounted) return;
         if (me) setTeacher(me);
 
@@ -143,14 +139,14 @@ export default function TeacherDashboardPage() {
       <section className="mb-6">
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-4">
-            <h3 className="text-xl font-semibold">
+            <h3 className="text-[24px] text-[#021034] font-[600]">
               Welcomeback, {teacher?.name ?? "Teacher"}!
             </h3>
-            <div className="flex gap-4">
-              <p className=" text-sm text-slate-600">
-                Monday, October 23, 2026
+            <div className="flex gap-2">
+              <p className=" text-[14px] text-[#737373] font-[400]">
+                Monday, October 23, 2026 .
               </p>
-              <p className=" text-sm text-green-700 font-medium">
+              <p className=" text-[14px] text-[#16A34A] font-[400]">
                 You are the class teacher of {klass.name}{" "}
                 {klass.section ? `- ${klass.section}` : ""}
               </p>
@@ -159,13 +155,14 @@ export default function TeacherDashboardPage() {
           <div className="text-sm text-slate-500">&nbsp;</div>
         </div>
       </section>
-      <div className="flex w-full grid-cols-1 md:grid-cols-4 gap-4 mb-4 grid">
+      <div className="flex w-full grid-cols-1 md:grid-cols-4 gap-[20px] mb-[20px] grid">
         <StatCard
           label="Total Students"
           progressLabel="+180 Last Month"
           value={students.length}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
+          iconBgColor="bg-[#D3FFF1]"
         />
         <StatCard
           label="Attenadance"
@@ -173,6 +170,7 @@ export default function TeacherDashboardPage() {
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={ClipboardCheck}
           progressLabel="+180 Last Month"
+          iconBgColor="bg-[#F9EAD0]"
         />
         <StatCard
           label="Pandding Marks"
@@ -180,6 +178,7 @@ export default function TeacherDashboardPage() {
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={MailQuestionMark}
           progressLabel="+180 Last Month"
+          iconBgColor="bg-[#CCDEFF]"
         />
         <StatCard
           label="Next Class"
@@ -187,32 +186,33 @@ export default function TeacherDashboardPage() {
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
           progressLabel="+180 Last Month"
+          iconBgColor="bg-[#E4D8FF]"
         />
       </div>
       <div className="flex flex-row gap-4">
         <section className="w-2/3 gap-4 mb-4 flex flex-col">
-          <div className="bg-[#D7E3FC] rounded-lg border border-slate-100">
+          <div className="bg-[#FFFFFF] rounded-[8px] border border-[#D7E3FC]">
             <div className="flex items-start justify-between px-6 py-6">
               <div>
-                <div className="text-lg font-semibold">
+                <div className="text-[24px] text-[#021034] font-semibold">
                   My Class: {klass.name}{" "}
                   {klass.section ? `- ${klass.section}` : ""}
                 </div>
-                <div className="mt-1 text-sm text-slate-600">
+                <div className="mt-1 text-[14px] text-[#737373] font-[400]">
                   Class Teacher Responsibilities
                 </div>
               </div>
 
-              <div className="text-sm text-slate-600">
-                Total Students:{" "}
-                <span className="font-semibold">{students.length ?? "NA"}</span>
+              <div className="flex flex-col text-right  text-[14px] text-[#737373] font-[400]">
+                <span className="mt-1 text-[24px] text-[#021034] font-semibold">{students.length ?? "NA"}</span>
+                Total Students
               </div>
             </div>
 
             <div className="  rounded-b-md border-t-2 border-slate-100 px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-amber-600">{WarningIcon()}</div>
-                <div className="text-sm text-amber-800">
+                <div className="text-[14px] text-[#737373] font-[600]">
                   {" Today's attendance not yet submitted."}
                 </div>
               </div>

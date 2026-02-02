@@ -30,12 +30,8 @@ function page() {
   }, [toast]);
 
   useEffect(() => {
-    // Redirect if not authenticated
-    if (!getToken("teacher")) {
-      // router.push("/login");
-      return;
-    }
-
+    // Ensure user is authenticated
+    const token = getToken("teacher");
     let mounted = true;
 
     async function load() {

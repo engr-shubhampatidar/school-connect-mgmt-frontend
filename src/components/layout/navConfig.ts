@@ -87,11 +87,21 @@ export const teacherNav = [
     href: "/teacher/class/attendance-history",
     icon: ClipboardCheck,
   },
+  // {
+  //   label: "Assignments",
+  //   href: "/teacher/assignments",
+  //   icon: GraduationCap,
+  // },
   {
-    label: "Assignments",
-    href: "/teacher/assignments",
-    icon: GraduationCap,
+    label: "Assigned Subjects",
+    href: "/teacher/subject",
+    icon: BookOpen,
   },
+  {
+    label: "historyOfAttandance",
+    href: "/teacher/dashboard/attendance/history",
+    icon: ClipboardList,
+  }
 ];
 
 export const studentNav = [

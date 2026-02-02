@@ -1,6 +1,4 @@
-import React, { useMemo, useState } from "react";
-import { Check, Clock } from "lucide-react";
-import { Badge } from "../ui";
+import React, { useMemo} from "react";
 import {
   Table,
   TableHeader,
@@ -9,13 +7,15 @@ import {
   TableHead,
   TableCell,
 } from "../ui/table";
+import  Badge  from "../ui/Badge";
+import { Clock, Check } from "lucide-react";
 
 export interface ClassTimetableEntry {
   id: string;
   classId: string;
   subjectId: string;
   teacherId: string | null;
-  dayOfWeek: number; // 0=Sunday ... 6=Saturday
+  // dayOfWeek: number; // 0=Sunday ... 6=Saturday
   startTime: string; // HH:mm:ss
   endTime: string; // HH:mm:ss
   room: string | null;
@@ -29,15 +29,15 @@ interface Props {
   selectedDay?: number;
 }
 
-const DAY_LABELS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
+// const DAY_LABELS = [
+//   "Sunday",
+//   "Monday",
+//   "Tuesday",
+//   "Wednesday",
+//   "Thursday",
+//   "Friday",
+//   "Saturday",
+// ];
 
 function parseTimeToDate(time: string, base = new Date()) {
   const [hh, mm, ss] = time.split(":").map((s) => parseInt(s, 10));
@@ -63,14 +63,14 @@ export default function TimetableList({
   const today = new Date();
   const defaultDay =
     typeof selectedDay === "number" ? selectedDay : today.getDay();
-  const [day, setDay] = useState<number>(defaultDay);
+  // const [day, setDay] = useState<number>(defaultDay);
 
   const filtered = useMemo(() => {
     return items
-      .filter((it) => it.dayOfWeek === day)
+      // .filter((it) => it.dayOfWeek === day)
       .slice()
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
-  }, [items, day]);
+  }, [items]);
 
   const now = new Date();
 
@@ -78,7 +78,7 @@ export default function TimetableList({
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 overflow-auto">
-          {DAY_LABELS.map((d, i) => (
+          {/* {DAY_LABELS.map((d, i) => (
             <button
               key={d}
               onClick={() => setDay(i)}
@@ -90,7 +90,7 @@ export default function TimetableList({
             >
               {d.slice(0, 3)}
             </button>
-          ))}
+          ))} */}
         </div>
 
         {[1, 2, 3].map((r) => (
@@ -110,7 +110,7 @@ export default function TimetableList({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 overflow-auto">
-        {DAY_LABELS.map((d, i) => (
+        {/* {DAY_LABELS.map((d, i) => (
           <button
             key={d}
             onClick={() => setDay(i)}
@@ -122,7 +122,7 @@ export default function TimetableList({
           >
             {d.slice(0, 3)}
           </button>
-        ))}
+        ))} */}
       </div>
 
       {filtered.length === 0 ? (
@@ -146,8 +146,8 @@ export default function TimetableList({
                 const start = parseTimeToDate(t.startTime, now);
                 const end = parseTimeToDate(t.endTime, now);
                 const isNow =
-                  now >= start && now <= end && now.getDay() === t.dayOfWeek;
-                const isCompleted = now > end && now.getDay() === t.dayOfWeek;
+                  now >= start && now <= end && now.getDay() === defaultDay;
+                const isCompleted = now > end && now.getDay() === defaultDay;
 
                 return (
                   <TableRow key={t.id}>

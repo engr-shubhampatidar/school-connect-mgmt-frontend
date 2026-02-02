@@ -118,7 +118,8 @@ export type TeachersResponse = {
 export type TeachersQuery = {
   search?: string;
   email?: string;
-  subject?: string;
+  subjectId?: string;
+  classId?: string;
   page?: number;
   pageSize?: number;
 };
@@ -130,7 +131,8 @@ export async function fetchTeachers(
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
   if (query.email) params.email = query.email;
-  if (query.subject) params.subject = query.subject;
+  if (query.subjectId) params.subjectId = query.subjectId;
+  if (query.classId) params.classId = query.classId;
   if (query.page) params.page = query.page;
   if (query.pageSize) {
     params.pageSize = query.pageSize;

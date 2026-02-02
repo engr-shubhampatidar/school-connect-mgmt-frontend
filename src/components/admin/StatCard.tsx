@@ -33,7 +33,7 @@ export function StatCard({
           </div>
         ) : null}
       </div>
-      <div className="mt-4 text-3xl font-bold">{value}</div>
+      <div className="mt-4 text-[30px] text-[#021034] font-bold">{value}</div>
       <div className="mt-3 text-sm">
         <p className={`${progressLabelColor || "text-slate-500"}`}>{progressText}</p>
       </div>

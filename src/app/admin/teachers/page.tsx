@@ -8,12 +8,12 @@ import React, {
 } from "react";
 import {
   fetchTeachers,
-  // fetchClasses,
   fetchSubjects,
   Teacher,
   TeachersQuery,
-  // ClassItem,
   Subject,
+  ClassItem,
+  fetchClasses,
 } from "../../../lib/adminApi";
 import TeachersFilterBar, {
   TeachersFilters,
@@ -36,18 +36,24 @@ export default function AdminTeachersPage() {
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [filters, setFilters] = useState<TeachersFilters>({});
 
+
   const controllerRef = useRef<AbortController | null>(null);
   const lastFetchRef = useRef<number | null>(null);
   const hasMountedRef = useRef<boolean>(false);
   // const [classes, setClasses] = useState<ClassItem[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [ classes, setClasses] = useState<ClassItem[]>([]);
   const fetchedRelatedRef = useRef<boolean>(false);
 
   // stable memoized subject options so child components receive a stable reference
   const subjectOptions = useMemo(
     () => subjects.map((s) => ({ id: s.id, name: s.name })),
-    [subjects]
+    [subjects],
   );
+
+  const classOptions = useMemo(() => {
+    return classes.map((c) => ({ id: c.id, name: c.name }));
+  }, [classes]);
 
   const load = useCallback(
     async (q?: TeachersQuery) => {
@@ -82,7 +88,7 @@ export default function AdminTeachersPage() {
         setLoading(false);
       }
     },
-    [page, pageSize]
+    [page, pageSize],
   );
 
   // Effect: load teachers on mount and when filters/page change.
@@ -110,12 +116,12 @@ export default function AdminTeachersPage() {
     let mounted = true;
     (async () => {
       try {
-        const [subjResp] = await Promise.all([
-          // fetchClasses({ pageSize: 1000 }),
+        const [clsResp, subjResp] = await Promise.all([
+          fetchClasses({ pageSize: 1000 }),
           fetchSubjects({ pageSize: 1000 }),
         ]);
         if (!mounted) return;
-        // setClasses(clsResp.classes ?? []);
+        setClasses(clsResp.classes ?? []);
         setSubjects(subjResp.subjects ?? []);
         // place further dependent API calls here if needed
       } catch (e) {
@@ -129,6 +135,7 @@ export default function AdminTeachersPage() {
 
   const handleApply = useCallback((f: TeachersFilters) => {
     setFilters(f);
+    console.log(f);
     setPage(1);
   }, []);
 
@@ -242,6 +249,7 @@ export default function AdminTeachersPage() {
           onApply={handleApply}
           onClear={handleClear}
           subjectOptions={subjectOptions}
+          classOptions={classOptions}
         />
       </div>
 
@@ -254,8 +262,6 @@ export default function AdminTeachersPage() {
         pageSize={pageSize}
         onRetry={() => load({ ...filters, page, pageSize })}
         onPageChange={(p) => setPage(p)}
-        onEdit={(id) => console.log("edit", id)}
-        onResendInvite={(id) => console.log("resend invite", id)}
       />
     </div>
   );
