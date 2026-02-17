@@ -77,7 +77,7 @@ export default function AdminClassesPage() {
 
           <div>
             <Button variant="dark" onClick={() => setCreatingOpen(true)}>
-              + Add Teacher
+              + Add New Class
             </Button>
             <CreateClassDialog
               open={creatingOpen}
