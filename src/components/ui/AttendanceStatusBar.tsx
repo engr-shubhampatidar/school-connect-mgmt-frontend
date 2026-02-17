@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "./Button";
 import { Check, X, Clock } from "lucide-react";
 
-export type AttendanceValue = "PRESENT" | "ABSENT" | "LATE";
+export type AttendanceValue = "PRESENT" | "ABSENT" | "LEAVE";
 
 interface AttendanceStatusBarProps {
   value: AttendanceValue;
@@ -25,30 +25,30 @@ const OPTIONS: {
     value: "PRESENT",
     label: "Present",
     Icon: Check,
-    activeBg: "bg-gray-200",
+    activeBg: "bg-green-600",
     inactiveText: "text-green-600",
     inactiveBorder: "border-green-200",
-    hoverBg: "hover:bg-gray-200",
+    hoverBg: "hover:bg-green-400",
     focusRing: "focus-visible:ring-green-300",
   },
   {
     value: "ABSENT",
     label: "Absent",
     Icon: X,
-    activeBg: "bg-gray-200",
+    activeBg: "bg-red-600",
     inactiveText: "text-red-600",
     inactiveBorder: "border-red-200",
-    hoverBg: "hover:bg-gray-200",
+    hoverBg: "hover:bg-red-400",
     focusRing: "focus-visible:ring-red-300",
   },
   {
-    value: "LATE",
-    label: "Late",
+    value: "LEAVE",
+    label: "Leave",
     Icon: Clock,
-    activeBg: "bg-gray-200",
+    activeBg: "bg-yellow-600",
     inactiveText: "text-amber-600",
     inactiveBorder: "border-amber-200",
-    hoverBg: "hover:bg-gray-200",
+    hoverBg: "hover:bg-yellow-400",
     focusRing: "focus-visible:ring-amber-300",
   },
 ];
@@ -72,10 +72,10 @@ export function AttendanceStatusBar({
         const Icon = opt.Icon;
         const base = `group h-8 px-2 rounded-full inline-flex items-center gap-2 text-xs transition-colors duration-150 `;
         const stateClasses = active
-          ? `bg-gray-200 border-transparent`
-          : `bg-transparent bg-gray-300 ${opt.inactiveBorder} ${
-              opt.inactiveText
-            } ${disabled ? "" : opt.hoverBg}`;
+          ? `${opt.activeBg} border-transparent`
+          : `bg-transparent ${opt.inactiveText} ${opt.inactiveBorder} ${
+              disabled ? "" : opt.hoverBg
+            }`;
 
         return (
           <Button
