@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = [ "/login", "/register-school"];
+const PUBLIC_ROUTES = ["/", "/login", "/register-school"];
 
 const ROLE_ROUTES: Record<string, string> = {
   admin: "/admin/dashboard",
