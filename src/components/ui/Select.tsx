@@ -196,7 +196,7 @@ export default function DefaultSelect({
   value,
   onChange,
   placeholder = "Select",
-  className = "w-full",
+  className = "w-full bg-transparent border border-[#D7E3FC]",
 }: {
   options: Option[];
   value: string;
