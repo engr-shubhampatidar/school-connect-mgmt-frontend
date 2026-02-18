@@ -62,7 +62,7 @@ export const createTeacherSchema = z
 
     aadhaar: z
       .string()
-      .optional()
+      .min(1, "Aadhaar number is required")
       .transform((v) => (v === "" ? undefined : v))
       .refine((v) => v === undefined || /^[0-9]{12}$/.test(v), {
         message: "Aadhaar must be exactly 12 digits",
@@ -79,7 +79,7 @@ export const createTeacherSchema = z
   })
   .strict();
 
-export type CreateTeacherValues = z.input<typeof createTeacherSchema>;
+export type CreateTeacherValues = z.infer<typeof createTeacherSchema>;
 
 export const SubjectsResponseSchema = z.object({
   items: z.array(SubjectSchema),

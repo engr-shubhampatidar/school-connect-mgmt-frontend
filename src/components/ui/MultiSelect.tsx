@@ -81,6 +81,7 @@ export default function MultiSelect({
                   type="checkbox"
                   checked={value.includes(o.id)}
                   onChange={() => toggle(o.id)}
+                  // disabled={!value.includes(o.id) && value.length >= 5}
                   className="h-4 w-4"
                 />
                 <span className="text-sm">{o.name}</span>
@@ -88,6 +89,9 @@ export default function MultiSelect({
             ))}
           </div>
         </div>
+      )}
+      {value.length > 5 && (
+        <p className="text-sm text-red-600">You can select up to 5 subjects</p>
       )}
     </div>
   );

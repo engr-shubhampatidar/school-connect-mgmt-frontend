@@ -57,11 +57,12 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   const generateTimer = useRef<number | null>(null);
 
   const form = useForm<CreateTeacherValues>({
-    resolver: zodResolver(createTeacherSchema),
+    // cast resolver to any to avoid type mismatch from duplicate react-hook-form types
+    resolver: zodResolver(createTeacherSchema) as any,
     defaultValues: {
       fullName: "",
       email: "",
-      phone: "+91 ",
+      phone: "",
       date_of_birth: "",
       gender: "male",
       aadhaar: undefined,
@@ -131,7 +132,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         const res = await generateEmployeeId({
           fullName: watchedFullName.trim(),
           date_of_birth: watchedDob,
-          phone: watchedPhone.trim(),
+          phone: "+91" + watchedPhone.trim(),
         });
         setEmployeeId(res.employee_id);
         // also set form value for employeeId via uncontrolled field if needed
@@ -181,7 +182,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             const gen = await generateEmployeeId({
               fullName: values.fullName.trim(),
               date_of_birth: values.date_of_birth,
-              phone: values.phone.trim(),
+              phone: "+91" + values.phone.trim(),
             });
             finalEmployeeId = gen.employee_id;
             setEmployeeId(finalEmployeeId ?? null);
@@ -196,7 +197,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         const payload: any = {
           email: values.email,
           fullName: values.fullName,
-          mobile: numeric(values.phone),
+          mobile: numeric("+91" + values.phone),
           address: values.permanentAddress,
           gender: values.gender,
           date_of_birth: values.date_of_birth,
@@ -303,10 +304,16 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
               <FormField>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input
-                    {...form.register("phone")}
-                    placeholder="+91 9876543210"
-                  />
+                  <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
+                    <p className="border-r border-[#D7E3FC] px-2 py-2">+91</p>
+                    <input
+                      className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                      type="text"
+                      placeholder="9876543210"
+                      value={form.watch("phone") || ""}
+                      onChange={(e) => form.setValue("phone", e.target.value)}
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage>
                   {form.formState.errors.phone?.message as React.ReactNode}
@@ -351,9 +358,25 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                   control={form.control}
                   name="date_of_birth"
                   render={({ field }) => {
-                    const pickerValue = field.value
-                      ? new Date(field.value)
-                      : undefined;
+                    // parse "YYYY-MM-DD" as a local date (avoid Date("YYYY-MM-DD") UTC parsing)
+                    const parseLocalDate = (s?: string) => {
+                      if (!s) return undefined;
+                      const [y, m, d] = s.split("-").map(Number);
+                      if (!y || !m || !d) return undefined;
+                      return new Date(y, m - 1, d);
+                    };
+
+                    // format a Date to local "YYYY-MM-DD" (avoid toISOString timezone shift)
+                    const formatLocalYMD = (date: Date) =>
+                      `${date.getFullYear()}-${String(
+                        date.getMonth() + 1,
+                      ).padStart(
+                        2,
+                        "0",
+                      )}-${String(date.getDate()).padStart(2, "0")}`;
+
+                    const pickerValue = parseLocalDate(field.value as string);
+
                     return (
                       <div className="space-y-2">
                         <FormDatePicker
@@ -362,9 +385,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                             if (!d) {
                               field.onChange("");
                             } else {
-                              // store as YYYY-MM-DD string for schema
-                              const iso = d.toISOString().split("T")[0];
-                              field.onChange(iso);
+                              field.onChange(formatLocalYMD(d));
                             }
                           }}
                         />
@@ -387,6 +408,8 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                     inputMode="numeric"
                     pattern="[0-9]*"
                     maxLength={12}
+                    minLength={12}
+                    // required={true}
                     {...form.register("aadhaar")}
                     placeholder="12 digit Aadhaar"
                   />
@@ -402,18 +425,13 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             <FormLabel>
               Subject Speciality{" "}
               <span className="text-[14px] text-[#646487] font-[500]">
-                {"(Max 3)"}
+                {"(Max 5)"}
               </span>
             </FormLabel>
             <div>{renderSubjectMulti()}</div>
             <FormMessage>
               {form.formState.errors.subjects?.message as React.ReactNode}
             </FormMessage>
-            {subjectsError ? (
-              <div className="text-xs text-destructive mt-1">
-                {subjectsError}
-              </div>
-            ) : null}
           </FormField>
 
           {/* <Separator /> */}
