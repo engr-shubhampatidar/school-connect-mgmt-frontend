@@ -393,9 +393,9 @@ export default function CreateTeacherDialog({
                   </button>
                 </div>
               </div>
-              <div className="p-5 bg-white overflow-hidden rounded-b-lg">
-                <div className=" space-y-4 bg-white rounded-lg">
-                  <div className="overflow-auto max-h-[60vh] rounded-t-lg p-4">
+              <div className="p-4 bg-white overflow-hidden  no-scrollbar rounded-b-lg">
+                <div className=" space-y-4 bg-white no-scrollbar rounded-lg">
+                  <div className="overflow-auto  no-scrollbar max-h-[60vh] rounded-t-lg p-4">
                     <Card className="p-4 rounded-t-lg">
                       <h4 className="text-sm font-medium">Basic Info</h4>
                       <p className="text-xs text-slate-500">

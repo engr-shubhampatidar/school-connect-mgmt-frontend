@@ -73,7 +73,7 @@ export const teacherNav = [
     icon: School,
   },
   {
-    label: "Subjects",
+    label: "My Subjects",
     href: "/teacher/subject",
     icon: GraduationCap,
   },
@@ -92,11 +92,6 @@ export const teacherNav = [
   //   href: "/teacher/assignments",
   //   icon: GraduationCap,
   // },
-  {
-    label: "Assigned Subjects",
-    href: "/teacher/subject",
-    icon: BookOpen,
-  },
   {
     label: "historyOfAttandance",
     href: "/teacher/dashboard/attendance/history",

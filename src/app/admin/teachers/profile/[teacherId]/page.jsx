@@ -1,8 +1,7 @@
-import React from "react";
 import Image from "next/image";
 import Card from "../../../../../components/ui/Card";
 import ClassSubjectAllocationTable from "./components/ClassSubjectAllocationTable";
-
+import Button from "../../../../../components/ui/Button";
 
 const allocations = [
   {
@@ -41,16 +40,22 @@ export default function page() {
   return (
     <div className="p-3 md:p-6">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[20px] lg:text-[24px] font-[600] text-[#021034]">
-            Total Students
-          </h1>
-          <p className="mt-1 text-[13px] lg:text-[14px] text-[#737373]">
-            Manage, Student Profiles, status and Enrollment
-          </p>
+      <section>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-[24px] text-[#021034] font-[600]">
+              Teacher Profile Management
+            </h1>
+            <p className="mt-1 text-sm text-slate-600">
+              Manage, view and Edit Teacher
+            </p>
+          </div>
+
+          <div>
+            <Button variant="dark">+ Edit Profile</Button>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Profile Card */}
       <Card className="flex items-center gap-6 mb-[20px]">
@@ -110,12 +115,11 @@ export default function page() {
               <p className="text-[11px] lg:text-[14px] font-[500]">---</p>
             </div>
           ))}
-
         </div>
-          <div className="border border-blue-200 rounded-lg p-3 bg-blue-50 mt-4">
-            <p className="text-xs lg:text-sm text-gray-500 mb-1">Address</p>
-            <p className="text-[11px] lg:text-[14px] font-[500]">---</p>
-          </div>
+        <div className="border border-blue-200 rounded-lg p-3 bg-blue-50 mt-4">
+          <p className="text-xs lg:text-sm text-gray-500 mb-1">Address</p>
+          <p className="text-[11px] lg:text-[14px] font-[500]">---</p>
+        </div>
       </div>
       {/* Class & Subject Allocation */}
       <div className="mb-[20px]">
