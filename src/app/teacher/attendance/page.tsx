@@ -20,7 +20,7 @@ type StudentRow = {
   studentId: string;
   name: string;
   rollNo?: string | number | null;
-  status: AttendanceValue;
+  status?: AttendanceValue;
 };
 
 function todayISO() {
@@ -36,7 +36,7 @@ export default function TeacherAttendancePage() {
   }, [toast]);
   const [loading, setLoading] = useState(true);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [date, setDate] = useState<string>(todayISO());
+  const [date, setDate] = useState<string>("2026-02-04");
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [search, setSearch] = useState("");
 
@@ -52,6 +52,7 @@ export default function TeacherAttendancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [attendanceExists, setAttendanceExists] = useState(false);
   const [open, setOpen] = useState(false);
+  const notAssign:any = "N/A"
 
   useEffect(() => {
     if (!getToken("teacher")) {
@@ -86,7 +87,7 @@ export default function TeacherAttendancePage() {
             studentId: (so.id ?? so.studentId ?? "") as string,
             name: (so.name ?? "") as string,
             rollNo: (so.rollNo ?? so.roll_no ?? "") as string,
-            status: "PRESENT" as AttendanceValue,
+            status: undefined,
           };
         });
         setStudents(st);
@@ -126,7 +127,7 @@ export default function TeacherAttendancePage() {
               const id =
                 (cur as { studentId?: string; id?: string }).studentId ??
                 (cur as { studentId?: string; id?: string }).id;
-              const status = (cur as { status?: string }).status ?? "";
+              const status =  (cur as { status?: string }).status ?? "";
               if (id) acc[id] = status;
               return acc;
             },
@@ -135,7 +136,9 @@ export default function TeacherAttendancePage() {
           setStudents((s) =>
             s.map((r) => ({
               ...r,
-              status: (map[r.studentId] ?? "PRESENT") as AttendanceValue,
+              status: map[r.studentId]
+                ? (map[r.studentId] as AttendanceValue)
+                : undefined,
             })),
           );
           setAttendanceExists(true);
@@ -192,9 +195,8 @@ export default function TeacherAttendancePage() {
         date,
         students: students.map((s) => ({
           studentId: s.studentId,
-          // backend currently accepts only PRESENT or ABSENT
-          // map LATE -> PRESENT to avoid validation errors
-          status: s.status === "LATE" ? "PRESENT" : s.status || "ABSENT",
+          // backend now accepts PRESENT, ABSENT and LATE — send value as-is
+          status: s.status ?? "ABSENT",
         })),
       };
       await markAttendance(payload);
@@ -221,7 +223,7 @@ export default function TeacherAttendancePage() {
 
   return (
     <>
-      <div className="space-y-4 p-4 pb-20">
+      <div className="space-y-2 p-4 pb-20">
         <Card>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 ">
             <div>
@@ -322,7 +324,7 @@ export default function TeacherAttendancePage() {
                     <td className="px-6 py-4 ">
                       <div className="flex justify-end   ">
                         <AttendanceStatusBar
-                          value={s.status || "PRESENT"}
+                          value={s.status || notAssign}
                           onChange={(v) => setStatus(s.studentId, v)}
                           disabled={attendanceExists}
                         />
