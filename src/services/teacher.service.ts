@@ -84,3 +84,72 @@ export async function createTeacher(payload: CreateTeacherValues): Promise<unkno
     throw err;
   }
 }
+
+// -----------------------------
+// Fetch Teacher Profile
+// GET /api/admin/teacher/{id}
+// -----------------------------
+
+export interface TeacherProfileResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  mobile: string;
+  address: string;
+  gender: string;
+  date_of_birth: string | null;
+  aadhar: string;
+  subject_speciality: string[];
+  employee_id: string;
+}
+
+export async function fetchTeacherById(
+  id: string
+): Promise<TeacherProfileResponse> {
+  try {
+    const resp = await API.get(`/api/admin/teachers/${id}`);
+    return resp.data as TeacherProfileResponse;
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data as Record<string, unknown> | undefined;
+      throw new Error((data && (data.message as string)) ?? err.message);
+    }
+    throw err;
+  }
+}
+
+// -----------------------------
+// Update Teacher
+// PUT /api/admin/teacher/{id}
+// -----------------------------
+
+export interface UpdateTeacherPayload {
+  mobile: string;
+  address: string;
+  subject_speciality: string[];
+}
+
+export async function updateTeacher(
+  id: string,
+  payload: UpdateTeacherPayload
+): Promise<unknown> {
+  try {
+    const resp = await API.put(`/api/admin/teachers/${id}`, payload);
+    return resp.data;
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      const data = err.response?.data as Record<string, unknown> | undefined;
+
+      if (data?.fieldErrors && typeof data.fieldErrors === "object") {
+        throw new ApiValidationError(
+          (data.message as string) ?? err.message,
+          data.fieldErrors as Record<string, string>
+        );
+      }
+
+      throw new Error((data && (data.message as string)) ?? err.message);
+    }
+    throw err;
+  }
+}
+

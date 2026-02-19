@@ -11,7 +11,7 @@ const base =
 
 const variants: Record<string, string> = {
   default: "bg-sky-600 text-white hover:bg-sky-700",
-  ghost: "bg-transparent text-slate-700 hover:bg-slate-100",
+  ghost: "bg-transparent border text-slate-700 hover:bg-slate-100",
   pill: "bg-gray-200",
   inputType:
     "bg-transparent border border-[#D7E3FC] text-[#021034] hover:bg-[#D7E3FC]/50",
