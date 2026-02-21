@@ -19,7 +19,9 @@ export function FormField({ children }: { children: React.ReactNode }) {
 
 export function FormLabel({ children }: { children: React.ReactNode }) {
   return (
-    <label className="text-sm font-medium text-slate-700">{children}</label>
+    <label className="text-[14px] font-[500] text-[#021034] leading-[20px]">
+      {children}
+    </label>
   );
 }
 

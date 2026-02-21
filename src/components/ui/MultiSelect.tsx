@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Search, X } from "lucide-react";
 
 type Option = { id: string; name: string };
 
@@ -38,28 +39,38 @@ export default function MultiSelect({
       <button
         type="button"
         onClick={() => setOpen((s) => !s)}
-        className="w-full rounded-md border border-slate-200 px-3 py-2 text-left text-sm"
+        className="w-full rounded-md border border-[#D7E3FC] px-3 py-2 text-left text-sm flex items-center gap-2"
       >
+        <Search className="mr-2 inline size-4 text-slate-400" />
         <div className="flex flex-wrap gap-2">
           {value.length === 0 ? (
             <span className="text-slate-400">{placeholder}</span>
           ) : (
-            value
-              .map((id) => options.find((o) => o.id === id)?.name ?? id)
-              .map((label) => (
-                <span
-                  key={label}
-                  className="rounded-full bg-slate-100 px-2 py-0.5 text-xs"
+            value.map((id) => {
+              const label = options.find((o) => o.id === id)?.name ?? id;
+
+              return (
+                <p
+                  key={id}
+                  className="rounded-[8px] h-[26px] bg-[#F5F9FF] border border-[#D7E3FC] px-2 py-0.5 text-xs text-[#64748B] flex items-center gap-1"
                 >
                   {label}
-                </span>
-              ))
+                  <X
+                    className="inline h-4 w-4 text-[#64748B] cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onChange(value.filter((v) => v !== id));
+                    }}
+                  />
+                </p>
+              );
+            })
           )}
         </div>
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-slate-100 bg-white shadow-sm">
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-[#D7E3FC] bg-white shadow-sm">
           <div className="max-h-48 overflow-auto p-2">
             {options.map((o) => (
               <label
@@ -70,6 +81,7 @@ export default function MultiSelect({
                   type="checkbox"
                   checked={value.includes(o.id)}
                   onChange={() => toggle(o.id)}
+                  // disabled={!value.includes(o.id) && value.length >= 5}
                   className="h-4 w-4"
                 />
                 <span className="text-sm">{o.name}</span>
@@ -77,6 +89,9 @@ export default function MultiSelect({
             ))}
           </div>
         </div>
+      )}
+      {value.length > 5 && (
+        <p className="text-sm text-red-600">You can select up to 5 subjects</p>
       )}
     </div>
   );
