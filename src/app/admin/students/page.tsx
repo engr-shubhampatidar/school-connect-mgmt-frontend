@@ -15,6 +15,7 @@ import StudentsTable from "../../../components/admin/StudentsTable";
 import Button from "../../../components/ui/Button";
 import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
 import StudentDetailsDrawer from "../../../components/admin/StudentDetailsDrawer";
+import CreateNewStudent from "@/components/admin/CreateNewStudent";
 
 export default function AdminStudentsPage() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [open, setOpen] = useState(false);
 
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -99,6 +101,26 @@ export default function AdminStudentsPage() {
 
         <div>
           <Button variant="dark"  onClick={() => setCreatingOpen(true)}>+ Add Student</Button>
+          <div className="p-10">
+      <Button onClick={() => setOpen(true)}>Open Modal</Button>
+
+      <CreateNewStudent
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        title="Create Teacher"
+      >
+        <p className="text-sm text-gray-600">
+          This is reusable modal content.
+        </p>
+
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button>Save</Button>
+        </div>
+      </CreateNewStudent>
+    </div>
           <CreateStudentDialog
             open={creatingOpen}
             classes={classes}
