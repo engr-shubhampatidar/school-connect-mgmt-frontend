@@ -37,10 +37,28 @@ import Textarea from "@/components/ui/Textarea";
 import type { SubmitHandler } from "react-hook-form";
 import axios from "axios";
 import { InfoIcon } from "lucide-react";
+import { se } from "date-fns/locale";
 
 type Props = {
   onClose: () => void;
   onCreated?: () => void;
+};
+
+export const formatPhone = (value: string) => {
+  if (!value) return "";
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length <= 5) return digits;
+
+  return digits.slice(0, 5) + " " + digits.slice(5, 10);
+};
+
+export const formatAadhaar = (value: string) => {
+  if (!value) return "";
+
+  const digits = value.replace(/\D/g, "").slice(0, 12);
+
+  return digits.match(/.{1,4}/g)?.join(" ") || digits;
 };
 
 export default function CreateTeacherForm({ onClose, onCreated }: Props) {
@@ -101,6 +119,12 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
     () => subjects.map((s) => ({ id: s.id, name: s.name })),
     [subjects],
   );
+
+  const MAX_SUBJECTS = 5;
+  const selectedSubjects = watch("subjects") ?? [];
+  const selectedSubjectsCount = Array.isArray(selectedSubjects)
+    ? selectedSubjects.length
+    : 0;
 
   // Employee ID generation when fullName, date_of_birth and phone are valid
   const watchedFullName = watch("fullName");
@@ -197,7 +221,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         const payload: any = {
           email: values.email,
           fullName: values.fullName,
-          mobile: numeric("+91" + values.phone),
+          mobile: `+91${values.phone.trim()}`,
           address: values.permanentAddress,
           gender: values.gender,
           date_of_birth: values.date_of_birth,
@@ -302,16 +326,19 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                 </FormMessage>
               </FormField>
               <FormField>
-                <FormLabel>Phone Number</FormLabel>
+                <FormLabel>Mobile Number</FormLabel>
                 <FormControl>
                   <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
                     <p className="border-r border-[#D7E3FC] px-2 py-2">+91</p>
                     <input
                       className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
                       type="text"
-                      placeholder="9876543210"
-                      value={form.watch("phone") || ""}
-                      onChange={(e) => form.setValue("phone", e.target.value)}
+                      placeholder="98765 43210"
+                      value={formatPhone(form.watch("phone") || "")}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, ""); // keep only digits
+                        form.setValue("phone", raw);
+                      }}
                     />
                   </div>
                 </FormControl>
@@ -401,17 +428,24 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                 </FormMessage>
               </FormField>
               <FormField>
-                <FormLabel>Aadhar Number</FormLabel>
+                <FormLabel>Aadhaar Number</FormLabel>
                 <FormControl>
                   <Input
                     type="tel"
                     inputMode="numeric"
                     pattern="[0-9]*"
-                    maxLength={12}
-                    minLength={12}
+                    maxLength={15}
+                    minLength={15}
                     // required={true}
-                    {...form.register("aadhaar")}
+                    // {...form.register("aadhaar")}
                     placeholder="12 digit Aadhaar"
+                    value={formatAadhaar(form.watch("aadhaar") || "")}
+                    onChange={(e) => {
+                      const raw = e.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, 12);
+                      form.setValue("aadhaar", raw, { shouldValidate: true });
+                    }}
                   />
                 </FormControl>
                 <FormMessage>
@@ -424,8 +458,18 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
           <FormField>
             <FormLabel>
               Subject Speciality{" "}
-              <span className="text-[14px] text-[#646487] font-[500]">
-                {"(Max 5)"}
+              <span
+                className={`text-[14px] font-[500] ${
+                  selectedSubjectsCount > MAX_SUBJECTS
+                    ? "text-red-600"
+                    : "text-[#646487]"
+                }`}
+              >
+                {!selectedSubjectsCount
+                  ? "(Select at least one subject)"
+                  : selectedSubjectsCount > MAX_SUBJECTS
+                    ? `(Maximum ${MAX_SUBJECTS} subjects allowed)`
+                    : `(${selectedSubjectsCount} / ${MAX_SUBJECTS})`}
               </span>
             </FormLabel>
             <div>{renderSubjectMulti()}</div>

@@ -15,6 +15,7 @@ import { Upload, ChevronDown, Calendar } from "lucide-react";
 import MultiSelect from "@/components/ui/MultiSelect";
 import { Subject } from "@/schemas/teacher.schema";
 import { Controller, useForm } from "react-hook-form";
+import { formatAadhaar, formatPhone } from "../CreateTeacherForm";
 
 type Props = {
   open: boolean;
@@ -78,6 +79,11 @@ export default function EditTeacherDialog({
     [subjects],
   );
   const { control } = form;
+  const MAX_SUBJECTS = 5;
+  const selectedSubjects = form.watch("subjects") ?? [];
+  const selectedSubjectsCount = Array.isArray(selectedSubjects)
+    ? selectedSubjects.length
+    : 0;
   // -----------------------------
   // Fetch teacher when modal opens
   // -----------------------------
@@ -217,17 +223,31 @@ export default function EditTeacherDialog({
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <FormField>
-                              <FormLabel>Mobile</FormLabel>
+                              <FormLabel>Mobile Number</FormLabel>
                               <FormControl>
-                                <Input
-                                  value={formData.mobile}
-                                  onChange={(e) =>
-                                    setFormData({
-                                      ...formData,
-                                      mobile: e.target.value,
-                                    })
-                                  }
-                                />
+                                <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
+                                  <p className="border-r border-[#D7E3FC] px-2 py-2">
+                                    +91
+                                  </p>
+                                  <input
+                                    className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                                    type="text"
+                                    placeholder="98765 43210"
+                                    value={formatPhone(
+                                      formData.mobile.slice(2) || "",
+                                    )}
+                                    onChange={(e) => {
+                                      const raw = e.target.value.replace(
+                                        /\D/g,
+                                        "",
+                                      ); // keep only digits
+                                      setFormData({
+                                        ...formData,
+                                        mobile: raw,
+                                      });
+                                    }}
+                                  />
+                                </div>
                               </FormControl>
                             </FormField>
                           </div>
@@ -258,7 +278,9 @@ export default function EditTeacherDialog({
                               <FormLabel>Gender</FormLabel>
                               <FormControl>
                                 <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
-                                  <p>{formData.gender}</p>
+                                  <p>
+                                    {`${formData.gender.charAt(0).toUpperCase()}${formData.gender.slice(1)}`}
+                                  </p>
                                   <div className="flex items-center">
                                     <ChevronDown className="h-4 w-4" />
                                   </div>
@@ -268,7 +290,7 @@ export default function EditTeacherDialog({
                             <FormField>
                               <FormLabel>Date of Birth</FormLabel>
                               <FormControl>
-                                 <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
+                                <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
                                   <p>{formData.date_of_birth}</p>
                                   <div className="flex items-center">
                                     <Calendar className="h-4 w-4" />
@@ -282,7 +304,7 @@ export default function EditTeacherDialog({
                               <FormLabel>Aadhar Number</FormLabel>
                               <FormControl>
                                 <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
-                                  {formData.aadhar}
+                                  {formatAadhaar(formData.aadhar)}
                                 </div>
                               </FormControl>
                             </FormField>
@@ -317,8 +339,18 @@ export default function EditTeacherDialog({
                         <FormField>
                           <FormLabel>
                             Subject Speciality{" "}
-                            <span className="text-[14px] text-[#646487] font-[500]">
-                              {"(Optional)"}
+                            <span
+                              className={`text-[14px] font-[500] ${
+                                selectedSubjectsCount > MAX_SUBJECTS
+                                  ? "text-red-600"
+                                  : "text-[#646487]"
+                              }`}
+                            >
+                              {!selectedSubjectsCount
+                                ? "(Select at least one subject)"
+                                : selectedSubjectsCount > MAX_SUBJECTS
+                                  ? `(Maximum ${MAX_SUBJECTS} subjects allowed)`
+                                  : `(${selectedSubjectsCount} / ${MAX_SUBJECTS})`}
                             </span>
                           </FormLabel>
                           <div>{renderSubjectMulti()}</div>
