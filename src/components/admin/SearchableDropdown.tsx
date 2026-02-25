@@ -11,7 +11,11 @@ interface Props {
   value?: string | null;
   onChange: (id: string | null) => void;
   placeholder?: string;
-  fetchTeachers?: (search: string) => Promise<Teacher[]>; // optional custom
+  subjectId?: string | null;
+  fetchTeachers?: (
+    search: string,
+    subjectId?: string | null,
+  ) => Promise<Teacher[]>;
 }
 
 export default function SearchableDropdown({
@@ -19,6 +23,7 @@ export default function SearchableDropdown({
   onChange,
   placeholder = "Select...",
   fetchTeachers,
+  subjectId,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<Teacher[]>([]);
@@ -39,18 +44,20 @@ export default function SearchableDropdown({
     if (!open) return;
     let mounted = true;
     setLoading(true);
-    const fn = fetchTeachers ?? ((s: string) => getNotClassTeachers(s));
-    fn(search)
+
+    const fn = fetchTeachers ?? getNotClassTeachers;
+    fn(search, subjectId)
       .then((res) => {
         if (!mounted) return;
         setOptions(Array.isArray(res) ? res : []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
     return () => {
       mounted = false;
     };
-  }, [open, search, fetchTeachers]);
+  }, [open, search, subjectId, fetchTeachers]);
 
   const selected =
     (Array.isArray(options) ? options : []).find((o) => o.id === value) || null;
@@ -66,14 +73,14 @@ export default function SearchableDropdown({
       </div>
       {open && (
         <div className="absolute z-40 mt-2 w-full bg-white border rounded shadow max-h-60 overflow-auto">
-          {/* <div className="p-2">
+          <div className="p-2">
             <input
               className="w-full border p-1"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </div> */}
+          </div>
           {loading && <div className="p-2">Loading...</div>}
           {!loading &&
             options.map((opt) => (

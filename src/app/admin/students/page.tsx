@@ -15,7 +15,6 @@ import StudentsTable from "../../../components/admin/StudentsTable";
 import Button from "../../../components/ui/Button";
 import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
 import StudentDetailsDrawer from "../../../components/admin/StudentDetailsDrawer";
-import CreateNewStudent from "@/components/admin/CreateNewStudent";
 
 export default function AdminStudentsPage() {
   const router = useRouter();
@@ -77,7 +76,7 @@ export default function AdminStudentsPage() {
       setFilters(f);
       setPage(1);
     },
-    [setFilters, setPage]
+    [setFilters, setPage],
   );
 
   const handleClear = useCallback(() => {
@@ -87,40 +86,26 @@ export default function AdminStudentsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+    null,
+  );
 
   return (
     <div className="mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-[600] text-[#021034]">Total Students</h1>
+          <h1 className="text-[24px] font-[600] text-[#021034]">
+            Total Students
+          </h1>
           <p className="mt-1 text-[14px] text-[#737373]">
             Manage, Student Profiles, status and Enrollment
           </p>
         </div>
 
         <div>
-          <Button variant="dark"  onClick={() => setCreatingOpen(true)}>+ Add Student</Button>
-          <div className="p-10">
-      <Button onClick={() => setOpen(true)}>Open Modal</Button>
-
-      <CreateNewStudent
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        title="Create Teacher"
-      >
-        <p className="text-sm text-gray-600">
-          This is reusable modal content.
-        </p>
-
-        <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+          <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            + Add Student
           </Button>
-          <Button>Save</Button>
-        </div>
-      </CreateNewStudent>
-    </div>
           <CreateStudentDialog
             open={creatingOpen}
             classes={classes}

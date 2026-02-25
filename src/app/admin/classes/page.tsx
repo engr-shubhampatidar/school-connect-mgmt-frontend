@@ -77,29 +77,13 @@ export default function AdminClassesPage() {
           </div>
 
           <div>
-            <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            <Button variant="dark" onClick={() => setOpen(true)}>
               + Add New Class
             </Button>
-            <div className="p-10">
-              <Button onClick={() => setOpen(true)}>Open Modal</Button>
-
-              <CreateNewClass
-                isOpen={open}
-                onClose={() => setOpen(false)}
-                title="Create Teacher"
-              >
-                <p className="text-sm text-gray-600">
-                  This is reusable modal content.
-                </p>
-
-                <div className="mt-4 flex justify-end gap-2">
-                  <Button variant="dark" onClick={() => setOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button>Save</Button>
-                </div>
-              </CreateNewClass>
-            </div>
+            <CreateNewClass
+              isOpen={open}
+              onClose={() => setOpen(false)}
+            ></CreateNewClass>
             <CreateClassDialog
               open={creatingOpen}
               onClose={() => setCreatingOpen(false)}
