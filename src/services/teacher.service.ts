@@ -7,6 +7,7 @@ export interface Teacher {
   name: string;
   subjects?: string[];
   subject_count?: number;
+  
 }
 
 const BASE = "/api/admin/teachers";
@@ -33,13 +34,19 @@ async function extractListFromResponse(resp: any): Promise<Teacher[]> {
   return [];
 }
 
-export async function getTeachers(params?: Record<string, any>) {
-  const res = await API.get(BASE, { params });
+export async function getTeachers( search = "",
+  subjectId?: string | null) {
+  const res = await API.get(BASE, {
+    params: {
+      search,
+      subjectId: subjectId ?? undefined, // only send if exists
+    },
+  });
   return extractListFromResponse(res);
 }
 
 export async function getNotClassTeachers(search = "") {
-  const res = await API.get(`${BASE}`, { params: { search, notClassTeacher: true } });
+  const res = await API.get(`/api/admin/teachers/eligible-class-teachers`, { params: { search, notClassTeacher: true } });
   return extractListFromResponse(res);
 }
 

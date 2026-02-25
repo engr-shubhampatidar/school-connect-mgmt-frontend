@@ -44,9 +44,10 @@ type Props = {
 };
 
 export default function CreateTeacherForm({ onClose, onCreated }: Props) {
+  const { toast } = useToast(); // ✅ Toast at top
+
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(false);
-  const [subjectsError, setSubjectsError] = useState<string | null>(null);
 
   const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [generatingId, setGeneratingId] = useState(false);
@@ -57,37 +58,27 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   const generateTimer = useRef<number | null>(null);
 
   const form = useForm<CreateTeacherValues>({
-    // cast resolver to any to avoid type mismatch from duplicate react-hook-form types
     resolver: zodResolver(createTeacherSchema) as any,
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      date_of_birth: "",
-      gender: "male",
-      aadhaar: undefined,
-      subjects: [],
-      permanentAddress: "",
-      employeeId: undefined,
-    },
     mode: "onBlur",
   });
 
   const { control, handleSubmit, watch, setError, reset, formState } = form;
 
-  // Fetch subjects once
+  // ================= FETCH SUBJECTS =================
   useEffect(() => {
     let mounted = true;
     (async () => {
       setSubjectsLoading(true);
-      setSubjectsError(null);
       try {
         const items = await fetchSubjects("");
         if (!mounted) return;
         setSubjects(items);
       } catch (err) {
-        if (!mounted) return;
-        setSubjectsError((err as Error).message ?? "Failed to load subjects");
+        toast({
+          title: "Failed to load subjects",
+          description: (err as Error).message,
+          type: "error",
+        });
       } finally {
         if (mounted) setSubjectsLoading(false);
       }
@@ -95,166 +86,126 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [toast]);
 
   const subjectOptions = useMemo(
     () => subjects.map((s) => ({ id: s.id, name: s.name })),
     [subjects],
   );
 
-  // Employee ID generation when fullName, date_of_birth and phone are valid
+  // ================= EMPLOYEE ID GENERATION =================
   const watchedFullName = watch("fullName");
   const watchedDob = watch("date_of_birth");
   const watchedPhone = watch("phone");
 
   const shouldGenerateId = useMemo(() => {
-    // ensure the fields exist and not empty and no validation errors present for those fields
     if (!watchedFullName || !watchedDob || !watchedPhone) return false;
-    const errs = formState.errors;
-    if (errs.fullName || errs.date_of_birth || errs.phone) return false;
+    if (
+      formState.errors.fullName ||
+      formState.errors.date_of_birth ||
+      formState.errors.phone
+    )
+      return false;
     return true;
   }, [watchedFullName, watchedDob, watchedPhone, formState.errors]);
 
   const triggerGenerate = useCallback(() => {
     if (!shouldGenerateId) return;
-    // debounce
+
     if (generateTimer.current) window.clearTimeout(generateTimer.current);
+
     generateTimer.current = window.setTimeout(async () => {
-      if (abortRef.current) {
-        try {
-          abortRef.current.abort();
-        } catch {}
-      }
+      if (abortRef.current) abortRef.current.abort();
       abortRef.current = new AbortController();
+
       setGeneratingId(true);
       setEmployeeId(null);
+
       try {
         const res = await generateEmployeeId({
           fullName: watchedFullName.trim(),
           date_of_birth: watchedDob,
           phone: "+91" + watchedPhone.trim(),
         });
+
         setEmployeeId(res.employee_id);
-        // also set form value for employeeId via uncontrolled field if needed
-        // we don't call setValue to avoid extra re-renders; store locally
+
+        toast({
+          title: "Employee ID generated",
+          description: res.employee_id,
+          type: "success",
+        });
       } catch (err) {
-        if (err instanceof ApiValidationError) {
-          // map backend field errors (may indicate missing fields)
-          Object.entries(err.fieldErrors).forEach(([k, v]) => {
-            try {
-              setError(k as any, { type: "server", message: v });
-            } catch {}
-          });
-        } else if (axios.isAxiosError(err)) {
-          // ignore network blips for employee id generation, but set a toast
-          toast({
-            title: err.message || "Failed to generate employee id",
-            type: "error",
-          });
-        } else if (err instanceof Error) {
-          toast({ title: err.message, type: "error" });
-        }
+        toast({
+          title: "Failed to generate employee ID",
+          type: "error",
+        });
       } finally {
         setGeneratingId(false);
       }
     }, 600);
-  }, [shouldGenerateId, watchedFullName, watchedDob, watchedPhone, setError]);
+  }, [shouldGenerateId, watchedFullName, watchedDob, watchedPhone, toast]);
 
   useEffect(() => {
     triggerGenerate();
-    return () => {
-      if (generateTimer.current) window.clearTimeout(generateTimer.current);
-    };
   }, [triggerGenerate]);
 
-  const { toast } = useToast();
-
+  // ================= SUBMIT =================
   const onSubmit: SubmitHandler<CreateTeacherValues> = useCallback(
     async (values) => {
       try {
-        // build backend payload with expected field names
-        const numeric = (s?: string) => (s ? s.replace(/\D/g, "") : "");
-
-        // ensure employee id exists; generate if missing
-        let finalEmployeeId = employeeId;
-        if (!finalEmployeeId) {
-          try {
-            const gen = await generateEmployeeId({
-              fullName: values.fullName.trim(),
-              date_of_birth: values.date_of_birth,
-              phone: "+91" + values.phone.trim(),
-            });
-            finalEmployeeId = gen.employee_id;
-            setEmployeeId(finalEmployeeId ?? null);
-          } catch (err) {
-            if (axios.isAxiosError(err) || err instanceof Error) {
-              toast({ title: "Failed to generate employee id", type: "error" });
-            }
-            throw err;
-          }
-        }
-
-        const payload: any = {
-          email: values.email,
+        const payload: CreateTeacherValues = {
           fullName: values.fullName,
-          mobile: numeric("+91" + values.phone),
-          address: values.permanentAddress,
-          gender: values.gender,
+          email: values.email,
+          phone: values.phone,
           date_of_birth: values.date_of_birth,
-          subject_speciality: values.subjects,
-          employee_id: finalEmployeeId,
+          gender: values.gender,
+          aadhaar: values.aadhaar,
+          subjects: values.subjects,
+          employeeId: employeeId ?? undefined,
+          permanentAddress: values.permanentAddress,
         };
 
-        // include aadhar only when provided (send digits-only string)
-        if (values.aadhaar) payload.aadhar = numeric(values.aadhaar);
-
         const res: any = await createTeacher(payload);
-        // show temporary credentials returned by backend
-        setTempEmail(res?.email ?? payload.email ?? null);
-        setTempPassword(
-          res?.temporaryPassword ?? res?.temporary_password ?? null,
-        );
+
+        setTempEmail(res?.email ?? null);
+        setTempPassword(res?.temporaryPassword ?? null);
+
         toast({
-          title: res?.message ?? "Teacher created successfully",
+          title: "Teacher created successfully 🎉",
+          description: "Temporary credentials generated.",
           type: "success",
         });
+
         reset();
         setEmployeeId(null);
         onCreated?.();
       } catch (err) {
         if (err instanceof ApiValidationError) {
           Object.entries(err.fieldErrors).forEach(([k, v]) => {
-            // backend sometimes returns message 'Email already exists'
-            try {
-              setError(k as any, { type: "server", message: v });
-            } catch {}
+            setError(k as any, { type: "server", message: v });
           });
-          toast({ title: err.message || "Validation failed", type: "error" });
-          return;
-        }
-        if (axios.isAxiosError(err)) {
-          const data = err.response?.data as any;
-          if (data?.message) {
-            // put common field message under email when it mentions email exists
-            if (
-              typeof data.message === "string" &&
-              data.message.toLowerCase().includes("email") &&
-              data.message.toLowerCase().includes("exist")
-            ) {
-              setError("email" as any, {
-                type: "server",
-                message: data.message,
-              });
-            }
-          }
+
           toast({
-            title: err.message || "Failed to create teacher",
+            title: "Validation failed",
+            description: err.message,
             type: "error",
           });
           return;
         }
+
+        if (axios.isAxiosError(err)) {
+          toast({
+            title: "Network Error",
+            description: err.message,
+            type: "error",
+          });
+          return;
+        }
+
         toast({
-          title: (err as Error).message || "Failed to create teacher",
+          title: "Something went wrong",
+          description: (err as Error).message,
           type: "error",
         });
       }

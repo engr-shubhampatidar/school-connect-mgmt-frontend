@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
-import CreateEditClassForm from "./CreateEditClassForm";
+import CreateEditClassForm from "./CreateClassForm";
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,7 +16,6 @@ export default function CreateNewClass({
   onClose,
   classId = null,
   title = "Create New Class",
-  children,
 }: ModalProps) {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -31,7 +30,7 @@ export default function CreateNewClass({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-[900px] max-h-[90vh] overflow-auto bg-white rounded-lg z-50">
+      <div className="relative w-[900px] max-h-[90vh] overflow-auto no-scrollbar bg-white rounded-lg z-50">
         <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg py-[24px] px-[16px] justify-between gap-4">
           <div>
             <h3 className="text-[24px] font-[700] text-white">{title}</h3>
@@ -51,9 +50,7 @@ export default function CreateNewClass({
           </div>
         </div>
 
-        {children ?? (
-          <CreateEditClassForm classId={classId} onClose={onClose} />
-        )}
+        <CreateEditClassForm classId={classId} onClose={onClose} />
       </div>
     </div>
   );
