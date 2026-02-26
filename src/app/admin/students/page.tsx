@@ -20,12 +20,14 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [open, setOpen] = useState(false);
 
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
   const [filters, setFilters] = useState<StudentsFilters>({});
   const initialMountRef = useRef(true);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
 
   const load = useCallback(async (q: StudentsQuery) => {
     setLoading(true);
@@ -83,10 +85,7 @@ export default function AdminStudentsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null,
-  );
-  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   return (
     <div className="mx-auto px-4 py-6">
