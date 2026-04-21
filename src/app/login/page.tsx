@@ -9,29 +9,35 @@ export default function Page() {
 
   return (
     <>
-      <div className="grid lg:grid-cols-2 ">
-        <div className="absolute w-1/2  lg:flex items-start justify-start hidden flex-col pl-12 pt-12">
-          <div className="w-full flex items-center mb-92">
-            <h1 className="font-bold text-2xl text-white max-w-[100px]">
-              MAXUSE INSTITUTE
-            </h1>
-          </div>
-          <div className="mb-70"></div>
-          <div className="flex flex-col text-white sticky bottom-0">
-            <h1 className="text-white text-[48px]  font-[600] leading-[56px] mb-4">
-              Sign in to SchoolConnect
-            </h1>
-            <p>Secure access For Admin, Teachers and Student</p>
+      <div className="flex items-center justify-center h-screen overflow-hidden">
+        <div className="relative w-full h-screen lg:flex hidden">
+          {/* Image */}
+          <Image
+            src="/images/Login.png"
+            alt="Teacher Login Illustration"
+            fill
+            className="object-cover lg:flex hidden"
+          />
+
+          {/* Overlay text */}
+          <div className="absolute w-1/2 lg:flex items-start justify-start hidden flex-col pl-12 pt-12">
+            <div className="w-full flex items-center mb-92">
+              <h1 className="font-bold text-2xl text-white max-w-[100px]">
+                MAXUSE INSTITUTE
+              </h1>
+            </div>
+
+            <div className="mb-70"></div>
+
+            <div className="flex flex-col text-white sticky bottom-0">
+              <h1 className="text-[48px] font-[600] leading-[56px] mb-4">
+                Sign in to SchoolConnect
+              </h1>
+              <p>Secure access For Admin, Teachers and Student</p>
+            </div>
           </div>
         </div>
-        <Image
-          src="/images/Login.png"
-          alt="Teacher Login Illustration"
-          width={1600}
-          height={800}
-          className="hidden h-screen lg:flex"
-        />
-        <div className="flex w-full flex-col items-center justify-between pb-2  px-4 sm:px-6 lg:px-8">
+        <div className="flex w-full flex-col items-center justify-between pb-2 z-50  px-4 sm:px-6 lg:px-8">
           <div className="h-16"></div>
           <div className="flex flex-col items-center justify-center">
             <div className="mb-4">

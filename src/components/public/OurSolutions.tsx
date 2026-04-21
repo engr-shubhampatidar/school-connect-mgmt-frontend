@@ -38,8 +38,7 @@ export default function OurSolutions() {
             </div>
 
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              Access attendance, academics, assignments, and updates through a
-              simple student dashboard.
+             Access attendance, course materials, assignments, and real-time updates through an intuitive student dashboard. Stay organized and track academic progress effortlessly.
             </p>
           </div>
         </div>
@@ -47,7 +46,7 @@ export default function OurSolutions() {
           {/* Image */}
           <div className="relative h-[440px] w-full">
             <Image
-              src="/images/SolutionCardOne.jpg" // replace with your image
+              src="/images/teacher.jpg" // replace with your image
               alt="Student studying"
               fill
               className="object-cover"
@@ -57,7 +56,7 @@ export default function OurSolutions() {
           {/* Content */}
           <div className="p-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Students</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Faculty</h3>
 
               <button className="flex h-8 w-8 items-center justify-center rounded-md border border-blue-500 text-blue-500 transition hover:bg-blue-500 hover:text-white">
                 <ChevronRight size={18} />
@@ -65,8 +64,7 @@ export default function OurSolutions() {
             </div>
 
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              Access attendance, academics, assignments, and updates through a
-              simple student dashboard.
+             Manage classes, upload study materials, mark attendance, and evaluate student performance—all from one centralized platform designed for educators.
             </p>
           </div>
         </div>
@@ -74,7 +72,7 @@ export default function OurSolutions() {
           {/* Image */}
           <div className="relative h-[440px] w-full">
             <Image
-              src="/images/SolutionCardOne.jpg" // replace with your image
+              src="/images/admin.jpg" // replace with your image
               alt="Student studying"
               fill
               className="object-cover"
@@ -84,7 +82,7 @@ export default function OurSolutions() {
           {/* Content */}
           <div className="p-5">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Students</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Administration</h3>
 
               <button className="flex h-8 w-8 items-center justify-center rounded-md border border-blue-500 text-blue-500 transition hover:bg-blue-500 hover:text-white">
                 <ChevronRight size={18} />
@@ -92,8 +90,7 @@ export default function OurSolutions() {
             </div>
 
             <p className="mt-2 text-sm leading-relaxed text-gray-500">
-              Access attendance, academics, assignments, and updates through a
-              simple student dashboard.
+             Streamline operations with tools for admissions, fee management, scheduling, and reporting. Gain full control over institutional workflows with powerful insights.
             </p>
           </div>
         </div>

@@ -15,25 +15,25 @@ export default function Testimonals() {
       </div>
       <div className="grid grid-cols-1 gap-10 overflow-x-auto py-10 px-3 md:grid-cols-2 lg:grid-cols-3 lg:gap-6 lg:px-20">
         <TestimonialCard
-          quote="Before EduCore, I was staying back until 7 PM reconciling records. Now everything updates automatically. I can actually leave at a reasonable hour."
+          quote="Before EduCore, I was spending hours every evening reviewing reports and managing operations manually. Now everything is streamlined and automated. I finally have time to focus on improving our school, not just running it."
           name="Priya Sharma"
           role="Principal"
-          avatar="/priya.jpg"
-          company="Creative Market"
+          avatar="/images/images.png"
+          company="Sunrise Public School"
         />
         <TestimonialCard
-          quote="Before EduCore, I was staying back until 7 PM reconciling records. Now everything updates automatically. I can actually leave at a reasonable hour."
-          name="Priya Sharma"
-          role="Principal"
-          avatar="/priya.jpg"
-          company="Creative Market"
+          quote="Managing attendance, assignments, and grading used to be overwhelming. With EduCore, everything is in one place. It has made my daily teaching workflow much smoother and more efficient."
+          name="Rahul Verma"
+          role="Senior Teacher"
+          avatar="/images/images.png"
+          company="Green Valley High School"
         />
         <TestimonialCard
-          quote="Before EduCore, I was staying back until 7 PM reconciling records. Now everything updates automatically. I can actually leave at a reasonable hour."
-          name="Priya Sharma"
-          role="Principal"
-          avatar="/priya.jpg"
-          company="Creative Market"
+          quote="Our admission process and fee tracking were completely manual before. EduCore helped us digitize everything. The accuracy and time savings have been incredible."
+          name="Neha Gupta"
+          role="Admin Officer"
+          avatar="/images/images.png"
+          company="Bright Future Academy"
         />
       </div>
     </section>

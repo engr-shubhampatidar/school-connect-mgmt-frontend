@@ -82,7 +82,8 @@ const documentSchema = z.object({
   document_type: z.string().min(1, "Document type is required").max(120),
   url: z.string().url("Invalid document URL"),
 });
-
+const genders = ["male", "female", "other"];
+const catosss = ["General", "OBC", "SC", "ST", "EWS"];
 const formSchema = z.object({
   name: z
     .string()
@@ -96,11 +97,11 @@ const formSchema = z.object({
     .min(10, "Phone must be 10-15 digits")
     .max(15, "Phone must be 10-15 digits")
     .regex(/^[0-9]+$/, "Digits only"),
-  gender: z.enum(["male", "female", "other"], {
-    required_error: "Select gender",
+  gender: z.string().refine((val) => genders.includes(val), {
+    message: "Select gender",
   }),
-  category: z.enum(["General", "OBC", "SC", "ST", "EWS"], {
-    required_error: "Select category",
+  category: z.string().refine((val) => catosss.includes(val), {
+    message: "Select Category",
   }),
   admission_date: z.string().refine((v) => {
     if (!v) return false;
@@ -412,12 +413,7 @@ export default function UpdateStudentDialog({
       email: toLower(values.email),
       fullName: values.name.trim(),
       phoneNumber: cleanDigits(values.phone_no),
-      gender:
-        values.gender === "male"
-          ? "Male"
-          : values.gender === "female"
-            ? "Female"
-            : "Other",
+      gender: values.gender,
       category: values.category,
       admissionDate: values.admission_date,
       addressLine: values.address.trim(),
@@ -483,85 +479,82 @@ export default function UpdateStudentDialog({
 
   const disableSave = submitting || loading;
 
-  return (
-    <Dialog.Root open={open}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/30" />
-        <div className="fixed inset-0 z-50 flex overflow-y-auto overflow-x-hidden  items-center justify-center p-4">
-          <Dialog.Content asChild>
-            <Card className="w-full max-w-5xl rounded-2xl p-0 shadow-xl">
-              <div className="flex flex-col h-full max-h-full">
-                <header className="flex items-start justify-between bg-[#0A1D4D] px-6 py-5">
-                  <div className="space-y-1">
-                    <Dialog.Title className="text-2xl font-bold text-white">
-                      Create & Update Student
-                    </Dialog.Title>
-                    <p className="text-sm text-white/80">
-                      Update and create new student information
-                    </p>
-                  </div>
-                  <button
-                    aria-label="Close"
-                    onClick={handleClose}
-                    className="text-white hover:text-white/80"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </header>
+  if (!open) return null;
 
-                <div className="flex-1 overflow-y-auto bg-[#F5F7FB] px-6 pb-6 pt-4">
-                  {loading ? (
-                    <div className="space-y-4">
-                      <div className="h-6 w-1/3 animate-pulse rounded bg-slate-200" />
-                      <div className="grid gap-4 md:grid-cols-2">
-                        {Array.from({ length: 8 }).map((_, idx) => (
-                          <div
-                            key={idx}
-                            className="h-16 animate-pulse rounded bg-slate-200"
-                          />
-                        ))}
-                      </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
+        <div className="relative w-[777px] rounded-xl max-h-[90vh] overflow-hidden overflow-y-auto no-scrollbar">
+          <div className="rounded-lg ">
+            <div className=" min-h-full  rounded-lg  bg-white shadow-lg">
+              <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg py-[24px] px-[16px] justify-between gap-4">
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-bold text-white">
+                    Create & Update Student
+                  </h1>
+                  <p className="text-sm text-white/80">
+                    Update and create new student information
+                  </p>
+                </div>
+                <button
+                  aria-label="Close"
+                  onClick={handleClose}
+                  className="text-white hover:text-white/80"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto overflow-hidden bg-[#F5F7FB] px-6 pb-6 pt-4 rounded-lg">
+                {loading ? (
+                  <div className="space-y-4 ">
+                    <div className="h-6 w-1/3 animate-pulse rounded bg-slate-200" />
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {Array.from({ length: 8 }).map((_, idx) => (
+                        <div
+                          key={idx}
+                          className="h-16 animate-pulse rounded bg-slate-200"
+                        />
+                      ))}
                     </div>
-                  ) : fetchError ? (
-                    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                      <div className="font-semibold">
-                        Failed to load student
-                      </div>
-                      <div className="mt-1">{fetchError}</div>
-                      <div className="mt-3 flex gap-2">
-                        <Button
-                          onClick={() => {
-                            if (studentId) {
-                              setLoading(true);
-                              setFetchError(null);
-                              fetchController.current?.abort();
-                              const controller = new AbortController();
-                              fetchController.current = controller;
-                              API.get(`/api/admin/students/${studentId}`, {
-                                signal: controller.signal,
-                              })
-                                .then((res) =>
-                                  hydrateForm(
-                                    res.data as StudentProfileResponse,
-                                  ),
-                                )
-                                .catch((err) =>
-                                  setFetchError(
-                                    err?.message ?? "Failed to load",
-                                  ),
-                                )
-                                .finally(() => setLoading(false));
-                            }
-                          }}
-                        >
-                          Retry
-                        </Button>
-                        <Button variant="ghost" onClick={handleClose}>
-                          Close
-                        </Button>
-                      </div>
+                  </div>
+                ) : fetchError ? (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    <div className="font-semibold">Failed to load student</div>
+                    <div className="mt-1">{fetchError}</div>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        onClick={() => {
+                          if (studentId) {
+                            setLoading(true);
+                            setFetchError(null);
+                            fetchController.current?.abort();
+                            const controller = new AbortController();
+                            fetchController.current = controller;
+                            API.get(`/api/admin/students/${studentId}`, {
+                              signal: controller.signal,
+                            })
+                              .then((res) =>
+                                hydrateForm(res.data as StudentProfileResponse),
+                              )
+                              .catch((err) =>
+                                setFetchError(err?.message ?? "Failed to load"),
+                              )
+                              .finally(() => setLoading(false));
+                          }
+                        }}
+                      >
+                        Retry
+                      </Button>
+                      <Button variant="ghost" onClick={handleClose}>
+                        Close
+                      </Button>
                     </div>
-                  ) : (
+                  </div>
+                ) : (
+                  <div>
                     <Form
                       onSubmit={form.handleSubmit(onSubmit)}
                       className="space-y-6"
@@ -764,7 +757,7 @@ export default function UpdateStudentDialog({
                             </FormMessage>
                           </FormField>
 
-                          <FormField className="md:col-span-2">
+                          <FormField>
                             <FormLabel>Home Address</FormLabel>
                             <FormControl>
                               <Textarea
@@ -808,7 +801,7 @@ export default function UpdateStudentDialog({
                         </div>
                         <div className="grid gap-4 md:grid-cols-2">
                           <FormField>
-                            <FormLabel>Father's Name</FormLabel>
+                            <FormLabel>{"Father's Name"}</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Full name"
@@ -824,7 +817,7 @@ export default function UpdateStudentDialog({
                           </FormField>
 
                           <FormField>
-                            <FormLabel>Mother's Name (Optional)</FormLabel>
+                            <FormLabel>{"Mother's Name (Optional)"}</FormLabel>
                             <FormControl>
                               <Input
                                 placeholder="Full name"
@@ -871,7 +864,7 @@ export default function UpdateStudentDialog({
                             </FormMessage>
                           </FormField>
 
-                          <FormField className="md:col-span-2">
+                          <FormField>
                             <FormLabel>
                               Parent Permanent Address (Optional)
                             </FormLabel>
@@ -976,53 +969,42 @@ export default function UpdateStudentDialog({
                           </div>
                         </div>
                       </section>
-
-                      <div className="flex items-center justify-end gap-3">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={handleClose}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            // DEBUG: log click and current form values
-                            // eslint-disable-next-line no-console
-                            console.debug(
-                              "Save button clicked",
-                              form.getValues(),
-                            );
-                            // Trigger RHF submit and log client-side validation errors
-                            form.handleSubmit(onSubmit, (errs) => {
-                              // eslint-disable-next-line no-console
-                              console.error(
-                                "Client validation errors on click:",
-                                errs,
-                              );
-                            })();
-                          }}
-                          disabled={disableSave}
-                        >
-                          {submitting ? (
-                            <span className="flex items-center gap-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />{" "}
-                              Saving...
-                            </span>
-                          ) : (
-                            "+ Save Profile"
-                          )}
-                        </Button>
-                      </div>
                     </Form>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            </Card>
-          </Dialog.Content>
+              <div className="flex  items-center justify-end gap-3 sticky bottom-0 bg-white p-4 rounded-b-lg">
+                <Button type="button" variant="ghost" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="dark"
+                  onClick={() => {
+                    // DEBUG: log click and current form values
+                    // eslint-disable-next-line no-console
+                    console.debug("Save button clicked", form.getValues());
+                    // Trigger RHF submit and log client-side validation errors
+                    form.handleSubmit(onSubmit, (errs) => {
+                      // eslint-disable-next-line no-console
+                      console.error("Client validation errors on click:", errs);
+                    })();
+                  }}
+                  disabled={disableSave}
+                >
+                  {submitting ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                    </span>
+                  ) : (
+                    "Update Profile"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </Dialog.Portal>
-    </Dialog.Root>
+      </div>
+    </div>
   );
 }
