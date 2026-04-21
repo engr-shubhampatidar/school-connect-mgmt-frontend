@@ -12,7 +12,7 @@ export default function TestimonialCard({
   quote,
   name,
   role,
-  avatar = "/avatar.png",
+  avatar,
   company,
 }: TestimonialCardProps) {
   return (
@@ -21,15 +21,13 @@ export default function TestimonialCard({
       <div className="text-5xl leading-none text-gray-400">“</div>
 
       {/* Quote Text */}
-      <p className="mt-2 text-lg leading-relaxed text-blue-900">
-        {quote}
-      </p>
+      <p className="mt-2 text-lg leading-relaxed text-blue-900">{quote}</p>
 
       {/* Footer */}
       <div className="mt-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Image
-            src={avatar}
+            src={avatar ? avatar : "/images/images.png"}
             alt={name}
             width={44}
             height={44}
@@ -37,19 +35,13 @@ export default function TestimonialCard({
           />
 
           <div>
-            <p className="text-sm font-semibold text-blue-900">
-              {name}
-            </p>
-            <p className="text-xs text-gray-500">
-              {role}
-            </p>
+            <p className="text-sm font-semibold text-blue-900">{name}</p>
+            <p className="text-xs text-gray-500">{role}</p>
           </div>
         </div>
 
         {company && (
-          <span className="text-lg font-semibold text-blue-500">
-            {company}
-          </span>
+          <span className="text-lg font-semibold text-blue-500">{company}</span>
         )}
       </div>
     </div>

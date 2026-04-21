@@ -7,6 +7,7 @@ import CreateClassDialog from "../../../components/admin/CreateClassDialog";
 import API from "../../../lib/axios";
 import { UsersIcon, BookOpen, ClipboardList } from "lucide-react";
 import ClassesFilterBar from "../../../components/admin/ClassesFilterBar";
+import CreateNewClass from "@/components/admin/CreateNewClass";
 
 export default function AdminClassesPage() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -16,8 +17,8 @@ export default function AdminClassesPage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [open, setOpen] = useState(false);
   const mountedRef = useRef(false);
-
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
@@ -37,7 +38,7 @@ export default function AdminClassesPage() {
         setLoading(false);
       }
     },
-    [page, pageSize]
+    [page, pageSize],
   );
 
   const fetchStats = async () => {
@@ -76,9 +77,13 @@ export default function AdminClassesPage() {
           </div>
 
           <div>
-            <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            <Button variant="dark" onClick={() => setOpen(true)}>
               + Add New Class
             </Button>
+            <CreateNewClass
+              isOpen={open}
+              onClose={() => setOpen(false)}
+            ></CreateNewClass>
             <CreateClassDialog
               open={creatingOpen}
               onClose={() => setCreatingOpen(false)}

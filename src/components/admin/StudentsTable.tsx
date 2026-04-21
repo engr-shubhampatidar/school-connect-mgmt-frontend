@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Card from "../ui/Card";
 import Button from "../ui/Button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "../ui/table";
 import { Student } from "../../lib/adminApi";
 import Image from "next/image";
+import EditStudentDialog from "./EditStudentDialog";
 
 type Props = {
   students: Student[];
@@ -41,8 +42,9 @@ export default function StudentsTable({
 }: Props) {
   const totalPages = Math.max(
     1,
-    Math.ceil((total || students.length) / pageSize)
+    Math.ceil((total || students.length) / pageSize),
   );
+  const [open, setOpen] = useState(false);
 
   if (loading) {
     return (
@@ -169,10 +171,10 @@ export default function StudentsTable({
                       {typeof s.class === "string"
                         ? s.class
                         : s.class
-                        ? `${s.class.name}${
-                            s.class.section ? ` - ${s.class.section}` : ""
-                          }`
-                        : "-"}
+                          ? `${s.class.name}${
+                              s.class.section ? ` - ${s.class.section}` : ""
+                            }`
+                          : "-"}
                     </div>
                   </div>
                 </TableCell>
@@ -200,6 +202,27 @@ export default function StudentsTable({
                     <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
                       Edit
                     </Button>
+                    <div className="">
+                      <Button onClick={() => setOpen(true)}>Edit Student</Button>
+
+                      <EditStudentDialog
+                        isOpen={open}
+                        onClose={() => setOpen(false)}
+                        
+                      >
+                       
+
+                        <div className=" flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={() => setOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button>Save</Button>
+                        </div>
+                      </EditStudentDialog>
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>

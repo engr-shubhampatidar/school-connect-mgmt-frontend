@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import TrustBy from "./TrustBy";
 
 const images = [
   "/images/MainImage1.jpg",
@@ -192,13 +193,16 @@ export default function HeroPage() {
           </div>
         </div>
       </section>
-      <div className="flex items-center justify-center mt-10 md:mt-20">
-        <div className="w-full border-t border-[#021034] "></div>
-        <div className="px-1 text-[#05164380] text-[10px] md:text-[20px] font-[600] min-w-[60px] md:min-w-[107px] text-center">
-          <span>Trusted By</span>
+      <section className="">
+        <div className="flex  items-center justify-center mt-10 md:mt-20">
+          <div className="w-full border-t border-[#021034] "></div>
+          <div className="px-1 text-[#05164380] text-[10px] md:text-[20px] font-[600] min-w-[60px] md:min-w-[107px] text-center">
+            <span>Trusted By</span>
+          </div>
+          <div className="w-full border-t border-[#021034]"></div>
         </div>
-        <div className="w-full border-t border-[#021034]"></div>
-      </div>
+          <TrustBy/>
+      </section>
     </section>
   );
 }

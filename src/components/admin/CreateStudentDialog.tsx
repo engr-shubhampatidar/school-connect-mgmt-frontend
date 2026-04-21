@@ -21,12 +21,18 @@ import { useToast } from "../ui/use-toast";
 import type { ClassItem } from "@/lib/adminApi";
 import API from "@/lib/axios";
 import { ADMIN_API } from "@/lib/api-routes";
+import { FormDatePicker } from "../ui/form-date-picker";
 
 const createStudentSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
   classId: z.string().min(1, "Class is required"),
   email: z.string().email("Invalid email address").optional(),
-  photoUrl: z
+  phoneNumber: z
+    .string()
+    .min(10, "Phone number must be 10 digits")
+    .max(15)
+    .optional(),
+  profileUrl: z
     .string()
     .optional()
     .refine((v) => {
@@ -38,6 +44,7 @@ const createStudentSchema = z.object({
         return false;
       }
     }, "Must be a valid URL"),
+  admissionDate: z.string().min(1, "Admission date is required"),
 });
 
 type CreateStudentValues = z.infer<typeof createStudentSchema>;
@@ -60,6 +67,8 @@ export default function CreateStudentDialog({
   const [classes, setClasses] = useState<ClassItem[]>(parentClasses ?? []);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [tempRollNo, setTempRollNo] = useState<string | null>(null);
+  const [generatedStudentId, setGeneratedStudentId] = useState<string>("");
+  const [idLoading, setIdLoading] = useState(false);
 
   // accept classes from parent via props; use fallback if not provided
   useEffect(() => {
@@ -73,22 +82,31 @@ export default function CreateStudentDialog({
 
   const form = useForm<CreateStudentValues>({
     resolver: zodResolver(
-      createStudentSchema
+      createStudentSchema,
     ) as unknown as Resolver<CreateStudentValues>,
-    defaultValues: { name: "", classId: "", email: "", photoUrl: "" },
+    defaultValues: {
+      fullName: "",
+      classId: "",
+      email: "",
+      phoneNumber: "",
+      profileUrl: "",
+      admissionDate: "",
+    },
   });
 
   const onSubmit = async (values: CreateStudentValues) => {
     setLoading(true);
     try {
       const resp = await API.post(ADMIN_API.STUDENTS, {
-        name: values.name,
+        fullName: values.fullName,
         classId: values.classId,
         email: values.email ?? undefined,
-        photoUrl:
-          values.photoUrl && values.photoUrl.trim() !== ""
-            ? values.photoUrl
-            : "https://i.pinimg.com/736x/ce/30/bc/ce30bc4a449d4926ad1dd3164dc5c46f.jpg",
+        phoneNumber: values.phoneNumber ?? undefined,
+        profileUrl:
+          values.profileUrl && values.profileUrl.trim() !== ""
+            ? values.profileUrl
+            : null,
+        admissionDate: values.admissionDate,
       });
 
       toast({ title: "Student created successfully", type: "success" });
@@ -102,25 +120,27 @@ export default function CreateStudentDialog({
       const data = resp.data as
         | {
             id?: string;
-            name?: string;
-            rollNo?: string;
-            temporaryPassword?: string;
+            studentId?: string;
+            admissionDate?: string;
+            profileUrl?: string | null;
+            user?: { fullName?: string; email?: string } | null;
+            class?: { id?: string; name?: string } | null;
+            temporaryPassword?: string | null;
           }
         | undefined;
 
-      const rollNo = data?.rollNo ?? null;
+      const studentId = data?.studentId ?? null;
       const pw = data?.temporaryPassword ?? null;
 
-      if (typeof rollNo === "string" && rollNo.length > 0) {
-        setTempRollNo(rollNo);
+      if (typeof studentId === "string" && studentId.length > 0) {
+        setTempRollNo(studentId);
       }
 
       if (typeof pw === "string" && pw.length > 0) {
         setTempPassword(pw);
       }
 
-      if (!rollNo && !pw) {
-        // nothing to show
+      if (!studentId && !pw) {
         onClose();
       }
     } catch (err: unknown) {
@@ -154,106 +174,236 @@ export default function CreateStudentDialog({
       setLoading(false);
     }
   };
+  const fetchGeneratedStudentId = async () => {
+    try {
+      setIdLoading(true);
+
+      const resp = await API.get("/api/admin/students/generate-id");
+
+      const data = resp.data as { studentId?: string };
+
+      if (data?.studentId) {
+        setGeneratedStudentId(data.studentId);
+      }
+    } catch (error) {
+      toast({
+        title: "Failed to generate Student ID",
+        type: "error",
+      });
+    } finally {
+      setIdLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchGeneratedStudentId();
+    }
+  }, [open]);
 
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-lg p-4">
-        <Card>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Create Student
-              </h3>
-              <p className="text-sm text-slate-600">
-                Add a new student record to the school.
-              </p>
-            </div>
-            <div>
-              <button
-                aria-label="close"
-                onClick={onClose}
-                className="text-slate-500 hover:text-slate-700"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <Form onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField>
-                <FormLabel>Name</FormLabel>
-                <Input {...form.register("name")} placeholder="Student name" />
-                <FormMessage>
-                  {form.formState.errors.name?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <FormField>
-                <FormLabel>Class</FormLabel>
-                <FormControl>
-                  <Controller
-                    control={form.control}
-                    name="classId"
-                    render={({ field }) => (
-                      <Select
-                        options={classes.map((c) => ({
-                          id: c.id,
-                          name: `${c.name}${
-                            c.section ? ` - ${c.section}` : ""
-                          }`,
-                        }))}
-                        value={field.value ?? ""}
-                        onChange={(v) => field.onChange(v)}
-                        placeholder="Select class"
-                      />
-                    )}
-                  />
-                </FormControl>
-                <p className="mt-1 text-sm text-slate-500">
-                  Roll number will be auto-generated
-                </p>
-                <FormMessage>
-                  {form.formState.errors.classId?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <FormField>
-                <FormLabel>Email (optional)</FormLabel>
-                <Input
-                  {...form.register("email")}
-                  placeholder="student@example.com"
-                />
-                <FormMessage>
-                  {form.formState.errors.email?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <FormField>
-                <FormLabel>Photo URL</FormLabel>
-                <Input
-                  {...form.register("photoUrl")}
-                  placeholder="https://example.com/photo.jpg"
-                />
-                <FormMessage>
-                  {form.formState.errors.photoUrl?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <div className="mt-4 flex items-center justify-end gap-2">
-                <Button variant="ghost" onClick={onClose} type="button">
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Creating…" : "Create Student"}
-                </Button>
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative w-[777px] p-4 max-h-full overflow-hidden no-scrollbar overflow-y-auto">
+          <div className="rounded-lg">
+            <div className=" min-h-full">
+              <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg py-[24px] px-[16px] justify-between gap-4">
+                <div>
+                  <h3 className="text-[24px] font-[700] text-white">
+                    Create New Student
+                  </h3>
+                  <p className="text-[14px] font-[400] text-white">
+                    Fill in the details to register a new student in the system.
+                  </p>
+                </div>
+                <div>
+                  <button
+                    aria-label="close"
+                    onClick={onClose}
+                    className="text-white hover:text-white/80"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
-            </Form>
+              <div className="p-[16px] bg-white overflow-hidden rounded-b-lg max-h-full">
+                <Form onSubmit={form.handleSubmit(onSubmit)}>
+                  <Card>
+                    <h1 className="text-[16px] text-[#0F172A] font-semibold font-[600] mb-[24px]">
+                      Class Information
+                    </h1>
+                    <div className="flex flex-col gap-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField>
+                          <FormLabel>Full Name </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...form.register("fullName")}
+                              type="text"
+                              placeholder="e.g. John Doe"
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {
+                              form.formState.errors.fullName
+                                ?.message as React.ReactNode
+                            }
+                          </FormMessage>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>Class Name</FormLabel>
+                          <FormControl>
+                            <Controller
+                              control={form.control}
+                              name="classId"
+                              render={({ field }) => (
+                                <Select
+                                  options={classes.map((c) => ({
+                                    id: c.id,
+                                    name: `${c.name}${c.section ? ` - ${c.section}` : ""}`,
+                                  }))}
+                                  value={field.value ?? ""}
+                                  onChange={(v) => field.onChange(v)}
+                                  placeholder="Select"
+                                />
+                              )}
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {
+                              form.formState.errors.classId
+                                ?.message as React.ReactNode
+                            }
+                          </FormMessage>
+                        </FormField>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-4 mt-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField>
+                          <FormLabel>Email Address </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...form.register("email")}
+                              type="text"
+                              placeholder="john@example.com"
+                            />
+                          </FormControl>
+                          <FormMessage>
+                            {
+                              form.formState.errors.email
+                                ?.message as React.ReactNode
+                            }
+                          </FormMessage>
+                        </FormField>
+                        <FormField>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
+                              <p className="border-r border-[#D7E3FC] px-2 py-2">
+                                +91
+                              </p>
+                              <input
+                                {...form.register("phoneNumber")}
+                                className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                                type="text"
+                                placeholder="9876543210"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage>
+                            {
+                              form.formState.errors.phoneNumber
+                                ?.message as React.ReactNode
+                            }
+                          </FormMessage>
+                        </FormField>
+                      </div>
+                      <FormField>
+                        <FormLabel>Profile URL (Optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...form.register("profileUrl")}
+                            type="text"
+                            placeholder="https://linkedin.com/in/student-name"
+                          />
+                        </FormControl>
+                        <FormMessage>
+                          {
+                            form.formState.errors.profileUrl
+                              ?.message as React.ReactNode
+                          }
+                        </FormMessage>
+                      </FormField>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField>
+                          <FormLabel>Admission Date</FormLabel>
+                          <Controller
+                            control={form.control}
+                            name="admissionDate"
+                            render={({ field }) => {
+                              const formatLocalYMD = (date: Date) =>
+                                `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+                              const parseLocalDate = (value?: string) => {
+                                if (!value) return undefined;
+                                const [y, m, d] = value.split("-").map(Number);
+                                return new Date(y, m - 1, d);
+                              };
+
+                              return (
+                                <div className="space-y-2">
+                                  <FormDatePicker
+                                    value={parseLocalDate(field.value)}
+                                    onChange={(date: Date | undefined) => {
+                                      if (!date) {
+                                        field.onChange("");
+                                      } else {
+                                        field.onChange(formatLocalYMD(date));
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              );
+                            }}
+                          />
+                        </FormField>
+                        <FormField>
+                          <FormLabel>Student ID</FormLabel>
+                          <FormControl>
+                            <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400]">
+                              {idLoading ? (
+                                <p>Generating...</p>
+                              ) : (
+                                <p>{generatedStudentId || "—"}</p>
+                              )}
+                            </div>
+                          </FormControl>
+                        </FormField>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="mt-6 flex sticky bottom-0 justify-end gap-2">
+                    <Button type="button" variant="ghost" onClick={onClose}>
+                      Cancel
+                    </Button>
+
+                    <Button type="submit" variant="dark" disabled={loading}>
+                      {loading ? "Creating…" : "Create Student"}
+                    </Button>
+                  </div>
+                </Form>
+              </div>
+            </div>
           </div>
-        </Card>
+        </div>
       </div>
+
       {tempPassword || tempRollNo ? (
         <div className="fixed inset-0 z-60 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40" />

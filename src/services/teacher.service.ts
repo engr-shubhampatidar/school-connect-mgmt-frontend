@@ -1,6 +1,54 @@
 import API from "@/lib/axios";
-import { SubjectsResponse, Subject, CreateTeacherValues } from "@/schemas/teacher.schema";
 import axios from "axios";
+import { SubjectsResponse, Subject, CreateTeacherValues } from "@/schemas/teacher.schema";
+
+export interface Teacher {
+  id: string;
+  name: string;
+  subjects?: string[];
+  subject_count?: number;
+  
+}
+
+const BASE = "/api/admin/teachers";
+
+function normalizeTeacher(it: any): Teacher {
+  if (!it) return { id: "", name: "" };
+  if (typeof it === "string") return { id: it, name: it };
+  const o = it as Record<string, any>;
+  return {
+    id: String(o.id ?? o._id ?? o.uuid ?? o.value ?? ""),
+    name: String(o.fullName ?? o.name ?? o.title ?? o.email ?? ""),
+    subjects: Array.isArray(o.subjectsSpeciality) ? o.subjectsSpeciality : (o.subjects ?? undefined),
+    subject_count: typeof o.subject_count === "number" ? o.subject_count : undefined,
+  } as Teacher;
+}
+
+async function extractListFromResponse(resp: any): Promise<Teacher[]> {
+  const data = resp?.data ?? resp;
+  if (Array.isArray(data)) return data.map(normalizeTeacher);
+  if (data && typeof data === "object") {
+    const items = data.items ?? data.data ?? data.results ?? [];
+    if (Array.isArray(items)) return items.map(normalizeTeacher);
+  }
+  return [];
+}
+
+export async function getTeachers( search = "",
+  subjectId?: string | null) {
+  const res = await API.get(BASE, {
+    params: {
+      search,
+      subjectId: subjectId ?? undefined, // only send if exists
+    },
+  });
+  return extractListFromResponse(res);
+}
+
+export async function getNotClassTeachers(search = "") {
+  const res = await API.get(`/api/admin/teachers/eligible-class-teachers`, { params: { search, notClassTeacher: true } });
+  return extractListFromResponse(res);
+}
 
 export class ApiValidationError extends Error {
   public fieldErrors: Record<string, string>;

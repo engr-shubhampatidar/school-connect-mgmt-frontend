@@ -1,33 +1,33 @@
 "use client";
-import React, { useCallback, useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import {
-  fetchStudents,
-  fetchClasses,
-  Student,
-  StudentsQuery,
-  ClassItem,
-} from "../../../lib/adminApi";
+import UpdateStudentDialog from "@/components/admin/UpdateStudentDialog";
+import { useCallback, useEffect, useRef, useState } from "react";
+import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
 import StudentsFilterBar, {
   StudentsFilters,
 } from "../../../components/admin/StudentsFilterBar";
 import StudentsTable from "../../../components/admin/StudentsTable";
 import Button from "../../../components/ui/Button";
-import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
-import StudentDetailsDrawer from "../../../components/admin/StudentDetailsDrawer";
+import {
+  ClassItem,
+  fetchClasses,
+  fetchStudents,
+  Student,
+  StudentsQuery,
+} from "../../../lib/adminApi";
 
 export default function AdminStudentsPage() {
-  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
+  const [open, setOpen] = useState(false);
 
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
 
   const [filters, setFilters] = useState<StudentsFilters>({});
   const initialMountRef = useRef(true);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
 
   const load = useCallback(async (q: StudentsQuery) => {
     setLoading(true);
@@ -75,7 +75,7 @@ export default function AdminStudentsPage() {
       setFilters(f);
       setPage(1);
     },
-    [setFilters, setPage]
+    [setFilters, setPage],
   );
 
   const handleClear = useCallback(() => {
@@ -91,14 +91,18 @@ export default function AdminStudentsPage() {
     <div className="mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-[24px] font-[600] text-[#021034]">Total Students</h1>
+          <h1 className="text-[24px] font-[600] text-[#021034]">
+            Total Students
+          </h1>
           <p className="mt-1 text-[14px] text-[#737373]">
             Manage, Student Profiles, status and Enrollment
           </p>
         </div>
 
         <div>
-          <Button variant="dark"  onClick={() => setCreatingOpen(true)}>+ Add Student</Button>
+          <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            + Add Student
+          </Button>
           <CreateStudentDialog
             open={creatingOpen}
             classes={classes}
@@ -130,13 +134,22 @@ export default function AdminStudentsPage() {
         onRetry={() => load({ ...filters, page, pageSize })}
         onPageChange={(p) => setPage(p)}
         onView={(id) => setSelectedStudentId(id)}
-        onEdit={(id) => router.push(`/admin/students/${id}/edit`)}
+        onEdit={(id) => setEditingStudentId(id)}
       />
 
-      <StudentDetailsDrawer
+      {/* <StudentDetailsDrawer
         studentId={selectedStudentId}
         isOpen={Boolean(selectedStudentId)}
         onClose={() => setSelectedStudentId(null)}
+      /> */}
+
+      <UpdateStudentDialog
+        open={Boolean(editingStudentId)}
+        studentId={editingStudentId}
+        onClose={() => setEditingStudentId(null)}
+        onUpdated={() => {
+          void load({ ...filters, page, pageSize });
+        }}
       />
     </div>
   );
