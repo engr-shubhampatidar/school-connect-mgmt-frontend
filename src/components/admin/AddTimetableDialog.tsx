@@ -68,8 +68,8 @@ export default function AddTimetableDialog({
         const subjList = Array.isArray(subjData)
           ? subjData
           : Array.isArray(subjData?.items)
-          ? subjData.items
-          : [];
+            ? subjData.items
+            : [];
         const normalizedSubjects = subjList.map((s: any) => ({
           id: s.id,
           name: s.name || s.title || s.subjectName || "Unnamed Subject",
@@ -81,19 +81,23 @@ export default function AddTimetableDialog({
         const teachList = Array.isArray(teachData)
           ? teachData
           : Array.isArray(teachData?.items)
-          ? teachData.items
-          : [];
+            ? teachData.items
+            : [];
         const normalizedTeachers = teachList.map((t: any) => ({
           id: t.id,
           name:
-            t.name || t.user?.fullName || t.user?.full_name ||
+            t.fullName ||
+            t.user?.fullName ||
+            t.user?.full_name ||
             [t.firstName, t.lastName].filter(Boolean).join(" ") ||
             "Unnamed Teacher",
         }));
         if (!cancelled) setTeachers(normalizedTeachers);
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message ?? err.message ?? "Failed to fetch");
+          setError(
+            err.response?.data?.message ?? err.message ?? "Failed to fetch",
+          );
         } else if (err instanceof Error) {
           setError(err.message);
         } else {
@@ -154,10 +158,13 @@ export default function AddTimetableDialog({
       onSuccess?.();
       // Optionally, refresh the page or data
       router?.refresh?.();
-      
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message ?? err.message ?? "Failed to add timetable entry");
+        setError(
+          err.response?.data?.message ??
+            err.message ??
+            "Failed to add timetable entry",
+        );
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
@@ -178,7 +185,9 @@ export default function AddTimetableDialog({
         <div className="relative z-50 w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-medium">Add Timetable Entry</h3>
-            <button onClick={resetAndClose} className="text-slate-500">✕</button>
+            <button onClick={resetAndClose} className="text-slate-500">
+              ✕
+            </button>
           </div>
 
           <div className="mt-4 space-y-4">
@@ -197,7 +206,9 @@ export default function AddTimetableDialog({
             <div>
               <label className="block text-sm text-slate-700">Teacher</label>
               {loadingTeachers ? (
-                <div className="text-sm text-slate-500">Loading teachers...</div>
+                <div className="text-sm text-slate-500">
+                  Loading teachers...
+                </div>
               ) : (
                 <DefaultSelect
                   options={[{ id: "", name: "-- Select --" }, ...teachers]}
@@ -209,7 +220,9 @@ export default function AddTimetableDialog({
             </div>
 
             <div>
-              <label className="block text-sm text-slate-700">Day of Week</label>
+              <label className="block text-sm text-slate-700">
+                Day of Week
+              </label>
               <DefaultSelect
                 options={[
                   { id: "", name: "-- Select --" },
@@ -229,25 +242,41 @@ export default function AddTimetableDialog({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-sm text-slate-700">Start Time</label>
-                <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                <label className="block text-sm text-slate-700">
+                  Start Time
+                </label>
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
               </div>
               <div>
                 <label className="block text-sm text-slate-700">End Time</label>
-                <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-sm text-slate-700">Room</label>
-              <Input value={room} onChange={(e) => setRoom(e.target.value)} placeholder="e.g. Room 101" />
+              <Input
+                value={room}
+                onChange={(e) => setRoom(e.target.value)}
+                placeholder="e.g. Room 101"
+              />
             </div>
 
             {error ? <div className="text-sm text-red-600">{error}</div> : null}
           </div>
 
           <div className="mt-6 flex items-center justify-end gap-2">
-            <Button variant="ghost" onClick={resetAndClose}>Cancel</Button>
+            <Button variant="ghost" onClick={resetAndClose}>
+              Cancel
+            </Button>
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting ? "Adding..." : "Add Timetable"}
             </Button>

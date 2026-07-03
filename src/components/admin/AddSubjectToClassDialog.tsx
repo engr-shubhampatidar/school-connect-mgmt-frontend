@@ -49,8 +49,8 @@ function AddSubjectToClassDialog({
         const subjList = Array.isArray(subjData)
           ? subjData
           : Array.isArray(subjData?.items)
-          ? subjData.items
-          : [];
+            ? subjData.items
+            : [];
         const normalizedSubjects = subjList.map((s: any) => ({
           id: s.id,
           name: s.name || s.title || s.subjectName || "Unnamed Subject",
@@ -62,12 +62,12 @@ function AddSubjectToClassDialog({
         const teachList = Array.isArray(teachData)
           ? teachData
           : Array.isArray(teachData?.items)
-          ? teachData.items
-          : [];
+            ? teachData.items
+            : [];
         const normalizedTeachers = teachList.map((t: any) => ({
           id: t.id,
           name:
-            t.name ||
+            t.fullName ||
             t.user?.fullName ||
             t.user?.full_name ||
             [t.firstName, t.lastName].filter(Boolean).join(" ") ||
@@ -77,7 +77,7 @@ function AddSubjectToClassDialog({
       } catch (err: unknown) {
         if (axios.isAxiosError(err)) {
           setError(
-            err.response?.data?.message ?? err.message ?? "Failed to fetch"
+            err.response?.data?.message ?? err.message ?? "Failed to fetch",
           );
         } else if (err instanceof Error) {
           setError(err.message);
@@ -118,7 +118,7 @@ function AddSubjectToClassDialog({
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(
-          err.response?.data?.message ?? err.message ?? "Failed to add subject"
+          err.response?.data?.message ?? err.message ?? "Failed to add subject",
         );
       } else if (err instanceof Error) {
         setError(err.message);

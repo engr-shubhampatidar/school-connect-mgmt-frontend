@@ -147,7 +147,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   }, [shouldGenerateId, watchedFullName, watchedDob, watchedPhone, toast]);
 
   useEffect(() => {
-    triggerGenerate();
+    // triggerGenerate();
   }, [triggerGenerate]);
 
   // ================= SUBMIT =================
@@ -157,13 +157,13 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         const payload: CreateTeacherValues = {
           fullName: values.fullName,
           email: values.email,
-          phone: values.phone,
+          mobile: `+91${values.phone}`,
           date_of_birth: values.date_of_birth,
           gender: values.gender,
-          aadhaar: values.aadhaar,
+          aadhar: values.aadhaar,
           subjects: values.subjects,
-          employeeId: employeeId ?? undefined,
-          permanentAddress: values.permanentAddress,
+          employee_id: employeeId ?? "EMP-1234",
+          address: values.permanentAddress,
         };
 
         const res: any = await createTeacher(payload);
