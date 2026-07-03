@@ -32,7 +32,7 @@ export const createTeacherSchema = z
 
     email: z.string().email("Must be a valid email"),
 
-    phone: z
+    mobile: z
       .string()
       .min(1, "Phone is required")
       .transform((s) => s.trim())
@@ -56,26 +56,32 @@ export const createTeacherSchema = z
         const now = new Date();
         return d <= now;
       }, "Date of birth cannot be in the future")
-      .refine((s) => calculateAgeYears(new Date(s)) >= 18, "Teacher must be at least 18 years old"),
+      .refine(
+        (s) => calculateAgeYears(new Date(s)) >= 18,
+        "Teacher must be at least 18 years old",
+      ),
 
     gender: z.enum(["male", "female", "other"]),
 
-    aadhaar: z
+    aadhar: z
       .string()
-      .min(1, "Aadhaar number is required")
+      .min(1, "Aadhar number is required")
       .transform((v) => (v === "" ? undefined : v))
       .refine((v) => v === undefined || /^[0-9]{12}$/.test(v), {
-        message: "Aadhaar must be exactly 12 digits",
+        message: "Aadhar must be exactly 12 digits",
       }),
 
-    subjects: z
+    subject_speciality: z
       .array(z.string())
       .min(1, "Select at least one subject")
       .max(5, "You can select up to 5 subjects"),
 
-    employeeId: z.string().optional(),
+    employee_id: z.string().optional(),
 
-    permanentAddress: z.string().min(1, "Permanent address is required").max(300, "Address must be at most 300 characters"),
+    address: z
+      .string()
+      .min(1, "Permanent address is required")
+      .max(300, "Address must be at most 300 characters"),
   })
   .strict();
 

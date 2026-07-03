@@ -96,14 +96,14 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   // ================= EMPLOYEE ID GENERATION =================
   const watchedFullName = watch("fullName");
   const watchedDob = watch("date_of_birth");
-  const watchedPhone = watch("phone");
+  const watchedPhone = watch("mobile");
 
   const shouldGenerateId = useMemo(() => {
     if (!watchedFullName || !watchedDob || !watchedPhone) return false;
     if (
       formState.errors.fullName ||
       formState.errors.date_of_birth ||
-      formState.errors.phone
+      formState.errors.mobile
     )
       return false;
     return true;
@@ -157,19 +157,19 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         const { employee_id } = await generateEmployeeId({
           fullName: values.fullName.trim(),
           date_of_birth: values.date_of_birth,
-          phone: "+91" + values.phone.trim(),
+          phone: "+91" + values.mobile.trim(),
         });
 
         const payload: CreateTeacherValues = {
           fullName: values.fullName,
           email: values.email,
-          mobile: `+91${values.phone}`,
+          mobile: `+91${values.mobile}`,
           date_of_birth: values.date_of_birth,
           gender: values.gender,
-          aadhar: values.aadhaar,
-          subject_speciality: values.subjects,
+          aadhar: values.aadhar,
+          subject_speciality: values.subject_speciality,
           employee_id: employee_id ?? "EMP-1234",
-          address: values.permanentAddress,
+          address: values.address,
         };
 
         const res: any = await createTeacher(payload);
@@ -224,7 +224,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
     () => (
       <Controller
         control={control}
-        name="subjects"
+        name="subject_speciality"
         render={({ field }) => (
           <MultiSelect
             options={subjectOptions}
@@ -269,13 +269,13 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                       type="text"
                       placeholder="9876543210"
                       maxLength={10}
-                      value={form.watch("phone") || ""}
-                      onChange={(e) => form.setValue("phone", e.target.value)}
+                      value={form.watch("mobile") || ""}
+                      onChange={(e) => form.setValue("mobile", e.target.value)}
                     />
                   </div>
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.phone?.message as React.ReactNode}
+                  {form.formState.errors.mobile?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
               <FormField>
@@ -369,12 +369,12 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                     maxLength={12}
                     minLength={12}
                     // required={true}
-                    {...form.register("aadhaar")}
-                    placeholder="12 digit Aadhaar"
+                    {...form.register("aadhar")}
+                    placeholder="12 digit Aadhar number"
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.aadhaar?.message as React.ReactNode}
+                  {form.formState.errors.aadhar?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
             </div>
@@ -389,7 +389,10 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             </FormLabel>
             <div>{renderSubjectMulti()}</div>
             <FormMessage>
-              {form.formState.errors.subjects?.message as React.ReactNode}
+              {
+                form.formState.errors.subject_speciality
+                  ?.message as React.ReactNode
+              }
             </FormMessage>
           </FormField>
 
@@ -412,17 +415,14 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             <FormLabel>Permanent Address</FormLabel>
             <FormControl>
               <Textarea
-                {...form.register("permanentAddress")}
+                {...form.register("address")}
                 maxLength={450}
                 rows={4}
                 placeholder="Enter complete residential address..."
               />
             </FormControl>
             <FormMessage>
-              {
-                form.formState.errors.permanentAddress
-                  ?.message as React.ReactNode
-              }
+              {form.formState.errors.address?.message as React.ReactNode}
             </FormMessage>
           </FormField>
           <div>
