@@ -35,7 +35,7 @@ export type StudentsQuery = {
 };
 
 export async function fetchStudents(
-  query: StudentsQuery = {}
+  query: StudentsQuery = {},
 ): Promise<StudentsResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
@@ -126,7 +126,7 @@ export type TeachersQuery = {
 
 export async function fetchTeachers(
   query: TeachersQuery = {},
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<TeachersResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
@@ -150,8 +150,8 @@ export async function fetchTeachers(
     Array.isArray(d.teachers)
       ? d.teachers
       : Array.isArray(d.items)
-      ? d.items
-      : []
+        ? d.items
+        : []
   ) as unknown[];
 
   const teachers: Teacher[] = (items || []).map((it) => {
@@ -170,10 +170,10 @@ export async function fetchTeachers(
       subjects = (itObj.subjects as unknown[])
         .map((s) =>
           s && typeof s === "object"
-            ? (s as Record<string, unknown>).name ?? null
+            ? ((s as Record<string, unknown>).name ?? null)
             : typeof s === "string"
-            ? s
-            : null
+              ? s
+              : null,
         )
         .filter(Boolean) as string[];
     }
@@ -193,7 +193,7 @@ export async function fetchTeachers(
         .filter(Boolean) as string[];
       if (subjFromAssignments.length > 0) {
         subjects = Array.from(
-          new Set([...(subjects ?? []), ...subjFromAssignments])
+          new Set([...(subjects ?? []), ...subjFromAssignments]),
         );
       }
     }
@@ -259,7 +259,7 @@ export async function fetchTeachers(
         .filter(Boolean) as string[];
       if (classesFromAssignments.length > 0) {
         assignedClasses = Array.from(
-          new Set([...(assignedClasses ?? []), ...classesFromAssignments])
+          new Set([...(assignedClasses ?? []), ...classesFromAssignments]),
         );
       }
     }
@@ -342,7 +342,7 @@ export type ClassesQuery = {
 };
 
 export async function fetchClasses(
-  query: ClassesQuery = {}
+  query: ClassesQuery = {},
 ): Promise<ClassesResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
@@ -366,7 +366,11 @@ export async function fetchClasses(
 
   // If API returned grouped grade objects with `sections`, derive a flat list for callers
   const first = rawItems && rawItems.length > 0 ? rawItems[0] : null;
-  if (first && typeof first === "object" && Array.isArray((first as Record<string, any>).sections)) {
+  if (
+    first &&
+    typeof first === "object" &&
+    Array.isArray((first as Record<string, any>).sections)
+  ) {
     groups = rawItems as unknown[];
     classes = (groups as any[]).flatMap((g) => {
       const grade = g as Record<string, any>;
@@ -376,7 +380,7 @@ export async function fetchClasses(
         const sid = s.id ?? s.classId ?? `${gradeName}-${s.section ?? idx}`;
         return {
           id: String(sid),
-          name: `${gradeName}${s.sectionLabel ? ` - ${s.sectionLabel}` : s.section ? ` - ${s.section}` : ""}`,
+          name: `${gradeName}${s.sectionLabel ? ` - ${s.sectionLabel}` : ""}`,
           section: s.section ?? null,
           createdAt: undefined,
           classTeacherId: s.classTeacherId ?? null,
@@ -386,13 +390,22 @@ export async function fetchClasses(
     });
   } else {
     classes = (rawItems || []).map((it) => {
-      const obj = it && typeof it === "object" ? (it as Record<string, any>) : {};
+      const obj =
+        it && typeof it === "object" ? (it as Record<string, any>) : {};
       const id = (obj.classId ?? obj.id ?? obj._id ?? "") as string;
       const name = (obj.className ?? obj.name ?? "") as string;
-      const section = (obj.classSection ?? obj.section ?? null) as string | null;
+      const section = (obj.classSection ?? obj.section ?? null) as
+        | string
+        | null;
       const ct = obj.classTeacher ?? obj.class_teacher ?? null;
-      const classTeacherId = ct && typeof ct === "object" ? (ct.teacherId ?? ct.id ?? ct._id ?? null) : null;
-      const classTeacherName = ct && typeof ct === "object" ? (ct.fullName ?? ct.name ?? null) : (obj.classTeacherName ?? null);
+      const classTeacherId =
+        ct && typeof ct === "object"
+          ? (ct.teacherId ?? ct.id ?? ct._id ?? null)
+          : null;
+      const classTeacherName =
+        ct && typeof ct === "object"
+          ? (ct.fullName ?? ct.name ?? null)
+          : (obj.classTeacherName ?? null);
 
       return {
         id: String(id),
@@ -445,7 +458,11 @@ export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
   if (Array.isArray(data) && data.length > 0) {
     // detect grouped shape (grade objects with `sections`) and flatten below
     const first = data[0];
-    if (first && typeof first === "object" && Array.isArray((first as Record<string, any>).sections)) {
+    if (
+      first &&
+      typeof first === "object" &&
+      Array.isArray((first as Record<string, any>).sections)
+    ) {
       const groups = data as any[];
       const flat: ClassWithTeacher[] = groups.flatMap((g) => {
         const gradeName = g.gradeName ?? g.name ?? "";
@@ -457,19 +474,25 @@ export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
           const teacher =
             s.classTeacher || s.classTeacherName || s.class_teacher
               ? // normalize teacher object
-                (s.classTeacher && typeof s.classTeacher === "object"
-                  ? {
-                      teacherId: s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
-                      fullName: s.classTeacher.fullName ?? s.classTeacher.name ?? String(s.classTeacherName ?? "") ,
-                      email: s.classTeacher.email ?? null,
-                      phone: s.classTeacher.phone ?? null,
-                    }
-                  : {
-                      teacherId: s.teacherId ?? "",
-                      fullName: String(s.classTeacherName ?? s.classTeacher ?? ""),
-                      email: null,
-                      phone: null,
-                    })
+                s.classTeacher && typeof s.classTeacher === "object"
+                ? {
+                    teacherId:
+                      s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
+                    fullName:
+                      s.classTeacher.fullName ??
+                      s.classTeacher.name ??
+                      String(s.classTeacherName ?? ""),
+                    email: s.classTeacher.email ?? null,
+                    phone: s.classTeacher.phone ?? null,
+                  }
+                : {
+                    teacherId: s.teacherId ?? "",
+                    fullName: String(
+                      s.classTeacherName ?? s.classTeacher ?? "",
+                    ),
+                    email: null,
+                    phone: null,
+                  }
               : null;
 
           return {
@@ -487,7 +510,8 @@ export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
     return data as ClassWithTeacher[];
   }
 
-  const d = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
   if (Array.isArray(d.items)) return d.items as ClassWithTeacher[];
   if (Array.isArray(d.classes)) return d.classes as ClassWithTeacher[];
 
@@ -496,8 +520,8 @@ export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
   const groups = Array.isArray(d.grades)
     ? d.grades
     : Array.isArray(d.groups)
-    ? d.groups
-    : null;
+      ? d.groups
+      : null;
   if (Array.isArray(groups) && groups.length > 0) {
     const flat: ClassWithTeacher[] = (groups as any[]).flatMap((g) => {
       const gradeName = g.gradeName ?? g.name ?? "";
@@ -508,19 +532,23 @@ export async function fetchClassesWithTeacher(): Promise<ClassWithTeacher[]> {
         const className = gradeName || s.className || s.name || "";
         const teacher =
           s.classTeacher || s.classTeacherName || s.class_teacher
-            ? (s.classTeacher && typeof s.classTeacher === "object"
-                ? {
-                    teacherId: s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
-                    fullName: s.classTeacher.fullName ?? s.classTeacher.name ?? String(s.classTeacherName ?? ""),
-                    email: s.classTeacher.email ?? null,
-                    phone: s.classTeacher.phone ?? null,
-                  }
-                : {
-                    teacherId: s.teacherId ?? "",
-                    fullName: String(s.classTeacherName ?? s.classTeacher ?? ""),
-                    email: null,
-                    phone: null,
-                  })
+            ? s.classTeacher && typeof s.classTeacher === "object"
+              ? {
+                  teacherId:
+                    s.classTeacher.teacherId ?? s.classTeacher.id ?? "",
+                  fullName:
+                    s.classTeacher.fullName ??
+                    s.classTeacher.name ??
+                    String(s.classTeacherName ?? ""),
+                  email: s.classTeacher.email ?? null,
+                  phone: s.classTeacher.phone ?? null,
+                }
+              : {
+                  teacherId: s.teacherId ?? "",
+                  fullName: String(s.classTeacherName ?? s.classTeacher ?? ""),
+                  email: null,
+                  phone: null,
+                }
             : null;
 
         return {
@@ -543,7 +571,7 @@ export async function createClass(payload: {
 }) {
   const res = await API.post<{ id: string } | ClassItem>(
     ADMIN_API.CLASSES,
-    payload
+    payload,
   );
   return res.data;
 }
@@ -567,7 +595,7 @@ export async function fetchAvailableTeachers(): Promise<Teacher[]> {
 // Assign a teacher to a class
 export async function assignTeacherToClass(
   classId: string,
-  teacherId: string
+  teacherId: string,
 ): Promise<void> {
   const url = `${ADMIN_API.CLASSES}/${classId}/assign-teacher`;
   await API.post(url, { teacherId });
@@ -594,7 +622,7 @@ export type SubjectsQuery = {
 };
 
 export async function fetchSubjects(
-  query: SubjectsQuery = {}
+  query: SubjectsQuery = {},
 ): Promise<SubjectsResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
@@ -662,7 +690,7 @@ export type UpdateTimetableEntryDto = {
 };
 
 export async function fetchTimetable(
-  classId: string
+  classId: string,
 ): Promise<TimetableEntryDto[]> {
   const url = `${ADMIN_API.CLASSES}/${classId}/timetable`;
   const res = await API.get<TimetableEntryDto[]>(url);
@@ -671,7 +699,7 @@ export async function fetchTimetable(
 
 export async function createTimetableEntry(
   classId: string,
-  payload: CreateTimetableEntryDto
+  payload: CreateTimetableEntryDto,
 ): Promise<TimetableEntryDto> {
   const url = `${ADMIN_API.CLASSES}/${classId}/timetable`;
   const res = await API.post<TimetableEntryDto>(url, payload);
@@ -681,7 +709,7 @@ export async function createTimetableEntry(
 export async function updateTimetableEntry(
   classId: string,
   teId: string,
-  payload: UpdateTimetableEntryDto
+  payload: UpdateTimetableEntryDto,
 ): Promise<TimetableEntryDto> {
   const url = `${ADMIN_API.CLASSES}/${classId}/timetable/${teId}`;
   const res = await API.put<TimetableEntryDto>(url, payload);
@@ -690,7 +718,7 @@ export async function updateTimetableEntry(
 
 export async function deleteTimetableEntry(
   classId: string,
-  teId: string
+  teId: string,
 ): Promise<{ message: string }> {
   const url = `${ADMIN_API.CLASSES}/${classId}/timetable/${teId}/delete`;
   const res = await API.post(url);
@@ -717,7 +745,7 @@ export type UpdateClassSubjectDto = {
 };
 
 export async function fetchClassSubjects(
-  classId: string
+  classId: string,
 ): Promise<ClassSubjectDto[]> {
   const url = `${ADMIN_API.CLASSES}/${classId}/subjects`;
   const res = await API.get<ClassSubjectDto[]>(url);
@@ -726,7 +754,7 @@ export async function fetchClassSubjects(
 
 export async function assignSubjectToClass(
   classId: string,
-  payload: CreateClassSubjectDto
+  payload: CreateClassSubjectDto,
 ): Promise<ClassSubjectDto> {
   const url = `${ADMIN_API.CLASSES}/${classId}/subjects`;
   const res = await API.post<ClassSubjectDto>(url, payload);
@@ -736,7 +764,7 @@ export async function assignSubjectToClass(
 export async function updateClassSubject(
   classId: string,
   csId: string,
-  payload: UpdateClassSubjectDto
+  payload: UpdateClassSubjectDto,
 ): Promise<ClassSubjectDto> {
   const url = `${ADMIN_API.CLASSES}/${classId}/subjects/${csId}`;
   const res = await API.put<ClassSubjectDto>(url, payload);
@@ -745,7 +773,7 @@ export async function updateClassSubject(
 
 export async function removeClassSubject(
   classId: string,
-  csId: string
+  csId: string,
 ): Promise<{ message: string }> {
   const url = `${ADMIN_API.CLASSES}/${classId}/subjects/${csId}/delete`;
   const res = await API.post(url);
@@ -780,7 +808,7 @@ export type AnnouncementsQuery = {
 
 export async function fetchAnnouncements(
   query: AnnouncementsQuery = {},
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
 ): Promise<AnnouncementsResponse> {
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
@@ -795,18 +823,22 @@ export async function fetchAnnouncements(
   });
 
   const data = res.data as unknown;
-  const d = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const d =
+    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
-  const items = (Array.isArray(data)
-    ? (data as unknown[])
-    : Array.isArray(d.announcements)
-    ? (d.announcements as unknown[])
-    : Array.isArray(d.items)
-    ? (d.items as unknown[])
-    : []) as unknown[];
+  const items = (
+    Array.isArray(data)
+      ? (data as unknown[])
+      : Array.isArray(d.announcements)
+        ? (d.announcements as unknown[])
+        : Array.isArray(d.items)
+          ? (d.items as unknown[])
+          : []
+  ) as unknown[];
 
   const announcements: Announcement[] = (items || []).map((it) => {
-    const obj = it && typeof it === "object" ? (it as Record<string, unknown>) : {};
+    const obj =
+      it && typeof it === "object" ? (it as Record<string, unknown>) : {};
     return {
       id: String(obj.id ?? obj._id ?? obj.announcementId ?? ""),
       title: String(obj.title ?? obj.name ?? ""),
@@ -815,16 +847,22 @@ export async function fetchAnnouncements(
       role: (obj.role ?? null) as string | null,
       attachments: (obj.attachments ?? obj.files ?? null) as string | null,
       createdAt: (obj.createdAt ?? obj.created_at ?? null) as string | null,
-      scheduledAt: (obj.scheduledAt ?? obj.scheduled_at ?? null) as string | null,
+      scheduledAt: (obj.scheduledAt ?? obj.scheduled_at ?? null) as
+        | string
+        | null,
     } as Announcement;
   });
 
   const total: number | undefined =
-    (d.total as number | undefined) ?? (d.totalCount as number | undefined) ?? announcements.length;
+    (d.total as number | undefined) ??
+    (d.totalCount as number | undefined) ??
+    announcements.length;
   const page: number | undefined =
     (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
   const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ?? (d.limit as number | undefined) ?? query.pageSize;
+    (d.pageSize as number | undefined) ??
+    (d.limit as number | undefined) ??
+    query.pageSize;
 
   return {
     announcements,

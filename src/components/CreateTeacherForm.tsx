@@ -154,6 +154,12 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   const onSubmit: SubmitHandler<CreateTeacherValues> = useCallback(
     async (values) => {
       try {
+        const { employee_id } = await generateEmployeeId({
+          fullName: values.fullName.trim(),
+          date_of_birth: values.date_of_birth,
+          phone: "+91" + values.phone.trim(),
+        });
+
         const payload: CreateTeacherValues = {
           fullName: values.fullName,
           email: values.email,
@@ -161,8 +167,8 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
           date_of_birth: values.date_of_birth,
           gender: values.gender,
           aadhar: values.aadhaar,
-          subjects: values.subjects,
-          employee_id: employeeId ?? "EMP-1234",
+          subject_speciality: values.subjects,
+          employee_id: employee_id ?? "EMP-1234",
           address: values.permanentAddress,
         };
 
@@ -181,6 +187,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         setEmployeeId(null);
         onCreated?.();
       } catch (err) {
+        console.log("Error creating teacher:", err);
         if (err instanceof ApiValidationError) {
           Object.entries(err.fieldErrors).forEach(([k, v]) => {
             setError(k as any, { type: "server", message: v });
@@ -261,6 +268,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                       className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
                       type="text"
                       placeholder="9876543210"
+                      maxLength={10}
                       value={form.watch("phone") || ""}
                       onChange={(e) => form.setValue("phone", e.target.value)}
                     />

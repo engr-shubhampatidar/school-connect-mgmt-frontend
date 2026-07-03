@@ -264,7 +264,7 @@ export default function CreateStudentDialog({
                                 <Select
                                   options={classes.map((c) => ({
                                     id: c.id,
-                                    name: `${c.name}${c.section ? ` - ${c.section}` : ""}`,
+                                    name: `${c.name}`,
                                   }))}
                                   value={field.value ?? ""}
                                   onChange={(v) => field.onChange(v)}
@@ -310,6 +310,7 @@ export default function CreateStudentDialog({
                               <input
                                 {...form.register("phoneNumber")}
                                 className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                                maxLength={10}
                                 type="text"
                                 placeholder="9876543210"
                               />

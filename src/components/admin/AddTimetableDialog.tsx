@@ -129,10 +129,6 @@ export default function AddTimetableDialog({
   };
 
   const handleSubmit = async () => {
-    if (!subjectId || dayOfWeek === "" || !startTime || !endTime) {
-      setError("Please fill all required fields");
-      return;
-    }
     if (!isTimeLess(startTime, endTime)) {
       setError("Start time must be earlier than end time");
       return;
@@ -146,7 +142,7 @@ export default function AddTimetableDialog({
     try {
       const payload: any = {
         subjectId,
-        dayOfWeek: Number(dayOfWeek),
+        dayOfWeek: 0,
         startTime,
         endTime,
         room,
@@ -219,7 +215,7 @@ export default function AddTimetableDialog({
               )}
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-sm text-slate-700">
                 Day of Week
               </label>
@@ -238,7 +234,7 @@ export default function AddTimetableDialog({
                 onChange={(v) => setDayOfWeek(v)}
                 placeholder="Select Day"
               />
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-2 gap-2">
               <div>
