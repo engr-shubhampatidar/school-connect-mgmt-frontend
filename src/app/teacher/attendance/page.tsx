@@ -36,7 +36,7 @@ export default function TeacherAttendancePage() {
   }, [toast]);
   const [loading, setLoading] = useState(true);
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [date, setDate] = useState<string>("2026-02-04");
+  const [date, setDate] = useState<string>(todayISO());
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [search, setSearch] = useState("");
 
@@ -52,7 +52,7 @@ export default function TeacherAttendancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [attendanceExists, setAttendanceExists] = useState(false);
   const [open, setOpen] = useState(false);
-  const notAssign:any = "N/A"
+  const notAssign: any = "N/A";
 
   useEffect(() => {
     if (!getToken("teacher")) {
@@ -86,7 +86,7 @@ export default function TeacherAttendancePage() {
           return {
             studentId: (so.id ?? so.studentId ?? "") as string,
             name: (so.name ?? "") as string,
-            rollNo: (so.rollNo ?? so.roll_no ?? "") as string,
+            rollNo: (so.studentId ?? so.roll_no ?? "") as string,
             status: undefined,
           };
         });
@@ -127,7 +127,7 @@ export default function TeacherAttendancePage() {
               const id =
                 (cur as { studentId?: string; id?: string }).studentId ??
                 (cur as { studentId?: string; id?: string }).id;
-              const status =  (cur as { status?: string }).status ?? "";
+              const status = (cur as { status?: string }).status ?? "";
               if (id) acc[id] = status;
               return acc;
             },
