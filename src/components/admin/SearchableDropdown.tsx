@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   getNotClassTeachers,
-  getTeachers,
   Teacher,
 } from "@/services/teacher.service";
 
@@ -11,6 +10,7 @@ interface Props {
   value?: string | null;
   onChange: (id: string | null) => void;
   placeholder?: string;
+  selectedLabel?: string | null;
   subjectId?: string | null;
   fetchTeachers?: (
     search: string,
@@ -22,6 +22,7 @@ export default function SearchableDropdown({
   value,
   onChange,
   placeholder = "Select...",
+  selectedLabel,
   fetchTeachers,
   subjectId,
 }: Props) {
@@ -29,46 +30,74 @@ export default function SearchableDropdown({
   const [options, setOptions] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [fetched, setFetched] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
+  const fetchFnRef = useRef(fetchTeachers ?? getNotClassTeachers);
+
+  useEffect(() => {
+    fetchFnRef.current = fetchTeachers ?? getNotClassTeachers;
+  }, [fetchTeachers]);
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (!ref.current) return;
-      if (!ref.current.contains(e.target as Node)) setOpen(false);
+      if (!ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
     }
     document.addEventListener("click", onDoc);
     return () => document.removeEventListener("click", onDoc);
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || fetched) return;
+
     let mounted = true;
     setLoading(true);
 
-    const fn = fetchTeachers ?? getNotClassTeachers;
-    fn(search, subjectId)
+    fetchFnRef
+      .current("", subjectId)
       .then((res) => {
         if (!mounted) return;
-        setOptions(Array.isArray(res) ? res : []);
-        setLoading(false);
+        const list = Array.isArray(res) ? res : [];
+        setOptions(list);
+        setFetched(true);
+        if (!value && selectedLabel) {
+          const match = list.find((t) => t.name === selectedLabel);
+          if (match) onChange(match.id);
+        }
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        if (!mounted) return;
+        setOptions([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
 
     return () => {
       mounted = false;
     };
-  }, [open, search, subjectId, fetchTeachers]);
+  }, [open, fetched, subjectId, value, selectedLabel, onChange]);
 
-  const selected =
-    (Array.isArray(options) ? options : []).find((o) => o.id === value) || null;
+  const selected = options.find((o) => o.id === value) ?? null;
+  const displayName = selected?.name ?? selectedLabel ?? placeholder;
+
+  const filtered = options.filter(
+    (o) => !search || o.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
     <div ref={ref} className="relative">
       <div
-        className="flex items-center  gap-2 justify-between w-full rounded-md border border-[#D7E3FC]  px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]"
-        onClick={() => setOpen((s) => !s)}
+        className="flex items-center gap-2 justify-between w-full rounded-md border border-[#D7E3FC] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280] cursor-pointer"
+        onClick={() => {
+          if (open) setSearch("");
+          setOpen((s) => !s);
+        }}
       >
-        <div>{selected ? selected.name : placeholder}</div>
+        <div>{displayName}</div>
         <div>▾</div>
       </div>
       {open && (
@@ -79,17 +108,22 @@ export default function SearchableDropdown({
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
           {loading && <div className="p-2">Loading...</div>}
+          {!loading && filtered.length === 0 && (
+            <div className="p-2 text-sm text-slate-500">No teachers found</div>
+          )}
           {!loading &&
-            options.map((opt) => (
+            filtered.map((opt) => (
               <div
                 key={opt.id}
                 className="p-2 hover:bg-slate-50 cursor-pointer"
                 onClick={() => {
                   onChange(opt.id);
                   setOpen(false);
+                  setSearch("");
                 }}
               >
                 {opt.name}

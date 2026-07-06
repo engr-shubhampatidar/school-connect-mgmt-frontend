@@ -51,6 +51,7 @@ interface Props {
   classId?: string;
   onReloadSubjects?: () => void;
   onReloadTimetable?: () => void;
+  onReloadDetails?: () => void;
 }
 
 export default function ClassOverview({
@@ -67,6 +68,7 @@ export default function ClassOverview({
   classId,
   onReloadSubjects,
   onReloadTimetable,
+  onReloadDetails,
 }: Props) {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isTimetableDialogOpen, setIsTimetableDialogOpen] =
@@ -77,6 +79,7 @@ export default function ClassOverview({
         data={details ?? null}
         isLoading={!!isLoadingDetails}
         error={detailsError ?? null}
+        onUpdated={onReloadDetails}
       />
 
       {/* Class & Subject Allocation */}

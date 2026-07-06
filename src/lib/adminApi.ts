@@ -92,6 +92,7 @@ export type Teacher = {
   email: string;
   phone?: string | null;
   subjects?: string[] | null;
+  employeeId?: string;
   assignedClasses?: string[] | null;
   classTeacher?: { id: string; name: string; section?: string | null } | null;
   classes?: TeacherClassRaw[] | null;
@@ -161,7 +162,7 @@ export async function fetchTeachers(
       itObj.user && typeof itObj.user === "object"
         ? (itObj.user as Record<string, unknown>)
         : {};
-    const name = (user.fullName ?? itObj.name ?? "") as string;
+    const name = (itObj.fullName ?? "") as string;
     const email = (user.email ?? itObj.email ?? "") as string;
     const phone = (itObj.phone ?? user.phone ?? null) as string | null;
 
@@ -270,6 +271,7 @@ export async function fetchTeachers(
       email,
       phone,
       subjects,
+      employeeId: itObj.employeeId,
       assignedClasses,
       classes: Array.isArray(classesArr)
         ? (classesArr as TeacherClassRaw[])
@@ -574,6 +576,25 @@ export async function createClass(payload: {
     payload,
   );
   return res.data;
+}
+
+export type ClassDetail = {
+  className: string;
+  section: string;
+  homeRoom: string;
+  classTeacherName: string;
+};
+
+export async function fetchClassById(id: string): Promise<ClassDetail> {
+  const res = await API.get<ClassDetail>(`${ADMIN_API.CLASSES}/${id}`);
+  return res.data;
+}
+
+export async function updateClass(
+  id: string,
+  payload: { room_no: string; classTeacherId: string },
+): Promise<void> {
+  await API.put(`${ADMIN_API.CLASSES}/${id}`, payload);
 }
 
 // Fetch available teachers for assignment

@@ -1,16 +1,18 @@
 "use client";
-import React, { useState } from "react";
-import Card from "../ui/Card";
-import Button from "../ui/Button";
-import TeacherDetailsDrawer from "./TeacherDetailsDrawer";
-import { Teacher } from "../../lib/adminApi";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-
-// TeachersTable
-// - Renders the teachers list with loading skeleton and empty state
-// - Handles pagination controls and delegates edit/resend actions via callbacks
-// - Shows a details drawer when a teacher row is opened
+import { Teacher } from "../../lib/adminApi";
+import Button from "../ui/Button";
+import Card from "../ui/Card";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
 
 type Props = {
   teachers: Teacher[];
@@ -40,22 +42,40 @@ export default function TeachersTable({
     Math.ceil((total || teachers.length) / pageSize)
   );
 
-  // Drawer state is local: open a teacher's details from the table row.
-  // The actual drawer component is a separate file (`TeacherDetailsDrawer`).
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (i > 1 && i < totalPages) {
+          pages.push(i);
+        }
+      }
+
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
   const router = useRouter();
-
-  function openDrawer(id: string) {
-    const t = teachers.find((x) => x.id === id) ?? null;
-    setSelectedTeacher(t);
-    setIsDrawerOpen(true);
-  }
-
-  function closeDrawer() {
-    setIsDrawerOpen(false);
-    setSelectedTeacher(null);
-  }
 
   if (loading) {
     return (
@@ -116,6 +136,8 @@ export default function TeachersTable({
     );
   }
 
+  console.log(teachers);
+
   return (
     <div className="rounded-lg bg-white border border-[#D7E3FC] ">
       <div className="overflow-x-auto ">
@@ -126,10 +148,11 @@ export default function TeachersTable({
                 Id No.
               </th>
               <th className="text-left py-4 px-4">Teacher Name</th>
+              <th className="text-left py-4 px-4">Contact No.</th>
               <th className="text-left py-4 hidden lg:table-cell">
-                Assigned Class
+                Class Teacher
               </th>
-              <th className="text-left py-4 hidden lg:table-cell">Subject</th>
+              <th className="text-left py-4 hidden lg:table-cell">Assigned Classes & Subjects</th>
               <th className="text-right py-4 pr-10">Actions</th>
             </tr>
           </thead>
@@ -139,13 +162,12 @@ export default function TeachersTable({
                 key={t.id}
                 className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
               >
-                <td className="py-3 hidden lg:table-cell p-6">{"ad-01234"}</td>
+                <td className="py-3 hidden lg:table-cell p-6">{t?.employeeId}</td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <button
                       aria-label="View teacher details"
                       title="View details"
-                      onClick={() => openDrawer(t.id)}
                     >
                       <div className="font-medium text-slate-900 flex items-center gap-3 cursor-pointer">
                         <div className="w-12 h-12">
@@ -161,7 +183,7 @@ export default function TeachersTable({
                         </div>
                         <div className="flex flex-col text-left">
                           <div className="text-[14px]">
-                            {t.user?.fullName ?? t.name ?? "-"}
+                            {t.name ?? "-"}
                           </div>
                           <div className="text-[12px] text-[#737373]">
                             {t.user?.email ?? t.email ?? "-"}
@@ -170,6 +192,9 @@ export default function TeachersTable({
                       </div>
                     </button>
                   </div>
+                </td>
+                <td className="py-3 hidden lg:table-cell">
+                  {t?.phone}
                 </td>
                 <td className="py-3 hidden lg:table-cell">
                   {t.classTeacher?.name
@@ -187,20 +212,10 @@ export default function TeachersTable({
                     : "-"}
                 </td>
                 <td className="py-3 hidden lg:table-cell">
-                  {t.subjects ?? "-"}
+                  {t.assignedClasses ?? "-"}
                 </td>
                 <td className="py-3 flex justify-end pr-6">
                   <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        const name = t.name ?? "-";
-                        window.alert(`Edit clicked for ${name}`);
-                        onEdit?.(t.id);
-                      }}
-                    >
-                      Edit
-                    </Button>
                     <Button
                     className="cursor-pointer"
                       variant="ghost"
@@ -218,38 +233,50 @@ export default function TeachersTable({
         </table>
       </div>
 
+      {/* Divider */}
+      <div className="border-t border-[#D7E3FC] mt-4" />
+
       {/* Pagination and summary */}
-      <div className="mt-4 flex items-center justify-between px-6 pb-4">
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-4">
         <div className="text-sm text-slate-600">
           Showing {teachers.length} of {total ?? teachers.length}
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
-            disabled={(page || 1) <= 1}
-          >
-            Previous
-          </Button>
-          <div className="text-sm text-slate-700">
-            Page {page} / {totalPages}
-          </div>
-          <Button
-            onClick={() => onPageChange(Math.min(totalPages, (page || 1) + 1))}
-            disabled={(page || 1) >= totalPages}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
+                disabled={(page || 1) <= 1}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
 
-      {/* Details drawer: displays the selected teacher and exposes edit/resend callbacks */}
-      <TeacherDetailsDrawer
-        isOpen={isDrawerOpen}
-        teacher={selectedTeacher}
-        onClose={closeDrawer}
-        onEdit={(id: string) => onEdit?.(id)}
-        onResendInvite={(id: string) => onResendInvite?.(id)}
-      />
+            {getPageNumbers().map((pageNumber, idx) => (
+              <PaginationItem key={idx}>
+                {pageNumber === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    isActive={pageNumber === page}
+                    onClick={() => onPageChange(pageNumber)}
+                    className="cursor-pointer"
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => onPageChange(Math.min(totalPages, (page || 1) + 1))}
+                disabled={(page || 1) >= totalPages}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }
