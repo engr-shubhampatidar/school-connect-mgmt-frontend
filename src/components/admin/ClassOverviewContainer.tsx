@@ -113,6 +113,20 @@ export default function ClassOverviewContainer() {
     };
   }, [clsId]);
 
+  const reloadDetails = async () => {
+    if (!clsId) return;
+    setIsLoadingDetails(true);
+    setDetailsError(null);
+    try {
+      const res = await API.get(`/api/admin/classes/${clsId}/details`);
+      setDetails(res.data ?? null);
+    } catch {
+      setDetailsError("Failed to load class details. Please try again.");
+    } finally {
+      setIsLoadingDetails(false);
+    }
+  };
+
   useEffect(() => {
     if (!clsId) {
       setTimetableItems([]);
@@ -157,6 +171,7 @@ export default function ClassOverviewContainer() {
       isLoadingDetails={isLoadingDetails}
       detailsError={detailsError}
       onReloadSubjects={reloadSubjects}
+      onReloadDetails={reloadDetails}
     />
   );
 }
