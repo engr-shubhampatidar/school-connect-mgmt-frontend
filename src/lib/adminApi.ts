@@ -1,11 +1,12 @@
 import API from "./axios";
 import type { AxiosRequestConfig } from "axios";
-import { ADMIN_API } from "./api-routes";
+import { ADMIN_API, BASE_URL } from "./api-routes";
+import { ur } from "zod/locales";
 
 export type Student = {
   id: string;
   name: string;
-  rollNo?: string | number | null;
+  studentId?: string | number | null;
   class?:
     | string
     | null
@@ -47,7 +48,7 @@ export async function fetchStudents(
     items: Array<{
       id: string;
       name: string;
-      rollNo?: string | number | null;
+      studentId?: string | number | null;
       currentClass?: { name: string; section?: string | null } | null;
       createdAt: string;
     }>;
@@ -61,7 +62,7 @@ export async function fetchStudents(
   const students: Student[] = items.map((it) => ({
     id: it.id,
     name: it.name,
-    rollNo: (it.rollNo ?? null) as string | number | null,
+    studentId: (it.studentId ?? null) as string | number | null,
     class: it.currentClass
       ? {
           id: "",
@@ -316,6 +317,35 @@ export async function fetchTeachers(
     page,
     pageSize,
   };
+}
+export interface StudentDetails {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
+  phoneNo: string;
+  gender: string | null;
+  category: string | null;
+  admissionDate: string | null;
+  aadhaar: string | null;
+  address: string | null;
+  rollNo: string | null;
+  fatherName: string | null;
+  fatherMobile: string | null;
+  fatherEmail: string | null;
+  motherName: string | null;
+  emergencyContact: string | null;
+  dob: string | null;
+}
+
+export async function getStudentById(id: string) {
+  console.log("BASE URL:", API.defaults.baseURL);
+ const url =`${BASE_URL}${ADMIN_API.STUDENTS}/${id}`
+  const res = await API.get(url);
+
+  console.log(res);
+
+  return res.data;
 }
 
 export type ClassItem = {

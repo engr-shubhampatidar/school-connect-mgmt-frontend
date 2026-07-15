@@ -131,7 +131,7 @@ type Props = {
 };
 
 type StudentProfileResponse = {
-  student_id: string;
+  studentId: string;
   id?: string;
   name: string;
   class_id: string;
@@ -275,13 +275,14 @@ export default function UpdateStudentDialog({
         admission_locked: locked,
       });
       setDocuments(data.student_documents ?? []);
-      setStudentIdDisplay(data.student_id ?? data.id ?? "");
+      setStudentIdDisplay(data.studentId ?? "");
       // If API included a class display name use it, otherwise try to derive from object
       if (data.class_name && data.class_name.trim()) {
         setClassDisplay(data.class_name);
       } else if (data.class_id && typeof data.class_id === "object") {
         const cname =
           (data.class_id as any).name ?? (data.class_id as any).className ?? "";
+        console.log(cname + "class name of student");
         setClassDisplay(cname || "");
       } else {
         setClassDisplay("");
