@@ -13,7 +13,7 @@ import {
 } from "../ui/table";
 import { Student } from "../../lib/adminApi";
 import Image from "next/image";
-import EditStudentDialog from "./EditStudentDialog";
+// import EditStudentDialog from "./EditStudentDialog";
 
 type Props = {
   students: Student[];
@@ -141,7 +141,7 @@ export default function StudentsTable({
                 className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
               >
                 <TableCell className="py-3 hidden lg:table-cell p-6">
-                  {s.rollNo ?? "-"}
+                  {s.studentId }
                 </TableCell>
 
                 <TableCell className="p-3">
@@ -199,30 +199,9 @@ export default function StudentsTable({
                     <Button variant="ghost" onClick={() => onView?.(s.id)}>
                       View
                     </Button>
-                    <Button variant="ghost" onClick={() => onEdit?.(s.id)}>
-                      Edit
+                    <Button variant="dark" onClick={() => onEdit?.(s.id)}>
+                      Edit Student
                     </Button>
-                    <div className="">
-                      <Button onClick={() => setOpen(true)}>Edit Student</Button>
-
-                      <EditStudentDialog
-                        isOpen={open}
-                        onClose={() => setOpen(false)}
-                        
-                      >
-                       
-
-                        <div className=" flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            onClick={() => setOpen(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button>Save</Button>
-                        </div>
-                      </EditStudentDialog>
-                    </div>
                   </div>
                 </TableCell>
               </TableRow>

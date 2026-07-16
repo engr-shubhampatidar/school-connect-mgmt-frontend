@@ -1,5 +1,6 @@
 "use client";
 import UpdateStudentDialog from "@/components/admin/UpdateStudentDialog";
+// import StudentDetailsDrawer from "@/components/admin/StudentDetailsDrawer";
 import { useCallback, useEffect, useRef, useState } from "react";
 import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
 import StudentsFilterBar, {
@@ -14,13 +15,16 @@ import {
   Student,
   StudentsQuery,
 } from "../../../lib/adminApi";
+import { useRouter } from "next/navigation";
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
+
+  const router = useRouter();
 
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
@@ -85,7 +89,9 @@ export default function AdminStudentsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+  // const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
+  //   null,
+  // );
 
   return (
     <div className="mx-auto px-4 py-6">
@@ -133,15 +139,9 @@ export default function AdminStudentsPage() {
         pageSize={pageSize}
         onRetry={() => load({ ...filters, page, pageSize })}
         onPageChange={(p) => setPage(p)}
-        onView={(id) => setSelectedStudentId(id)}
+        onView={(id) => router.push(`/admin/students/profile/${id}`)}
         onEdit={(id) => setEditingStudentId(id)}
       />
-
-      {/* <StudentDetailsDrawer
-        studentId={selectedStudentId}
-        isOpen={Boolean(selectedStudentId)}
-        onClose={() => setSelectedStudentId(null)}
-      /> */}
 
       <UpdateStudentDialog
         open={Boolean(editingStudentId)}

@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SCHOOL CONNECT - Management Dashboard",
+  title: "AKSHAR - Management Dashboard",
   description: "Powered by Sankalp Tech",
 };
 
