@@ -10,21 +10,27 @@ type Role = "admin" | "teacher" | "student";
 function normalizeUser(respUser: any, role: Role) {
   return {
     id: respUser?.id ?? respUser?._id ?? null,
-    name:
-      respUser?.fullName ?? respUser?.name ?? respUser?.username ?? null,
+    name: respUser?.fullName ?? respUser?.name ?? respUser?.username ?? null,
     email: respUser?.email ?? null,
     role: respUser?.role ?? role,
     school: respUser?.school ?? null,
   };
 }
 
-function extractTokenFromData(data: any): { access?: string; refresh?: string } {
+function extractTokenFromData(data: any): {
+  access?: string;
+  refresh?: string;
+} {
   if (!data || typeof data !== "object") return {};
   const d = data as Record<string, any>;
   const access =
     d.accessToken ?? d.token ?? d.access_token ?? d.data?.accessToken ?? null;
-  const refresh = d.refreshToken ?? d.refresh_token ?? d.data?.refreshToken ?? null;
-  return { access: typeof access === "string" ? access : undefined, refresh: typeof refresh === "string" ? refresh : undefined };
+  const refresh =
+    d.refreshToken ?? d.refresh_token ?? d.data?.refreshToken ?? null;
+  return {
+    access: typeof access === "string" ? access : undefined,
+    refresh: typeof refresh === "string" ? refresh : undefined,
+  };
 }
 
 function handleLoginResponse(role: Role, data: any) {
@@ -33,7 +39,10 @@ function handleLoginResponse(role: Role, data: any) {
     if (access) setToken(role, access);
     if (refresh) setToken(role, refresh, "refresh");
 
-    const respUser = data && typeof data === "object" ? (data.user ?? data.teacher ?? data.student ?? data) : null;
+    const respUser =
+      data && typeof data === "object"
+        ? (data.user ?? data.teacher ?? data.student ?? data)
+        : null;
     if (respUser && typeof respUser === "object") {
       const userToStore = normalizeUser(respUser, role);
       setUser(role, userToStore);

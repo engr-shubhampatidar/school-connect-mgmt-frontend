@@ -13,7 +13,7 @@ API.interceptors.request.use((config) => {
   try {
     const url = config.url ?? "";
     // attach token if calling admin API endpoints
-    if (url.startsWith("/api/admin") || url.includes("/api/admin")) {
+    if (url.startsWith("/admin") || url.includes("/api/admin")) {
       let token = getToken("admin");
       // fallback to cookie token if available
       if (!token && typeof document !== "undefined") {
@@ -56,7 +56,7 @@ API.interceptors.response.use(
 
     // Propagate original response data so callers can map field errors
     return Promise.reject(error);
-  }
+  },
 );
 
 export default API;
