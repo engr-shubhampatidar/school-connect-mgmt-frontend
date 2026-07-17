@@ -2,7 +2,15 @@
 import React from "react";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "default" | "ghost" | "pill" | "dark" | "inputType" | "outline" | "calendar";
+  variant?:
+    | "default"
+    | "ghost"
+    | "pill"
+    | "dark"
+    | "inputType"
+    | "outline"
+    | "calendar"
+    | "outlineNone";
   size?: string;
 };
 
@@ -19,6 +27,8 @@ const variants: Record<string, string> = {
   outline:
     "bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50",
   calendar: "bg-transparent outline-none text-slate-700 hover:bg-slate-100",
+  outlineNone:
+    "bg-transparent outline-none text-[#737373] text-[14px] font-[600]",
 };
 
 export const buttonVariants = ({

@@ -39,7 +39,7 @@ export default function TeachersTable({
 }: Props) {
   const totalPages = Math.max(
     1,
-    Math.ceil((total || teachers.length) / pageSize)
+    Math.ceil((total || teachers.length) / pageSize),
   );
 
   const getPageNumbers = () => {
@@ -84,10 +84,24 @@ export default function TeachersTable({
           <table className="w-full table-auto">
             <thead className="sticky top-0 bg-white">
               <tr>
-                <th className="text-left py-2">Name</th>
-                <th className="text-left py-2">Email</th>
-                <th className="text-left py-2">Phone</th>
-                <th className="text-left py-2">Actions</th>
+                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 pl-6 w-48 hidden lg:table-cell">
+                  Teacher ID
+                </th>
+                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
+                  Teacher Name & Mail
+                </th>
+                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
+                  Contact No.
+                </th>
+                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
+                  Class Teacher
+                </th>
+                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
+                  Assigned Classes & Subjects
+                </th>
+                <th className="text-right text-[#021034] font-[500] text-[14px] py-4 pr-10">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -144,25 +158,35 @@ export default function TeachersTable({
         <table className="w-full table-auto ">
           <thead className="sticky top-0  ">
             <tr>
-              <th className="text-left py-4 pl-6 w-48 hidden lg:table-cell">
-                Id No.
+              <th className="text-left text-[#021034] font-[500] text-[14px] py-4 pl-6 w-48 hidden lg:table-cell">
+                Teacher ID
               </th>
-              <th className="text-left py-4 px-4">Teacher Name</th>
-              <th className="text-left py-4 px-4">Contact No.</th>
-              <th className="text-left py-4 hidden lg:table-cell">
+              <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
+                Teacher Name & Mail
+              </th>
+              <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
+                Contact No.
+              </th>
+              <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
                 Class Teacher
               </th>
-              <th className="text-left py-4 hidden lg:table-cell">Assigned Classes & Subjects</th>
-              <th className="text-right py-4 pr-10">Actions</th>
+              <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
+                Assigned Classes & Subjects
+              </th>
+              <th className="text-right text-[#021034] font-[500] text-[14px] py-4 pr-10">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
             {teachers.map((t) => (
               <tr
                 key={t.id}
-                className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
+                className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-[#D7E3FC]"
               >
-                <td className="py-3 hidden lg:table-cell p-6">{t?.employeeId}</td>
+                <td className="py-3 hidden text-[#64748B] lg:table-cell p-6">
+                  {t?.employeeId}
+                </td>
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <button
@@ -182,9 +206,7 @@ export default function TeachersTable({
                           />
                         </div>
                         <div className="flex flex-col text-left">
-                          <div className="text-[14px]">
-                            {t.name ?? "-"}
-                          </div>
+                          <div className="text-[14px]">{t.name ?? "-"}</div>
                           <div className="text-[12px] text-[#737373]">
                             {t.user?.email ?? t.email ?? "-"}
                           </div>
@@ -193,39 +215,39 @@ export default function TeachersTable({
                     </button>
                   </div>
                 </td>
-                <td className="py-3 hidden lg:table-cell">
+                <td className="py-3 hidden lg:table-cell text-[14px] font-[500] text-[#64748B]">
                   {t?.phone}
                 </td>
-                <td className="py-3 hidden lg:table-cell">
-                  {t.classTeacher?.name
-                    ? `${t.classTeacher.name}${
-                        t.classTeacher.section
-                          ? " - " + t.classTeacher.section
-                          : ""
-                      }`
-                    : t.classes && t.classes.length
-                    ? `${t.classes[0].className}${
-                        t.classes[0].classSection
-                          ? " - " + t.classes[0].classSection
-                          : ""
-                      }`
-                    : "-"}
+                <td className="py-3 hidden  lg:table-cell">
+                  <span className="bg-[#D7E3FC] font-[600] text-[12px] text-[#021034] px-2 py-1 rounded-full">
+                    {t.classTeacher?.name
+                      ? `${t.classTeacher.name}${
+                          t.classTeacher.section
+                            ? " - " + t.classTeacher.section
+                            : ""
+                        }`
+                      : t.classes && t.classes.length
+                        ? `${t.classes[0].className}${
+                            t.classes[0].classSection
+                              ? " - " + t.classes[0].classSection
+                              : ""
+                          }`
+                        : "-"}
+                  </span>
                 </td>
                 <td className="py-3 hidden lg:table-cell">
                   {t.assignedClasses ?? "-"}
                 </td>
-                <td className="py-3 flex justify-end pr-6">
-                  <div className="flex gap-2">
-                    <Button
+                <td className="flex justify-end items-center py-5 pr-6">
+                  <Button
                     className="cursor-pointer"
-                      variant="ghost"
-                      onClick={() => {
-                       router.push(`/admin/teachers/profile/${t.id}`);
-                      }}
-                    >
-                      Veiw Profile
-                    </Button>
-                  </div>
+                    variant="outlineNone"
+                    onClick={() => {
+                      router.push(`/admin/teachers/profile/${t.id}`);
+                    }}
+                  >
+                    Veiw Profile
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -269,7 +291,9 @@ export default function TeachersTable({
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => onPageChange(Math.min(totalPages, (page || 1) + 1))}
+                onClick={() =>
+                  onPageChange(Math.min(totalPages, (page || 1) + 1))
+                }
                 disabled={(page || 1) >= totalPages}
                 className="cursor-pointer"
               />
