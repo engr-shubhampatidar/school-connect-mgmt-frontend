@@ -81,11 +81,10 @@ export default function TeachersFilterBar({
     onClear();
   };
 
-  const handleApply = () => {
-    const s = search.trim() || email.trim();
-    onApply({ search: s, email: email.trim(), subjectId, classId });
-  };
-
+  // const handleApply = () => {
+  //   const s = search.trim() || email.trim();
+  //   onApply({ search: s, email: email.trim(), subjectId, classId });
+  // };
   return (
     <Card>
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-4">
@@ -127,7 +126,7 @@ export default function TeachersFilterBar({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handleApply}>Apply</Button>
+          {/* <Button onClick={handleApply}>Apply</Button> */}
           <Button variant="ghost" onClick={handleClear}>
             Reset
           </Button>
