@@ -21,7 +21,7 @@ export type Student = {
 };
 
 export type StudentsResponse = {
-  data: Student[];
+  students: Student[];
   total?: number;
   page?: number;
   pageSize?: number;
@@ -57,24 +57,26 @@ export async function fetchStudents(
     limit?: number;
   }>(ADMIN_API.STUDENTS, { params });
 
-  const { data = [], total, page, limit } = res.data;
-  const students: Student[] = data.map((it) => ({
-    id: it.id,
-    name: it.name,
-    studentId: (it.studentId ?? null) as string | number | null,
-    class:
-      it.className && it.section
-        ? {
-            id: "",
-            name: it.className,
-            section: it.section ?? null,
-          }
-        : null,
-    createdAt: it.createdAt,
-  }));
+  const {
+    items = [],
+    total = 0,
+    page = 1,
+    limit = 10,
+  } = res.data as {
+    items: Array<{
+      id: string;
+      name: string;
+      studentId?: string | number | null;
+      currentClass?: { name: string; section?: string | null } | null;
+      createdAt: string;
+    }>;
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
 
   return {
-    students,
+    students: items,
     total,
     page,
     pageSize: limit,
