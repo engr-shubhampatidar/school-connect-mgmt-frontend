@@ -22,7 +22,7 @@ export default function ClassesFilterBar() {
           </div>
         </div>
 
-        <div className="w-28 ">
+        {/* <div className="w-28 ">
           <label className="sr-only">All Classes</label>
           <DefaultSelect
             options={classOptions}
@@ -31,9 +31,9 @@ export default function ClassesFilterBar() {
             placeholder="All Classes"
             className="bg-[#F5F9FF] w-full"
           />
-        </div>
+        </div> */}
 
-        <div className="w-28">
+        {/*  <div className="w-28">
           <label className="sr-only">Status</label>
           <DefaultSelect
             options={[
@@ -46,7 +46,7 @@ export default function ClassesFilterBar() {
             placeholder="All status"
             className="bg-[#F5F9FF] w-full"
           />
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-2">
           <Button variant="ghost">Reset</Button>

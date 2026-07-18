@@ -57,24 +57,26 @@ export async function fetchStudents(
     limit?: number;
   }>(ADMIN_API.STUDENTS, { params });
 
-  const { items = [], total, page, limit } = res.data;
-
-  const students: Student[] = items.map((it) => ({
-    id: it.id,
-    name: it.name,
-    studentId: (it.studentId ?? null) as string | number | null,
-    class: it.currentClass
-      ? {
-          id: "",
-          name: it.currentClass.name,
-          section: it.currentClass.section ?? null,
-        }
-      : null,
-    createdAt: it.createdAt,
-  }));
+  const {
+    items = [],
+    total = 0,
+    page = 1,
+    limit = 10,
+  } = res.data as {
+    items: Array<{
+      id: string;
+      name: string;
+      studentId?: string | number | null;
+      currentClass?: { name: string; section?: string | null } | null;
+      createdAt: string;
+    }>;
+    total?: number;
+    page?: number;
+    limit?: number;
+  };
 
   return {
-    students,
+    students: items,
     total,
     page,
     pageSize: limit,
@@ -342,7 +344,7 @@ export interface StudentDetails {
 
 export async function getStudentById(id: string) {
   console.log("BASE URL:", API.defaults.baseURL);
- const url =`${BASE_URL}${ADMIN_API.STUDENTS}/${id}`
+  const url = `${ADMIN_API.STUDENTS}/${id}`;
   const res = await API.get(url);
 
   console.log(res);
@@ -655,8 +657,8 @@ export async function assignTeacherToClass(
 export type Subject = {
   id: string;
   name: string;
-  code: string;
-  createdAt?: string;
+  code?: string;
+  schoolId?: string;
 };
 
 export type SubjectsResponse = {
@@ -681,20 +683,11 @@ export async function fetchSubjects(
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<SubjectsResponse>(ADMIN_API.SUBJECTS, { params });
   const data = res.data as unknown;
-  const d =
-    data && typeof data === "object" ? (data as Record<string, unknown>) : {};
 
-  const subjects: Subject[] = (d.subjects ?? d.items ?? []) as Subject[];
-  const total: number | undefined =
-    (d.total as number | undefined) ??
-    (d.totalCount as number | undefined) ??
-    subjects.length;
-  const page: number | undefined =
-    (d.page as number | undefined) ?? (d.p as number | undefined) ?? query.page;
-  const pageSize: number | undefined =
-    (d.pageSize as number | undefined) ??
-    (d.limit as number | undefined) ??
-    query.pageSize;
+  const subjects: Subject[] = (data as SubjectsResponse)?.subjects ?? [];
+  const total: number = (data as SubjectsResponse)?.total ?? 0;
+  const page: number = (data as SubjectsResponse)?.page ?? 1;
+  const pageSize: number = (data as unknown as { limit: number })?.limit ?? 10;
 
   return {
     subjects,
@@ -704,7 +697,7 @@ export async function fetchSubjects(
   };
 }
 
-export async function createSubject(payload: { name: string; code: string }) {
+export async function createSubject(payload: { name: string }) {
   const res = await API.post<{ id: string }>(ADMIN_API.SUBJECTS, payload);
   return res.data;
 }

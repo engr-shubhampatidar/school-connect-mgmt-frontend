@@ -13,10 +13,6 @@ import { createSubject } from "../../lib/adminApi";
 
 const createSubjectSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  code: z
-    .string()
-    .min(1, "Code is required")
-    .transform((v) => v.trim().toUpperCase()),
 });
 
 type CreateSubjectValues = z.infer<typeof createSubjectSchema>;
@@ -33,16 +29,16 @@ export default function AddSubjectDialog({ open, onClose, onCreated }: Props) {
 
   const form = useForm<CreateSubjectValues>({
     resolver: zodResolver(
-      createSubjectSchema
+      createSubjectSchema,
     ) as unknown as Resolver<CreateSubjectValues>,
     mode: "onChange",
-    defaultValues: { name: "", code: "" },
+    defaultValues: { name: "" },
   });
 
   const onSubmit = async (values: CreateSubjectValues) => {
     setLoading(true);
     try {
-      await createSubject({ name: values.name, code: values.code });
+      await createSubject({ name: values.name });
       toast({ title: "Subject created", type: "success" });
       form.reset();
       onClose();
@@ -112,14 +108,6 @@ export default function AddSubjectDialog({ open, onClose, onCreated }: Props) {
                 <Input {...form.register("name")} placeholder="Mathematics" />
                 <FormMessage>
                   {form.formState.errors.name?.message as React.ReactNode}
-                </FormMessage>
-              </FormField>
-
-              <FormField>
-                <FormLabel>Subject Code</FormLabel>
-                <Input {...form.register("code")} placeholder="MATH101" />
-                <FormMessage>
-                  {form.formState.errors.code?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
 

@@ -21,8 +21,8 @@ export default function AdminSubjectsPage() {
       setError(null);
       try {
         const resp = await fetchSubjects(q ?? { page, pageSize });
-        setSubjects(resp.subjects ?? []);
-        setTotal(resp.total ?? resp.subjects.length ?? 0);
+        setSubjects(resp.subjects);
+        setTotal(resp.total ?? 0);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError("Failed to load subjects");
@@ -30,7 +30,7 @@ export default function AdminSubjectsPage() {
         setLoading(false);
       }
     },
-    [page, pageSize]
+    [page, pageSize],
   );
 
   useEffect(() => {

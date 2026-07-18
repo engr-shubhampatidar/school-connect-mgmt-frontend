@@ -2,33 +2,40 @@ export const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
 export const PUBLIC_API = {
-  CONTACT: "/api/public/contact",
-  REGISTER_SCHOOL: "/api/public/register-school",
+  CONTACT: "/public/contact",
+  REGISTER_SCHOOL: "/auth/register-school",
 };
 
 export const ADMIN_API = {
-  LOGIN: "/api/admin/auth/login",
-  DASHBOARD: "/api/admin/dashboard",
-  STUDENTS: "/api/admin/students",
-  TEACHERS: "/api/admin/teachers",
-  CLASSES: "/api/admin/classes",
-  CLASSES_WITH_TEACHER: "/api/admin/classes/with-class-teacher",
-  SUBJECTS: "/api/admin/subjects",
-  ANNOUNCEMENTS: "/api/admin/announcements",
+  LOGIN: "/auth/login",
+  DASHBOARD: "/admin/dashboard",
+  STUDENTS: "/admin/students",
+  TEACHERS: "/admin/teachers",
+  CLASSES: "/admin/classes",
+  CLASSES_WITH_TEACHER: "/admin/classes/with-class-teacher",
+  SUBJECTS: "/admin/subjects",
+  ANNOUNCEMENTS: "/admin/announcements",
+  GRAPH: "/admin/attendance/graph",
+  CLASS_DASHBOARD: "/admin/classes/dashboard",
 };
 
 export const TEACHER_API = {
-  LOGIN: "/api/teacher/auth/login",
-  ME: "/api/teacher/dashboard",
-  CLASS: "/api/teacher/class",
+  LOGIN: "/teacher/auth/login",
+  ME: "/teacher/dashboard",
+  CLASS: "/teacher/class",
+  PROFILE: (id: string) => `/admin/teachers/${id}`,
 };
 
 export const ATTENDANCE_API = {
-  BASE: "/api/attendance",
-  CLASS: (classId: string) => `/api/attendance/class/${classId}`,
-  STUDENT: (studentId: string) => `/api/attendance/student/${studentId}`,
+  BASE: "/attendance",
+  CLASS: (classId: string) => `/attendance/class/${classId}`,
+  STUDENT: (studentId: string) => `/attendance/student/${studentId}`,
 };
 
-const routes = { BASE_URL, PUBLIC_API, ADMIN_API };
+export const STUDENT_API = {
+  PROFILE: (id: string) => `/admin/students/${id}`,
+};
+
+const routes = { BASE_URL, PUBLIC_API, ADMIN_API, TEACHER_API, STUDENT_API };
 
 export default routes;

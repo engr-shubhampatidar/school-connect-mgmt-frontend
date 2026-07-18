@@ -9,10 +9,18 @@ import {
   TableRow,
   TableHead,
   TableCell,
-  TableCaption,
 } from "../ui/table";
 import { Student } from "../../lib/adminApi";
 import Image from "next/image";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../ui/pagination";
 // import EditStudentDialog from "./EditStudentDialog";
 
 type Props = {
@@ -44,6 +52,39 @@ export default function StudentsTable({
     1,
     Math.ceil((total || students.length) / pageSize),
   );
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        if (i > 1 && i < totalPages) {
+          pages.push(i);
+        }
+      }
+
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
   const [open, setOpen] = useState(false);
 
   if (loading) {
@@ -141,7 +182,7 @@ export default function StudentsTable({
                 className="border-t border-[#D7E3FC] text-[#021034] text-[14px] font-[500] hover:bg-slate-50"
               >
                 <TableCell className="py-3 hidden lg:table-cell p-6">
-                  {s.studentId }
+                  {s.studentId}
                 </TableCell>
 
                 <TableCell className="p-3">
@@ -207,32 +248,52 @@ export default function StudentsTable({
               </TableRow>
             ))}
           </TableBody>
-
-          <TableCaption>
-            Showing {students.length} of {total ?? students.length}
-          </TableCaption>
         </Table>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <div />
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
-            disabled={(page || 1) <= 1}
-          >
-            Previous
-          </Button>
-          <div className="text-sm text-slate-700">
-            Page {page} / {totalPages}
-          </div>
-          <Button
-            onClick={() => onPageChange(Math.min(totalPages, (page || 1) + 1))}
-            disabled={(page || 1) >= totalPages}
-          >
-            Next
-          </Button>
+      <div className="border-t border-[#D7E3FC] mt-4" />
+
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-4">
+        <div className="text-sm text-slate-600">
+          Showing {students.length} of {total ?? students.length}
         </div>
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
+                disabled={(page || 1) <= 1}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
+
+            {getPageNumbers().map((pageNumber, idx) => (
+              <PaginationItem key={idx}>
+                {pageNumber === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    isActive={pageNumber === page}
+                    onClick={() => onPageChange(pageNumber)}
+                    className="cursor-pointer"
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  onPageChange(Math.min(totalPages, (page || 1) + 1))
+                }
+                disabled={(page || 1) >= totalPages}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

@@ -16,10 +16,11 @@ import {
 } from "@/schemas/teacher.schema";
 import {
   fetchSubjects,
-  generateEmployeeId,
   createTeacher,
   ApiValidationError,
+  normalizeAadharDigits,
 } from "@/services/teacher.service";
+import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
@@ -34,9 +35,38 @@ import Select from "@/components/ui/Select";
 import MultiSelect from "@/components/ui/MultiSelect";
 import Button from "@/components/ui/Button";
 import Textarea from "@/components/ui/Textarea";
-import type { SubmitHandler } from "react-hook-form";
+import type { FieldErrors, SubmitHandler } from "react-hook-form";
 import axios from "axios";
 import { InfoIcon } from "lucide-react";
+
+const GENDER_OPTIONS = [
+  { id: "MALE", name: "Male" },
+  { id: "FEMALE", name: "Female" },
+  { id: "OTHER", name: "Other" },
+] as const;
+
+const createTeacherFormSchema = createTeacherSchema
+  .omit({ aadhar: true, gender: true })
+  .extend({
+    gender: z
+      .string()
+      .min(1, "Gender is required")
+      .pipe(z.enum(["MALE", "FEMALE", "OTHER"])),
+    aadhar: z
+      .string()
+      .min(1, "Aadhar number is required")
+      .transform((v) => normalizeAadharDigits(v))
+      .refine((v) => /^[0-9]{12}$/.test(v), {
+        message: "Aadhar must be exactly 12 digits",
+      }),
+  });
+
+function formatAadharDisplay(value: string): string {
+  const digits = normalizeAadharDigits(value).slice(0, 12);
+  return digits.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, p1, p2, p3) =>
+    [p1, p2, p3].filter(Boolean).join(" "),
+  );
+}
 
 type Props = {
   onClose: () => void;
@@ -49,20 +79,32 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [subjectsLoading, setSubjectsLoading] = useState(false);
 
-  const [employeeId, setEmployeeId] = useState<string | null>(null);
-  const [generatingId, setGeneratingId] = useState(false);
   const [tempEmail, setTempEmail] = useState<string | null>(null);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
 
-  const abortRef = useRef<AbortController | null>(null);
-  const generateTimer = useRef<number | null>(null);
-
   const form = useForm<CreateTeacherValues>({
-    resolver: zodResolver(createTeacherSchema) as any,
-    mode: "onBlur",
+    resolver: zodResolver(createTeacherFormSchema) as any,
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      mobile: "",
+      date_of_birth: "",
+      aadhar: "",
+      subject_speciality: [],
+      address: "",
+    },
   });
 
-  const { control, handleSubmit, watch, setError, reset, formState } = form;
+  const {
+    control,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { errors, isSubmitting },
+  } = form;
 
   // ================= FETCH SUBJECTS =================
   useEffect(() => {
@@ -93,82 +135,18 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
     [subjects],
   );
 
-  // ================= EMPLOYEE ID GENERATION =================
-  const watchedFullName = watch("fullName");
-  const watchedDob = watch("date_of_birth");
-  const watchedPhone = watch("mobile");
-
-  const shouldGenerateId = useMemo(() => {
-    if (!watchedFullName || !watchedDob || !watchedPhone) return false;
-    if (
-      formState.errors.fullName ||
-      formState.errors.date_of_birth ||
-      formState.errors.mobile
-    )
-      return false;
-    return true;
-  }, [watchedFullName, watchedDob, watchedPhone, formState.errors]);
-
-  const triggerGenerate = useCallback(() => {
-    if (!shouldGenerateId) return;
-
-    if (generateTimer.current) window.clearTimeout(generateTimer.current);
-
-    generateTimer.current = window.setTimeout(async () => {
-      if (abortRef.current) abortRef.current.abort();
-      abortRef.current = new AbortController();
-
-      setGeneratingId(true);
-      setEmployeeId(null);
-
-      try {
-        const res = await generateEmployeeId({
-          fullName: watchedFullName.trim(),
-          date_of_birth: watchedDob,
-          phone: "+91" + watchedPhone.trim(),
-        });
-
-        setEmployeeId(res.employee_id);
-
-        toast({
-          title: "Employee ID generated",
-          description: res.employee_id,
-          type: "success",
-        });
-      } catch (err) {
-        toast({
-          title: "Failed to generate employee ID",
-          type: "error",
-        });
-      } finally {
-        setGeneratingId(false);
-      }
-    }, 600);
-  }, [shouldGenerateId, watchedFullName, watchedDob, watchedPhone, toast]);
-
-  useEffect(() => {
-    // triggerGenerate();
-  }, [triggerGenerate]);
-
-  // ================= SUBMIT =================
   const onSubmit: SubmitHandler<CreateTeacherValues> = useCallback(
     async (values) => {
       try {
-        const { employee_id } = await generateEmployeeId({
-          fullName: values.fullName.trim(),
-          date_of_birth: values.date_of_birth,
-          phone: "+91" + values.mobile.trim(),
-        });
-
         const payload: CreateTeacherValues = {
-          fullName: values.fullName,
+          firstName: values.firstName,
+          lastName: values.lastName,
           email: values.email,
           mobile: `+91${values.mobile}`,
           date_of_birth: values.date_of_birth,
           gender: values.gender,
           aadhar: values.aadhar,
           subject_speciality: values.subject_speciality,
-          employee_id: employee_id ?? "EMP-1234",
           address: values.address,
         };
 
@@ -184,7 +162,6 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         });
 
         reset();
-        setEmployeeId(null);
         onCreated?.();
       } catch (err) {
         console.log("Error creating teacher:", err);
@@ -217,7 +194,23 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
         });
       }
     },
-    [employeeId, onCreated, reset, setError],
+    [onCreated, reset, setError, toast],
+  );
+
+  const onInvalid = useCallback(
+    (fieldErrors: FieldErrors<CreateTeacherValues>) => {
+      const firstError = Object.values(fieldErrors).find(
+        (error) => error?.message,
+      );
+      toast({
+        title: "Please fix the form errors",
+        description:
+          (firstError?.message as string) ??
+          "Some required fields are missing or invalid.",
+        type: "error",
+      });
+    },
+    [toast],
   );
 
   const renderSubjectMulti = useCallback(
@@ -242,59 +235,83 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
 
   return (
     <div className="p-[16px]">
-      <Form onSubmit={handleSubmit(onSubmit)}>
+      <Form onSubmit={handleSubmit(onSubmit, onInvalid)}>
         <div className="grid grid-cols-1 gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid grid-cols-1 gap-4">
               {" "}
               <FormField>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
                   <Input
-                    {...form.register("fullName")}
-                    placeholder="e.g. Sarah Jenkins"
+                    {...form.register("firstName")}
+                    placeholder="First Name"
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.fullName?.message as React.ReactNode}
+                  {errors.firstName?.message as React.ReactNode}
+                </FormMessage>
+              </FormField>
+              <FormField>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...form.register("lastName")}
+                    placeholder="Last Name"
+                  />
+                </FormControl>
+                <FormMessage>
+                  {errors.lastName?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
               <FormField>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
-                    <p className="border-r border-[#D7E3FC] px-2 py-2">+91</p>
-                    <input
-                      className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
-                      type="text"
-                      placeholder="9876543210"
-                      maxLength={10}
-                      value={form.watch("mobile") || ""}
-                      onChange={(e) => form.setValue("mobile", e.target.value)}
-                    />
-                  </div>
+                  <Controller
+                    control={control}
+                    name="mobile"
+                    render={({ field }) => (
+                      <div className="flex w-full rounded-md border border-[#D7E3FC]  text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]  focus-within:ring-1 focus-within:ring-[#D7E3FC] focus-within:border-[#D7E3FC]">
+                        <p className="border-r border-[#D7E3FC] px-2 py-2">+91</p>
+                        <input
+                          className="pl-2 w-full outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0"
+                          type="text"
+                          placeholder="9876543210"
+                          maxLength={10}
+                          inputMode="numeric"
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value.replace(/\D/g, "").slice(0, 10),
+                            )
+                          }
+                          onBlur={field.onBlur}
+                        />
+                      </div>
+                    )}
+                  />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.mobile?.message as React.ReactNode}
+                  {errors.mobile?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
               <FormField>
                 <FormLabel>Gender</FormLabel>
                 <FormControl>
-                  <Select
-                    options={[
-                      { id: "male", name: "Male" },
-                      { id: "female", name: "Female" },
-                      { id: "other", name: "Other" },
-                    ]}
-                    value={form.watch("gender")}
-                    onChange={(v) =>
-                      form.setValue("gender", v as "male" | "female" | "other")
-                    }
+                  <Controller
+                    control={control}
+                    name="gender"
+                    render={({ field }) => (
+                      <Select
+                        options={[...GENDER_OPTIONS]}
+                        value={field.value ?? ""}
+                        onChange={field.onChange}
+                      />
+                    )}
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.gender?.message as React.ReactNode}
+                  {errors.gender?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
             </div>
@@ -308,7 +325,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.email?.message as React.ReactNode}
+                  {errors.email?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
               <FormField>
@@ -353,28 +370,34 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                   }}
                 />
                 <FormMessage>
-                  {
-                    form.formState.errors.date_of_birth
-                      ?.message as React.ReactNode
-                  }
+                  {errors.date_of_birth?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
               <FormField>
                 <FormLabel>Aadhar Number</FormLabel>
                 <FormControl>
-                  <Input
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={12}
-                    minLength={12}
-                    // required={true}
-                    {...form.register("aadhar")}
-                    placeholder="12 digit Aadhar number"
+                  <Controller
+                    control={control}
+                    name="aadhar"
+                    render={({ field }) => (
+                      <Input
+                        type="tel"
+                        inputMode="numeric"
+                        maxLength={14}
+                        value={formatAadharDisplay(field.value ?? "")}
+                        onChange={(e) =>
+                          field.onChange(
+                            normalizeAadharDigits(e.target.value).slice(0, 12),
+                          )
+                        }
+                        onBlur={field.onBlur}
+                        placeholder="1234 5678 9012"
+                      />
+                    )}
                   />
                 </FormControl>
                 <FormMessage>
-                  {form.formState.errors.aadhar?.message as React.ReactNode}
+                  {errors.aadhar?.message as React.ReactNode}
                 </FormMessage>
               </FormField>
             </div>
@@ -389,27 +412,11 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             </FormLabel>
             <div>{renderSubjectMulti()}</div>
             <FormMessage>
-              {
-                form.formState.errors.subject_speciality
-                  ?.message as React.ReactNode
-              }
+              {errors.subject_speciality?.message as React.ReactNode}
             </FormMessage>
           </FormField>
 
           {/* <Separator /> */}
-
-          <FormField>
-            <FormLabel>Employee ID</FormLabel>
-            <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
-              <p>{employeeId ? employeeId : "EDU-XXXX"}</p>
-              <div className="flex items-center">
-                <InfoIcon className="h-4 w-4" />
-                <span className="text-xs text-[#64748B] ml-1">
-                  {generatingId ? "Generating..." : "AUTO_GENERATED"}
-                </span>
-              </div>
-            </div>
-          </FormField>
 
           <FormField>
             <FormLabel>Permanent Address</FormLabel>
@@ -422,7 +429,7 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
               />
             </FormControl>
             <FormMessage>
-              {form.formState.errors.address?.message as React.ReactNode}
+              {errors.address?.message as React.ReactNode}
             </FormMessage>
           </FormField>
           <div>
@@ -440,9 +447,9 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
             <Button
               type="submit"
               variant="dark"
-              disabled={form.formState.isSubmitting}
+              disabled={isSubmitting}
             >
-              {form.formState.isSubmitting ? "Saving…" : "Create Teacher"}
+              {isSubmitting ? "Saving…" : "Create Teacher"}
             </Button>
           </div>
         </div>

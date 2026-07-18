@@ -38,8 +38,8 @@ export default function AdminStudentsPage() {
     setError(null);
     try {
       const resp = await fetchStudents(q);
-      setStudents(resp.students ?? []);
-      setTotal(resp.total ?? resp.students.length ?? 0);
+      setStudents(resp.students);
+      setTotal(resp.total ?? 0);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to load students");
