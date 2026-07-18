@@ -1,0 +1,140 @@
+[33me31f839[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32m58-admin-student-page-ui[m[33m, [m[1;31morigin/58-admin-student-page-ui[m[33m)[m upadte student ui
+[33m694b615[m remerge
+[33m741f64c[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into 58-admin-student-page-ui
+[33mc6e1b6d[m admin student page and student profile for admin updated
+[33m3beb393[m added edit class, fixes for teacher page
+[33m203e571[m[33m ([m[1;32mmain[m[33m)[m fixes for issue
+[33m59a8c54[m fixes for build errors
+[33m9732472[m added 10 digit validation on phone input, fixes for teacher creation
+[33mab4eec9[m resolved add teacher
+[33m8949415[m Merge pull request #57 from engr-shubhampatidar/55-update-student-admin-flow
+[33m4d707d3[m[33m ([m[1;31morigin/55-update-student-admin-flow[m[33m)[m redesign web page
+[33m8ca7f42[m Merge branch '51-frontend-create-class-form' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into 55-update-student-admin-flow
+[33m29423d8[m[33m ([m[1;31morigin/51-frontend-create-class-form[m[33m, [m[1;32m51-frontend-create-class-form[m[33m)[m fixed class from errors
+[33m83925ce[m update teacher popup
+[33m893b41c[m Create new Class modal with all the features
+[33m9e905d1[m[33m ([m[1;31morigin/54-create-new-student[m[33m, [m[1;32m54-create-new-student[m[33m)[m Merge pull request #47 from engr-shubhampatidar/45-sub-ticket-1-frontend-requirements
+[33mac5942d[m[33m ([m[1;31morigin/45-sub-ticket-1-frontend-requirements[m[33m, [m[1;32m45-sub-ticket-1-frontend-requirements[m[33m)[m complete Edit teacher form
+[33md8e0620[m  Calendar have yyyy-mm-dd format, Calendar functionality issues, a day before date is reflecting on calendar is fixed , Errors inline.
+[33m29e794b[m Complete Create Teacher Modal with popup of temp pass and emailId
+[33m2942af2[m[33m ([m[1;31morigin/49-frontend-admin-edit-teacher-form[m[33m)[m Merge pull request #46 from engr-shubhampatidar/31-fix-duplicate-filter-and-ui-mismatch-on-teachers-page
+[33mf6f0181[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into 31-fix-duplicate-filter-and-ui-mismatch-on-teachers-page
+[33m0f1b4bc[m fix ui mismatchs
+[33me4c8920[m changes for solving image breaking on production
+[33mb806770[m Merge pull request #42 from engr-shubhampatidar/31-fix-duplicate-filter-and-ui-mismatch-on-teachers-page
+[33m181360a[m change in ui and fix dupicates
+[33m3b4c460[m solved bug to base_url
+[33m2299b1b[m Merge pull request #38 from engr-shubhampatidar/footer-desgin
+[33m3bf1e0e[m add images
+[33m357410d[m Merge pull request #29 from engr-shubhampatidar/footer-desgin
+[33m0d94cc2[m change in footer desgin
+[33m9975e47[m[33m ([m[1;31morigin/28-create-announcement-page[m[33m, [m[1;32m28-create-announcement-page[m[33m)[m create new page for admin/ announcement and create featture to add announcement
+[33m39870b8[m[33m ([m[1;31morigin/20-student-module-frontend-integration[m[33m)[m Merge pull request #26 from engr-shubhampatidar/25-create-common-protected-route-for-role-based-access
+[33me7fa9e3[m[33m ([m[1;31morigin/25-create-common-protected-route-for-role-based-access[m[33m, [m[1;32m25-create-common-protected-route-for-role-based-access[m[33m)[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into 25-create-common-protected-route-for-role-based-access
+[33md427bd9[m Merge pull request #27 from engr-shubhampatidar/15-implement-attendance-graph-on-admin-dashboard
+[33m9928971[m added new proxy to manage all routing
+[33m62cfc21[m[33m ([m[1;31morigin/15-implement-attendance-graph-on-admin-dashboard[m[33m, [m[1;32m15-implement-attendance-graph-on-admin-dashboard[m[33m)[m Revert App.js to previous version
+[33me1af03a[m create attendance graph fix api calls,redesgin it
+[33m7475aaf[m Merge pull request #14 from engr-shubhampatidar/12-school-register-page-administrator-registration
+[33m59ecd6f[m[33m ([m[1;31morigin/12-school-register-page-administrator-registration[m[33m, [m[1;32m12-school-register-page-administrator-registration[m[33m)[m redesgin landing page and update register page and redesgin login page
+[33mac39532[m Merge pull request #11 from engr-shubhampatidar/class/overview
+[33madbe49b[m[33m ([m[1;31morigin/class/overview[m[33m, [m[1;32mclass/overview[m[33m)[m create class overview page and add subject to class and add timetable to class
+[33m0424149[m Merge pull request #10 from engr-shubhampatidar/register-ui
+[33m08a46a4[m[33m ([m[1;31morigin/register-ui[m[33m, [m[1;32mregister-ui[m[33m)[m create new register page and recreate login page ui
+[33m593a406[m Merge pull request #9 from engr-shubhampatidar/classSubjectAssign
+[33mb79d62d[m[33m ([m[1;31morigin/classSubjectAssign[m[33m, [m[1;32mclassSubjectAssign[m[33m)[m new file
+[33m25d1c51[m create class subject assignement page
+[33mc52b62a[m[33m ([m[1;32madmin-classes[m[33m)[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into admin-classes
+[33m98974ac[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m04ea6bd[m added class overview page
+[33m1aefff1[m create new admin-classes update ui and apis
+[33m972a75c[m Merge pull request #8 from engr-shubhampatidar/admin-desgin
+[33mb800a48[m[33m ([m[1;31morigin/admin-desgin[m[33m, [m[1;32madmin-desgin[m[33m)[m resolve conflict
+[33me57a6ac[m[33m ([m[1;32mclasses-desgin[m[33m)[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into admin-desgin
+[33md2e8c17[m update new ui and api
+[33mb871d93[m changes for classes page
+[33ma4c7252[m added timetable to classes
+[33m92483e7[m added new login page design
+[33m5e2b4fa[m added a single login page for all teacher, admin and student
+[33m2083ff1[m added classes teacher column to table
+[33m6131a59[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m7b39e6d[m changes for classes page
+[33mb498dd9[m Merge pull request #7 from engr-shubhampatidar/landing-page
+[33m6e41b5e[m[33m ([m[1;31morigin/landing-page[m[33m, [m[1;32mlanding-page[m[33m)[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into landing-page
+[33m95f122d[m redesign api calls
+[33m122658c[m add class validation completed
+[33ma7648e5[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33me597d40[m added fixes for add teacher
+[33m2a6cef6[m Merge pull request #6 from engr-shubhampatidar/landing-page
+[33m1196645[m add some design
+[33m985854e[m added logout
+[33m3de0afd[m added .env for production
+[33m3fa3a1b[m Merge pull request #5 from engr-shubhampatidar/landing-page
+[33mfc85261[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into landing-page
+[33mfb964db[m added new files
+[33m4d8b899[m resolve errors on all pages
+[33m10bba0a[m added fix for student login
+[33mec0b386[m in admin/student create student dialog, studnet drawer for details
+[33m9e691c1[m removed multiple api call from admin/student page and removed unnecessary
+[33mf1a9bdd[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m719844d[m added username to nav
+[33m2f60076[m Merge pull request #4 from engr-shubhampatidar/landing-page
+[33m34120df[m resolve merge
+[33md12dd36[m Important pages
+[33m4b93f87[m Merge branch 'main' of https://github.com/engr-shubhampatidar/school-connect-mgmt-frontend into landing-page
+[33m10b9426[m added student pages
+[33m3639533[m rewrite api-route
+[33ma4e8b3f[m Merge pull request #2 from engr-shubhampatidar/landing-page
+[33mf4fe79d[m check lint errors
+[33m1439a86[m resolve merge
+[33mebf066b[m create landing page
+[33m16f5494[m added teacher student page
+[33m79f2fef[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m4085497[m teacher student history
+[33m8110a62[m added teacher class attendance history page
+[33m666afd4[m Merge pull request #1 from engr-shubhampatidar/teacher-dashboard
+[33mc35a5cd[m[33m ([m[1;31morigin/teacher-dashboard[m[33m, [m[1;32mteacher-dashboard[m[33m)[m resolve error
+[33m2e62399[m resolve all
+[33m6a5a6b2[m solve pr errors
+[33m9a1b730[m added landing page of the application
+[33m3286207[m create teacher and admin dashboard
+[33m11077c2[m updated backend url
+[33m3072cbb[m fixes for cors
+[33m0aab43c[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m30785f2[m resolved build issues
+[33mb993e94[m Create classes attandance history page that show count of p and a students
+[33m10689fb[m Added redme files and clean code
+[33me0ed4d5[m create student attendacne page
+[33m331c912[m create Attendance history page
+[33m0898070[m added student history
+[33m19313ce[m Change select UI,fix teacherdrawer bugs, create attendance UI
+[33mea7481a[m ReDesign attendance button
+[33md1a7d25[m added a common statusbar
+[33mb5d1d16[m Merge branch 'main' of github.com-personal:engr-shubhampatidar/school-connect-mgmt-frontend
+[33m48a82c0[m added teacher login, and attendance page
+[33m7efd9b4[m code cleaning
+[33me92554f[m resolving conflicts
+[33m1521533[m changes for teacher drawer
+[33mefb0cdf[m correct folder structure of  students
+[33mbdd1452[m Fix teacher Drawer Unique Key
+[33m592f2fc[m updated teacher list, added detailed drawer for teacher
+[33mec33f4e[m add subject and assign class in teachers table
+[33mfcc6a1a[m change ui of addTeacher
+[33m2baad13[m update
+[33m0dfcb8e[m add subjects on subject page
+[33m5eb2275[m name into fullName
+[33m1af0aba[m change name into fullname
+[33mc1b19a9[m Merge branch 'main' of github.com:engr-shubhampatidar/school-connect-mgmt-frontend
+[33mbae84ee[m added page for all subjects and add
+[33m196512d[m changes in student
+[33mb0a7b0b[m predefine class id and fix student page
+[33m79084f5[m added classes and teacher
+[33m065a439[m added student page and add dialog
+[33m5f1b876[m created dashboard page
+[33mf5f7d67[m added a login page
+[33me3c32bf[m created new page register school and contact
+[33m3af5020[m re setup next.js only
+[33m8dde630[m initial setup
+[33mdc7b233[m changed to next.js
+[33me80726d[m initial setup
+[33mde63987[m first commit
