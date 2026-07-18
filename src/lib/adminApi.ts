@@ -342,7 +342,7 @@ export interface StudentDetails {
 
 export async function getStudentById(id: string) {
   console.log("BASE URL:", API.defaults.baseURL);
-  const url = `${BASE_URL}${ADMIN_API.STUDENTS}/${id}`;
+  const url = `${ADMIN_API.STUDENTS}/${id}`;
   const res = await API.get(url);
 
   console.log(res);

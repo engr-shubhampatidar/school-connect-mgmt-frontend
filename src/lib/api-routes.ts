@@ -16,12 +16,14 @@ export const ADMIN_API = {
   SUBJECTS: "/admin/subjects",
   ANNOUNCEMENTS: "/admin/announcements",
   GRAPH: "/admin/attendance/graph",
+  CLASS_DASHBOARD: "/admin/classes/dashboard",
 };
 
 export const TEACHER_API = {
   LOGIN: "/teacher/auth/login",
   ME: "/teacher/dashboard",
   CLASS: "/teacher/class",
+  PROFILE: (id: string) => `/admin/teachers/${id}`,
 };
 
 export const ATTENDANCE_API = {
@@ -30,6 +32,10 @@ export const ATTENDANCE_API = {
   STUDENT: (studentId: string) => `/attendance/student/${studentId}`,
 };
 
-const routes = { BASE_URL, PUBLIC_API, ADMIN_API };
+export const STUDENT_API = {
+  PROFILE: (id: string) => `/admin/students/${id}`,
+};
+
+const routes = { BASE_URL, PUBLIC_API, ADMIN_API, TEACHER_API, STUDENT_API };
 
 export default routes;

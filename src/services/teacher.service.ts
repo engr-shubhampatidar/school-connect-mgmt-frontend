@@ -1,4 +1,4 @@
-import { ADMIN_API } from "@/lib/api-routes";
+import { ADMIN_API, TEACHER_API } from "@/lib/api-routes";
 import API from "@/lib/axios";
 import { CreateTeacherValues, Subject } from "@/schemas/teacher.schema";
 import axios from "axios";
@@ -140,7 +140,7 @@ export async function fetchTeacherById(
   id: string,
 ): Promise<TeacherProfileResponse> {
   try {
-    const resp = await API.get(`/api/admin/teachers/${id}`);
+    const resp = await API.get(TEACHER_API.PROFILE(id));
     return resp.data as TeacherProfileResponse;
   } catch (err) {
     if (axios.isAxiosError(err)) {

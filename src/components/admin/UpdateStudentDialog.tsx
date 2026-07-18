@@ -48,6 +48,7 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { log } from "console";
+import { STUDENT_API } from "@/lib/api-routes";
 
 const nameRegex = /^[A-Za-z ]+$/;
 
@@ -307,7 +308,7 @@ export default function UpdateStudentDialog({
 
     (async () => {
       try {
-        const res = await API.get(`/api/admin/students/${studentId}`, {
+        const res = await API.get(STUDENT_API.PROFILE(studentId), {
           signal: controller.signal,
         });
         hydrateForm(res.data as StudentProfileResponse);
