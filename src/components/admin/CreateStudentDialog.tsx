@@ -312,7 +312,7 @@ export default function CreateStudentDialog({
                                 <Select
                                   options={classes.map((c) => ({
                                     id: c.id,
-                                    name: `${c.name}`,
+                                    name: `${c.name}-${c.section}`,
                                   }))}
                                   value={field.value ?? ""}
                                   onChange={(v) => field.onChange(v)}

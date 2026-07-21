@@ -209,13 +209,9 @@ export default function StudentsTable({
                 <TableCell className="py-3 hidden lg:table-cell">
                   <div className=" flex">
                     <div className="border border-[#D7E3FC] max-w-full px-2 py-1 rounded-full">
-                      {typeof s.class === "string"
-                        ? s.class
-                        : s.class
-                          ? `${s.class.name}${
-                              s.class.section ? ` - ${s.class.section}` : ""
-                            }`
-                          : "-"}
+                      {s.className
+                        ? `${s.className}${s.section ? ` - ${s.section}` : ""}`
+                        : "-"}
                     </div>
                   </div>
                 </TableCell>

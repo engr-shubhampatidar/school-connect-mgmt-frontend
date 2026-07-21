@@ -1,20 +1,13 @@
-import API from "./axios";
 import type { AxiosRequestConfig } from "axios";
-import { ADMIN_API, BASE_URL } from "./api-routes";
-import { ur } from "zod/locales";
+import { ADMIN_API } from "./api-routes";
+import API from "./axios";
 
 export type Student = {
   id: string;
   name: string;
   studentId?: string | number | null;
-  class?:
-    | string
-    | null
-    | {
-        id: string;
-        name: string;
-        section?: string | null;
-      };
+  className?: string | null;
+  section?: string | null;
   email?: string | null;
   photoUrl?: string | null;
   createdAt: string;
@@ -45,7 +38,7 @@ export async function fetchStudents(
   if (query.page) params.page = query.page;
   if (query.pageSize) params.pageSize = query.pageSize;
   const res = await API.get<{
-    items: Array<{
+    data: Array<{
       id: string;
       name: string;
       studentId?: string | number | null;
@@ -58,12 +51,12 @@ export async function fetchStudents(
   }>(ADMIN_API.STUDENTS, { params });
 
   const {
-    items = [],
+    data = [],
     total = 0,
     page = 1,
     limit = 10,
   } = res.data as {
-    items: Array<{
+    data: Array<{
       id: string;
       name: string;
       studentId?: string | number | null;
@@ -76,7 +69,7 @@ export async function fetchStudents(
   };
 
   return {
-    students: items,
+    students: data,
     total,
     page,
     pageSize: limit,

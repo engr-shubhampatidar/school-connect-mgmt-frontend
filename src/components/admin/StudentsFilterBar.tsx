@@ -35,7 +35,7 @@ export default function StudentsFilterBar({
         { id: "", name: "All classes" },
         ...parentClasses.map((c) => ({
           id: c.id ?? c.name,
-          name: c.section ? `${c.name}` : c.name,
+          name: c.section ? `${c.name}-${c.section}` : c.name,
         })),
       ];
     }
@@ -82,21 +82,6 @@ export default function StudentsFilterBar({
             value={klass}
             onChange={(v) => setKlass(v)}
             placeholder="All classes"
-          />
-        </div>
-
-        <div className="">
-          <label className="sr-only">Status</label>
-          <Select
-            className="bg-[#F5F9FF]"
-            options={[
-              { id: "", name: "Any status" },
-              { id: "active", name: "Active" },
-              { id: "inactive", name: "Inactive" },
-            ]}
-            value={status}
-            onChange={(v) => setStatus(v)}
-            placeholder="Any status"
           />
         </div>
       </div>
