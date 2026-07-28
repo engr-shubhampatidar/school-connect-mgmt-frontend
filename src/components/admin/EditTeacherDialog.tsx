@@ -46,7 +46,6 @@ export default function EditTeacherDialog({
     gender: "",
     date_of_birth: "",
     aadhar: "",
-    employee_id: "",
     subject_speciality: [] as string[],
     mobile: "",
     address: "",
@@ -95,7 +94,6 @@ export default function EditTeacherDialog({
           gender: data.gender,
           date_of_birth: data.date_of_birth ?? "",
           aadhar: data.aadhar,
-          employee_id: data.employee_id,
           subject_speciality: data.subject_speciality,
           mobile: data.mobile,
           address: data.address,
@@ -268,7 +266,7 @@ export default function EditTeacherDialog({
                             <FormField>
                               <FormLabel>Date of Birth</FormLabel>
                               <FormControl>
-                                 <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
+                                <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
                                   <p>{formData.date_of_birth}</p>
                                   <div className="flex items-center">
                                     <Calendar className="h-4 w-4" />
@@ -283,14 +281,6 @@ export default function EditTeacherDialog({
                               <FormControl>
                                 <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
                                   {formData.aadhar}
-                                </div>
-                              </FormControl>
-                            </FormField>
-                            <FormField>
-                              <FormLabel>EmployeeID</FormLabel>
-                              <FormControl>
-                                <div className="flex justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B] font-[400] placeholder:text-[#6B7280]">
-                                  {formData.employee_id}
                                 </div>
                               </FormControl>
                             </FormField>

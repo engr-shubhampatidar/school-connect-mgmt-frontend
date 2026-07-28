@@ -1,3 +1,4 @@
+import { ADMIN_API } from "@/lib/api-routes";
 import axios from "@/lib/axios";
 
 export interface Subject {
@@ -5,7 +6,7 @@ export interface Subject {
   name: string;
 }
 
-const BASE = "/api/admin/subjects";
+const BASE = ADMIN_API.SUBJECTS;
 
 function normalizeSubjectItem(it: any): Subject {
   if (!it) return { id: "", name: "" };
@@ -21,7 +22,7 @@ export async function searchSubjects(search = "", includeDeleted = false) {
   const res = await axios.get(`${BASE}`, {
     params: { search, includeDeleted },
   });
-  const data = res.data;
+  const data = res.data.subjects;
   // API may return { items: [...] } or an array directly
   if (Array.isArray(data)) {
     return data.map(normalizeSubjectItem);

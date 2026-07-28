@@ -1,13 +1,14 @@
+import { ADMIN_API, TEACHER_API } from "@/lib/api-routes";
 import API from "@/lib/axios";
+import { CreateTeacherValues, Subject } from "@/schemas/teacher.schema";
 import axios from "axios";
-import { SubjectsResponse, Subject, CreateTeacherValues } from "@/schemas/teacher.schema";
 
 export interface Teacher {
   id: string;
   name: string;
   subjects?: string[];
   subject_count?: number;
-  
+  user_id?: string;
 }
 
 const BASE = "/api/admin/teachers";
@@ -19,8 +20,12 @@ function normalizeTeacher(it: any): Teacher {
   return {
     id: String(o.id ?? o._id ?? o.uuid ?? o.value ?? ""),
     name: String(o.fullName ?? o.name ?? o.title ?? o.email ?? ""),
-    subjects: Array.isArray(o.subjectsSpeciality) ? o.subjectsSpeciality : (o.subjects ?? undefined),
-    subject_count: typeof o.subject_count === "number" ? o.subject_count : undefined,
+    subjects: Array.isArray(o.subjectsSpeciality)
+      ? o.subjectsSpeciality
+      : (o.subjects ?? undefined),
+    subject_count:
+      typeof o.subject_count === "number" ? o.subject_count : undefined,
+    user_id: o.userId,
   } as Teacher;
 }
 
@@ -34,9 +39,8 @@ async function extractListFromResponse(resp: any): Promise<Teacher[]> {
   return [];
 }
 
-export async function getTeachers( search = "",
-  subjectId?: string | null) {
-  const res = await API.get(BASE, {
+export async function getTeachers(search = "", subjectId?: string | null) {
+  const res = await API.get(ADMIN_API.TEACHERS, {
     params: {
       search,
       subjectId: subjectId ?? undefined, // only send if exists
@@ -46,8 +50,15 @@ export async function getTeachers( search = "",
 }
 
 export async function getNotClassTeachers(search = "") {
-  const res = await API.get(`/api/admin/teachers/eligible-class-teachers`, { params: { search, notClassTeacher: true } });
+  const res = await API.get(ADMIN_API.TEACHERS, {
+    params: { search, availableForClassTeacher: true },
+  });
   return extractListFromResponse(res);
+}
+
+/** Strip spaces/dashes so UI-formatted Aadhaar validates as 12 digits. */
+export function normalizeAadharDigits(value: string): string {
+  return value.replace(/\D/g, "");
 }
 
 export class ApiValidationError extends Error {
@@ -70,25 +81,11 @@ export interface GenerateEmployeeIdResponse {
 }
 
 export async function fetchSubjects(search = ""): Promise<Subject[]> {
-  const url = `/api/admin/subjects?search=${encodeURIComponent(search)}&includeDeleted=false`;
+  const url = `${ADMIN_API.SUBJECTS}?search=${encodeURIComponent(search)}&includeDeleted=false`;
   try {
     const resp = await API.get(url);
-    const data = resp.data as unknown;
-    // safe parse
-    if (data && typeof data === "object" && Array.isArray((data as any).items)) {
-      const items = (data as any).items as unknown[];
-      return items.map((it) => {
-        if (it && typeof it === "object") {
-          const o = it as Record<string, unknown>;
-          return {
-            id: String(o.id ?? o._id ?? o.uuid ?? o.value ?? o.key ?? ""),
-            name: String(o.name ?? o.title ?? o.value ?? ""),
-          } as Subject;
-        }
-        return { id: String(it ?? ""), name: String(it ?? "") } as Subject;
-      });
-    }
-    return [];
+    const data = resp.data.subjects as Subject[];
+    return data as Subject[];
   } catch (err) {
     if (axios.isAxiosError(err)) {
       throw new Error((err.response?.data as any)?.message ?? err.message);
@@ -97,35 +94,23 @@ export async function fetchSubjects(search = ""): Promise<Subject[]> {
   }
 }
 
-export async function generateEmployeeId(payload: GenerateEmployeeIdPayload): Promise<GenerateEmployeeIdResponse> {
+export async function createTeacher(
+  payload: CreateTeacherValues,
+): Promise<unknown> {
   try {
-    const resp = await API.post("/api/admin/teachers/generate-employee-id", payload);
-    const data = resp.data as { employee_id?: string } | undefined;
-    if (data && typeof data.employee_id === "string") {
-      return { employee_id: data.employee_id };
-    }
-    throw new Error("Unexpected response from employee id generator");
-  } catch (err) {
-    if (axios.isAxiosError(err)) {
-      const data = err.response?.data as Record<string, unknown> | undefined;
-      if (data?.fieldErrors && typeof data.fieldErrors === "object") {
-        throw new ApiValidationError((data.message as string) ?? err.message, data.fieldErrors as Record<string, string>);
-      }
-      throw new Error((data && (data.message as string)) ?? err.message);
-    }
-    throw err;
-  }
-}
-
-export async function createTeacher(payload: CreateTeacherValues): Promise<unknown> {
-  try {
-    const resp = await API.post("/api/admin/teachers", payload);
+    const resp = await API.post(ADMIN_API.TEACHERS, {
+      ...payload,
+      aadhar: normalizeAadharDigits(payload.aadhar ?? ""),
+    });
     return resp.data;
   } catch (err) {
     if (axios.isAxiosError(err)) {
       const data = err.response?.data as Record<string, unknown> | undefined;
       if (data?.fieldErrors && typeof data.fieldErrors === "object") {
-        throw new ApiValidationError((data.message as string) ?? err.message, data.fieldErrors as Record<string, string>);
+        throw new ApiValidationError(
+          (data.message as string) ?? err.message,
+          data.fieldErrors as Record<string, string>,
+        );
       }
       throw new Error((data && (data.message as string)) ?? err.message);
     }
@@ -152,10 +137,10 @@ export interface TeacherProfileResponse {
 }
 
 export async function fetchTeacherById(
-  id: string
+  id: string,
 ): Promise<TeacherProfileResponse> {
   try {
-    const resp = await API.get(`/api/admin/teachers/${id}`);
+    const resp = await API.get(TEACHER_API.PROFILE(id));
     return resp.data as TeacherProfileResponse;
   } catch (err) {
     if (axios.isAxiosError(err)) {
@@ -179,7 +164,7 @@ export interface UpdateTeacherPayload {
 
 export async function updateTeacher(
   id: string,
-  payload: UpdateTeacherPayload
+  payload: UpdateTeacherPayload,
 ): Promise<unknown> {
   try {
     const resp = await API.put(`/api/admin/teachers/${id}`, payload);
@@ -191,7 +176,7 @@ export async function updateTeacher(
       if (data?.fieldErrors && typeof data.fieldErrors === "object") {
         throw new ApiValidationError(
           (data.message as string) ?? err.message,
-          data.fieldErrors as Record<string, string>
+          data.fieldErrors as Record<string, string>,
         );
       }
 
@@ -200,4 +185,3 @@ export async function updateTeacher(
     throw err;
   }
 }
-

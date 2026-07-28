@@ -20,6 +20,8 @@ import {
   YAxis,
   Tooltip,
 } from "recharts";
+import { ADMIN_API } from "@/lib/api-routes";
+import API from "@/lib/axios";
 
 type AttendanceData = {
   month: string;
@@ -68,9 +70,7 @@ export default function AttendanceOverviewCard({
         // include selected period so backend can return appropriate aggregation
         payload.period = selectedPeriod;
 
-        const res = await (
-          await import("@/lib/axios")
-        ).default.post("/api/admin/attendance/graph", payload);
+        const res = await API.post(ADMIN_API.GRAPH, payload);
         // Response may be an array of { month, value } OR an object like
         // { "Jan": 67, "Dec": 83, ... }. Normalize both shapes to
         // AttendanceData[] in month order.

@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import {
-  getNotClassTeachers,
-  Teacher,
-} from "@/services/teacher.service";
+import { getNotClassTeachers, Teacher } from "@/services/teacher.service";
 
 interface Props {
   value?: string | null;
@@ -65,7 +62,7 @@ export default function SearchableDropdown({
         setFetched(true);
         if (!value && selectedLabel) {
           const match = list.find((t) => t.name === selectedLabel);
-          if (match) onChange(match.id);
+          if (match) onChange(match.user_id ?? null);
         }
       })
       .catch(() => {
@@ -81,7 +78,7 @@ export default function SearchableDropdown({
     };
   }, [open, fetched, subjectId, value, selectedLabel, onChange]);
 
-  const selected = options.find((o) => o.id === value) ?? null;
+  const selected = options.find((o) => o.user_id === value) ?? null;
   const displayName = selected?.name ?? selectedLabel ?? placeholder;
 
   const filtered = options.filter(
@@ -121,7 +118,7 @@ export default function SearchableDropdown({
                 key={opt.id}
                 className="p-2 hover:bg-slate-50 cursor-pointer"
                 onClick={() => {
-                  onChange(opt.id);
+                  onChange(opt.user_id ?? null);
                   setOpen(false);
                   setSearch("");
                 }}

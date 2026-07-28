@@ -33,7 +33,7 @@ export function getToken(role: Role, tokenType = "access") {
 
 export function removeToken(role: Role, tokenType = "access") {
   try {
-    localStorage.removeItem(keyFor(role, tokenType));
+    // localStorage.removeItem(keyFor(role, tokenType));
   } catch {
     /* ignore */
   }

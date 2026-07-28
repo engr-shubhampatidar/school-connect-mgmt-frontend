@@ -16,7 +16,7 @@ export default function ClassOverviewContainer() {
   const [error, setError] = useState<string | null>(null);
 
   const [timetableItems, setTimetableItems] = useState<ClassTimetableEntry[]>(
-    []
+    [],
   );
   const [isLoadingTimetable, setIsLoadingTimetable] = useState(true);
   const [timetableError, setTimetableError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function ClassOverviewContainer() {
     setIsLoading(true);
     setError(null);
 
-    API.get(`/api/admin/classes/${clsId}/subjects`)
+    API.get(`/admin/classes/${clsId}/subjects`)
       .then((res) => {
         if (!mounted) return;
         setItems(res.data ?? []);
@@ -68,7 +68,7 @@ export default function ClassOverviewContainer() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await API.get(`/api/admin/classes/${clsId}/subjects`);
+      const res = await API.get(`/admin/classes/${clsId}/subjects`);
       setItems(res.data ?? []);
     } catch (e) {
       setError("Failed to load subjects. Please try again.");
@@ -89,7 +89,7 @@ export default function ClassOverviewContainer() {
     setIsLoadingDetails(true);
     setDetailsError(null);
 
-    API.get(`/api/admin/classes/${clsId}/details`)
+    API.get(`/admin/classes/${clsId}/details`)
       .then((res) => {
         if (!mounted) return;
         setDetails(res.data ?? null);
@@ -118,7 +118,7 @@ export default function ClassOverviewContainer() {
     setIsLoadingDetails(true);
     setDetailsError(null);
     try {
-      const res = await API.get(`/api/admin/classes/${clsId}/details`);
+      const res = await API.get(`/admin/classes/${clsId}/details`);
       setDetails(res.data ?? null);
     } catch {
       setDetailsError("Failed to load class details. Please try again.");
@@ -139,7 +139,7 @@ export default function ClassOverviewContainer() {
     setIsLoadingTimetable(true);
     setTimetableError(null);
 
-    API.get(`/api/admin/classes/${clsId}/timetable`)
+    API.get(`/admin/classes/${clsId}/timetable`)
       .then((res) => {
         if (!mounted) return;
         setTimetableItems(res.data ?? []);

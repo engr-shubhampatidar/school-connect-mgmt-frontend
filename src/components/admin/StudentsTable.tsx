@@ -9,7 +9,6 @@ import {
   TableRow,
   TableHead,
   TableCell,
-  TableCaption,
 } from "../ui/table";
 import { Student } from "../../lib/adminApi";
 import Image from "next/image";
@@ -53,9 +52,13 @@ export default function StudentsTable({
     1,
     Math.ceil((total || students.length) / pageSize),
   );
+<<<<<<< HEAD
 
   const getPageNumbers = () => {
     const currentPage = page || 1;
+=======
+  const getPageNumbers = () => {
+>>>>>>> 5ebc1b386be79c532800c85e9d07137a75183e4c
     const pages: (number | "ellipsis")[] = [];
     const maxVisiblePages = 5;
 
@@ -66,12 +69,21 @@ export default function StudentsTable({
     } else {
       pages.push(1);
 
+<<<<<<< HEAD
       if (currentPage > 3) {
         pages.push("ellipsis");
       }
 
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
+=======
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+>>>>>>> 5ebc1b386be79c532800c85e9d07137a75183e4c
 
       for (let i = start; i <= end; i++) {
         if (i > 1 && i < totalPages) {
@@ -79,7 +91,11 @@ export default function StudentsTable({
         }
       }
 
+<<<<<<< HEAD
       if (currentPage < totalPages - 2) {
+=======
+      if (page < totalPages - 2) {
+>>>>>>> 5ebc1b386be79c532800c85e9d07137a75183e4c
         pages.push("ellipsis");
       }
 
@@ -88,7 +104,11 @@ export default function StudentsTable({
 
     return pages;
   };
+<<<<<<< HEAD
   // const [open, setOpen] = useState(false);
+=======
+  const [open, setOpen] = useState(false);
+>>>>>>> 5ebc1b386be79c532800c85e9d07137a75183e4c
 
   if (loading) {
     return (
@@ -256,13 +276,9 @@ export default function StudentsTable({
                 <TableCell className="py-3 hidden lg:table-cell">
                   <div className=" flex">
                     <div className="border border-[#D7E3FC] max-w-full px-2 py-1 rounded-full">
-                      {typeof s.class === "string"
-                        ? s.class
-                        : s.class
-                          ? `${s.class.name}${
-                              s.class.section ? ` - ${s.class.section}` : ""
-                            }`
-                          : "-"}
+                      {s.className
+                        ? `${s.className}${s.section ? ` - ${s.section}` : ""}`
+                        : "-"}
                     </div>
                   </div>
                 </TableCell>
@@ -295,6 +311,7 @@ export default function StudentsTable({
               </TableRow>
             ))}
           </TableBody>
+<<<<<<< HEAD
 
           <TableCaption className="border-t border-[#D7E3FC]">
             <div className="flex w-full justify-between p-4 items-center">
@@ -346,6 +363,55 @@ export default function StudentsTable({
           </TableCaption>
         </Table>
       </div>
+=======
+        </Table>
+      </div>
+
+      <div className="border-t border-[#D7E3FC] mt-4" />
+
+      <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-4">
+        <div className="text-sm text-slate-600">
+          Showing {students.length} of {total ?? students.length}
+        </div>
+        <Pagination className="mx-0 w-auto">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
+                disabled={(page || 1) <= 1}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
+
+            {getPageNumbers().map((pageNumber, idx) => (
+              <PaginationItem key={idx}>
+                {pageNumber === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    isActive={pageNumber === page}
+                    onClick={() => onPageChange(pageNumber)}
+                    className="cursor-pointer"
+                  >
+                    {pageNumber}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  onPageChange(Math.min(totalPages, (page || 1) + 1))
+                }
+                disabled={(page || 1) >= totalPages}
+                className="cursor-pointer"
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+>>>>>>> 5ebc1b386be79c532800c85e9d07137a75183e4c
     </div>
   );
 }

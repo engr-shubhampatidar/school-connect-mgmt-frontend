@@ -22,13 +22,8 @@ const phoneDigitsOnly = (val: string) => val.replace(/[^0-9]/g, "");
 
 export const createTeacherSchema = z
   .object({
-    fullName: z
-      .string()
-      .min(3, "Full name must be at least 3 characters")
-      .max(100, "Full name must be at most 100 characters")
-      .refine((s) => /^[A-Za-z ]+$/.test(s.trim()), {
-        message: "Full name can contain only letters and spaces",
-      }),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
 
     email: z.string().email("Must be a valid email"),
 
@@ -61,7 +56,7 @@ export const createTeacherSchema = z
         "Teacher must be at least 18 years old",
       ),
 
-    gender: z.enum(["male", "female", "other"]),
+    gender: z.enum(["MALE", "FEMALE", "OTHER"]),
 
     aadhar: z
       .string()

@@ -19,6 +19,7 @@ import { X } from "lucide-react";
 import { Button } from "../ui";
 import { Subject } from "@/services/subject.service";
 import { useToast } from "@/components/ui/use-toast";
+import { ADMIN_API } from "@/lib/api-routes";
 
 type Assignment = {
   subjectId: string;
@@ -114,7 +115,7 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
         subjects: subjectsPayload,
       };
 
-      const res = await axios.post(`/api/admin/classes`, payload);
+      const res = await axios.post(ADMIN_API.CLASSES, payload);
 
       toast({
         title: res?.data?.message ?? "Class created successfully",

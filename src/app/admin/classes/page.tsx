@@ -8,6 +8,7 @@ import API from "../../../lib/axios";
 import { UsersIcon, BookOpen, ClipboardList } from "lucide-react";
 import ClassesFilterBar from "../../../components/admin/ClassesFilterBar";
 import CreateNewClass from "@/components/admin/CreateNewClass";
+import { ADMIN_API } from "@/lib/api-routes";
 
 export default function AdminClassesPage() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -44,7 +45,7 @@ export default function AdminClassesPage() {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const res = await API.get("/api/admin/classes/dashboard");
+      const res = await API.get(ADMIN_API.CLASS_DASHBOARD);
       setStats(res.data ?? null);
     } catch (err) {
       setStats(null);
