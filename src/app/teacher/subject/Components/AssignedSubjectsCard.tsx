@@ -117,12 +117,12 @@ export default function AssignedSubjectsCard({
                       View Students
                     </button>
 
-                    <button
-                    //   onClick={() => onEnterMarks?.(item)}
+                    {/* <button
+                      onClick={() => onEnterMarks?.(item)}
                       className="rounded-lg border border-slate-300 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-900 hover:bg-slate-100"
                     >
                       Enter Marks
-                    </button>
+                    </button> */}
                   </div>
                 </td>
               </tr>
