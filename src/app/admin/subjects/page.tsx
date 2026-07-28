@@ -1,31 +1,81 @@
 "use client";
+
 import { useCallback, useEffect, useState } from "react";
 import { fetchSubjects, Subject, SubjectsQuery } from "../../../lib/adminApi";
 import Button from "../../../components/ui/Button";
 import AddSubjectDialog from "../../../components/admin/AddSubjectDialog";
 import Card from "../../../components/ui/Card";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function AdminSubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState<number>(0);
-  const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [creatingOpen, setCreatingOpen] = useState(false);
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(
+    1,
+    Math.ceil((total || subjects.length) / pageSize),
+  );
+
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+
+      if (page > 3) {
+        pages.push("ellipsis");
+      }
+
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (page < totalPages - 2) {
+        pages.push("ellipsis");
+      }
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   const load = useCallback(
     async (q?: SubjectsQuery) => {
       setLoading(true);
       setError(null);
+
       try {
         const resp = await fetchSubjects(q ?? { page, pageSize });
         setSubjects(resp.subjects);
         setTotal(resp.total ?? 0);
       } catch (err: unknown) {
-        if (err instanceof Error) setError(err.message);
-        else setError("Failed to load subjects");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Failed to load subjects");
+        }
       } finally {
         setLoading(false);
       }
@@ -34,19 +84,14 @@ export default function AdminSubjectsPage() {
   );
 
   useEffect(() => {
-    const q: SubjectsQuery = { page, pageSize };
-    void load(q);
+    void load({ page, pageSize });
   }, [page, pageSize, load]);
 
-  // Ensure current page is within available range when total changes
   useEffect(() => {
-    const tp = Math.max(1, Math.ceil(total / pageSize));
-    if (page > tp) {
-      setPage(tp);
+    if (page > totalPages) {
+      setPage(totalPages);
     }
-  }, [total, pageSize, page]);
-
-  const [creatingOpen, setCreatingOpen] = useState(false);
+  }, [page, totalPages]);
 
   return (
     <div className="mx-auto px-4 py-6">
@@ -58,119 +103,150 @@ export default function AdminSubjectsPage() {
           </p>
         </div>
 
-        <div>
-          <Button onClick={() => setCreatingOpen(true)}>Add Subject</Button>
-          <AddSubjectDialog
-            open={creatingOpen}
-            onClose={() => setCreatingOpen(false)}
-            onCreated={() => {
-              void load({ page, pageSize });
-            }}
-          />
+        <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+          Add Subject
+        </Button>
+
+        <AddSubjectDialog
+          open={creatingOpen}
+          onClose={() => setCreatingOpen(false)}
+          onCreated={() => void load({ page, pageSize })}
+        />
+      </div>
+
+      {loading ? (
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead>
+                <tr>
+                  <th className="py-4 pl-6 text-left text-[14px] font-medium text-[#021034]">
+                    Subject Name
+                  </th>
+                  <th className="px-4 py-4 text-left text-[14px] font-medium text-[#021034]">
+                    Subject Code
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {Array.from({ length: pageSize }).map((_, i) => (
+                  <tr key={i} className="border-t">
+                    <td className="p-6">
+                      <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
+                    </td>
+                    <td className="p-6">
+                      <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      ) : error ? (
+        <Card>
+          <div className="flex flex-col gap-4">
+            <p>Error: {error}</p>
+            <Button onClick={() => void load({ page, pageSize })}>
+              Retry
+            </Button>
+          </div>
+        </Card>
+      ) : subjects.length === 0 ? (
+        <Card>
+          <div className="text-center">
+            <h3 className="text-lg font-medium">No subjects found</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Add subjects to get started.
+            </p>
+
+            <Button
+              className="mt-4"
+              onClick={() => setCreatingOpen(true)}
+            >
+              Add Subject
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div className="rounded-lg border border-[#D7E3FC] bg-white">
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead>
+                <tr>
+                  <th className="py-4 pl-6 text-left text-[14px] font-medium text-[#021034]">
+                    Subject Name
+                  </th>
+                  <th className="px-4 py-4 text-left text-[14px] font-medium text-[#021034]">
+                    Subject Code
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {subjects.map((subject) => (
+                  <tr
+                    key={subject.id}
+                    className="border-t border-[#D7E3FC] hover:bg-[#D7E3FC]"
+                  >
+                    <td className="p-6 font-semibold text-[#021034]">
+                      {subject.name}
+                    </td>
+                    <td className="p-6 text-[#64748B]">
+                      {subject.code}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between px-6 pb-6">
+            <div className="text-sm text-slate-600">
+              Showing {subjects.length} of {total}
+            </div>
+
+            <Pagination className="mx-0 w-auto">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setPage(Math.max(1, page - 1))}
+                    disabled={page <= 1}
+                    className="cursor-pointer"
+                  />
+                </PaginationItem>
+
+                {getPageNumbers().map((pageNumber, index) => (
+                  <PaginationItem key={index}>
+                    {pageNumber === "ellipsis" ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        isActive={pageNumber === page}
+                        onClick={() => setPage(pageNumber)}
+                        className="cursor-pointer"
+                      >
+                        {pageNumber}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setPage(Math.min(totalPages, page + 1))
+                    }
+                    disabled={page >= totalPages}
+                    className="cursor-pointer"
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </div>
-      </div>
-
-      <div>
-        {loading ? (
-          <Card>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead className="sticky top-0 bg-white">
-                  <tr>
-                    <th className="text-left py-2">Subject Name</th>
-                    <th className="text-left py-2">Subject Code</th>
-                    <th className="text-left py-2">Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: pageSize }).map((_, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="py-3">
-                        <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
-                      </td>
-                      <td className="py-3">
-                        <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
-                      </td>
-                      <td className="py-3">
-                        <div className="h-4 w-28 animate-pulse rounded bg-slate-200" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        ) : error ? (
-          <Card>
-            <div className="flex flex-col items-start gap-4">
-              <div className="text-sm text-slate-700">Error: {error}</div>
-              <Button onClick={() => load({ page, pageSize })}>Retry</Button>
-            </div>
-          </Card>
-        ) : subjects.length === 0 ? (
-          <Card>
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-slate-900">
-                No subjects found
-              </h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Add subjects to get started.
-              </p>
-              <div className="mt-4">
-                <Button onClick={() => setCreatingOpen(true)}>
-                  Add Subject
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ) : (
-          <Card>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead className="sticky top-0 bg-white">
-                  <tr>
-                    <th className="text-left py-2">Subject Name</th>
-                    <th className="text-left py-2">Subject Code</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {subjects.map((s) => (
-                    <tr key={s.id} className="border-t hover:bg-slate-50">
-                      <td className="py-3">{s.name}</td>
-                      <td className="py-3">{s.code}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
-                Showing {subjects.length} of {total ?? subjects.length}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    if (page > 1) setPage(page - 1);
-                  }}
-                  disabled={page <= 1}
-                >
-                  Previous
-                </Button>
-                <div className="text-sm text-slate-700">Page {page}</div>
-                <Button
-                  onClick={() => {
-                    if (page < totalPages) setPage(page + 1);
-                  }}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
-      </div>
+      )}
     </div>
   );
 }
