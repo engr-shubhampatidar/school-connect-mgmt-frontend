@@ -13,19 +13,17 @@ API.interceptors.request.use((config) => {
   try {
     const url = config.url ?? "";
     // attach token if calling admin API endpoints
-    if (url.startsWith("/admin") || url.includes("/api/admin")) {
-      let token = getToken("admin");
-      // fallback to cookie token if available
-      if (!token && typeof document !== "undefined") {
-        const m = document.cookie.match(/(?:^|; )token=([^;]+)/);
-        if (m) token = decodeURIComponent(m[1]);
-      }
-      if (token) {
-        config.headers = {
-          ...((config.headers as AxiosRequestHeaders) ?? {}),
-          Authorization: `Bearer ${token}`,
-        } as AxiosRequestHeaders;
-      }
+    let token = getToken("admin");
+    // fallback to cookie token if available
+    if (!token && typeof document !== "undefined") {
+      const m = document.cookie.match(/(?:^|; )token=([^;]+)/);
+      if (m) token = decodeURIComponent(m[1]);
+    }
+    if (token) {
+      config.headers = {
+        ...((config.headers as AxiosRequestHeaders) ?? {}),
+        Authorization: `Bearer ${token}`,
+      } as AxiosRequestHeaders;
     }
   } catch {
     // swallow

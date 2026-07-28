@@ -76,7 +76,6 @@ export function AttendanceStatusBar({
           : `bg-transparent ${opt.inactiveText} ${opt.inactiveBorder} ${
               disabled ? "" : opt.hoverBg
             }`;
-
         return (
           <Button
             key={opt.value}

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, Eye, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type ClassSummaryCardProps = {
@@ -11,6 +11,7 @@ type ClassSummaryCardProps = {
   totalStudents: number;
   showAlert?: boolean;
   alertText?: string;
+  attendanceTaken?: boolean;
 };
 
 export default function ClassSummaryCard({
@@ -21,6 +22,7 @@ export default function ClassSummaryCard({
   totalStudents,
   showAlert = false,
   alertText = "Today's attendance not yet submitted",
+  attendanceTaken = false,
 }: ClassSummaryCardProps) {
   const router = useRouter();
   return (
@@ -68,8 +70,12 @@ export default function ClassSummaryCard({
           }}
           className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 cursor-pointer"
         >
-          <Plus className="h-4 w-4" />
-          Take Attendance
+          {attendanceTaken ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
+          {attendanceTaken ? "View Attendance" : "Take Attendance"}
         </button>
       </div>
     </div>

@@ -20,8 +20,9 @@ export const ADMIN_API = {
 };
 
 export const TEACHER_API = {
-  LOGIN: "/teacher/auth/login",
+  LOGIN: "/auth/login",
   ME: "/teacher/dashboard",
+  DASHBOARD: "/teacher/dashboard",
   CLASS: "/teacher/class",
   PROFILE: (id: string) => `/admin/teachers/${id}`,
 };

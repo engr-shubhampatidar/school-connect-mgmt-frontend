@@ -19,7 +19,6 @@ import { Search } from "lucide-react";
 type StudentRow = {
   studentId: string;
   name: string;
-  rollNo?: string | number | null;
   status?: AttendanceValue;
 };
 
@@ -45,8 +44,8 @@ export default function TeacherAttendancePage() {
     if (!q) return students;
     return students.filter((s) => {
       const name = (s.name ?? "").toString().toLowerCase();
-      const roll = (s.rollNo ?? "").toString().toLowerCase();
-      return name.includes(q) || roll.includes(q);
+      const studentId = (s.studentId ?? "").toString().toLowerCase();
+      return name.includes(q) || studentId.includes(q);
     });
   }, [students, search]);
   const [submitting, setSubmitting] = useState(false);
@@ -64,33 +63,18 @@ export default function TeacherAttendancePage() {
     let mounted = true;
     async function load() {
       try {
-        const res = await getTeacherClass();
+        const { class: classData, students: classStudents } =
+          await getTeacherClass();
         if (!mounted) return;
-        const r = res as unknown as Record<string, unknown> | null;
-        const clsData =
-          r && typeof r === "object" && "class" in r
-            ? (r.class as unknown)
-            : (res as unknown);
-        const studentsArr = Array.isArray(
-          (r as Record<string, unknown> | null)?.students,
-        )
-          ? ((r as Record<string, unknown>)!.students as unknown[])
-          : Array.isArray(
-                (clsData as Record<string, unknown> | undefined)?.students,
-              )
-            ? ((clsData as Record<string, unknown>)!.students as unknown[])
-            : [];
-        setKlass(clsData as TeacherClass);
-        const st = (studentsArr ?? []).map((s: unknown) => {
-          const so = (s as Record<string, unknown>) ?? {};
-          return {
-            studentId: (so.id ?? so.studentId ?? "") as string,
-            name: (so.name ?? "") as string,
-            rollNo: (so.studentId ?? so.roll_no ?? "") as string,
+
+        setKlass(classData);
+        setStudents(
+          (classStudents ?? []).map((s) => ({
+            studentId: s.studentId,
+            name: s.name ?? "",
             status: undefined,
-          };
-        });
-        setStudents(st);
+          })),
+        );
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
@@ -156,7 +140,85 @@ export default function TeacherAttendancePage() {
     };
   }, [klass, date]);
 
-  if (loading) return <div className="p-4">Loading…</div>;
+  if (loading) {
+    const rows = Array.from({ length: 8 }).map((_, i) => (
+      <tr key={i} className={`border-b ${i % 2 === 0 ? "bg-slate-50" : ""}`}>
+        <td className="px-6 py-4">
+          <div className="h-4 w-12 rounded bg-slate-200" />
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-full bg-slate-200" />
+            <div className="h-4 w-40 rounded bg-slate-300" />
+          </div>
+        </td>
+        <td className="px-6 py-4">
+          <div className="flex justify-end">
+            <div className="h-8 w-40 rounded-full bg-slate-200" />
+          </div>
+        </td>
+      </tr>
+    ));
+
+    return (
+      <div className="space-y-2 p-4 pb-20 animate-pulse" aria-hidden>
+        {/* Class header card */}
+        <div className="rounded-xl border bg-white p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-2">
+              <div className="h-3 w-24 rounded bg-slate-200" />
+              <div className="h-7 w-48 rounded bg-slate-300" />
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <div className="h-3 w-28 rounded bg-slate-200" />
+              <div className="h-8 w-36 rounded-md bg-slate-300" />
+            </div>
+          </div>
+        </div>
+
+        {/* Student list card */}
+        <div className="w-full rounded-xl border bg-white shadow-sm">
+          <div className="flex items-start justify-between p-6">
+            <div className="space-y-2">
+              <div className="h-5 w-32 rounded bg-slate-300" />
+              <div className="h-4 w-48 rounded bg-slate-200" />
+            </div>
+            <div className="h-9 w-56 rounded-lg bg-slate-200" />
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="text-slate-600">
+                <tr>
+                  <th className="px-6 py-3 font-medium">
+                    <div className="h-3 w-16 rounded bg-slate-200" />
+                  </th>
+                  <th className="px-6 py-3 font-medium">
+                    <div className="h-3 w-28 rounded bg-slate-200" />
+                  </th>
+                  <th className="px-6 py-3 font-medium text-right">
+                    <div className="ml-auto h-3 w-32 rounded bg-slate-200" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>{rows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="border-t bg-white fixed bottom-0 left-0 w-full md:pl-64 lg:pl-72">
+          <div className="mx-auto flex max-h-20 items-center justify-between px-6 py-4">
+            <div className="h-4 w-64 rounded bg-slate-200" />
+            <div className="flex items-center gap-4">
+              <div className="h-8 w-16 rounded bg-slate-200" />
+              <div className="h-9 w-36 rounded-lg bg-slate-300" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!klass || !klass.id) {
     return (
@@ -268,8 +330,8 @@ export default function TeacherAttendancePage() {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search by name or roll no"
-                aria-label="Search students by name or roll number"
+                placeholder="Search by name or student id"
+                aria-label="Search students by name or student id"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-500"
@@ -282,7 +344,7 @@ export default function TeacherAttendancePage() {
             <table className="w-full text-left text-sm">
               <thead className=" text-slate-600">
                 <tr>
-                  <th className="px-6 py-3 font-medium">Roll No.</th>
+                  <th className="px-6 py-3 font-medium">Student Id</th>
                   <th className="px-6 py-3 font-medium">Student Name</th>
                   <th className="px-6 py-3 font-medium text-right">
                     Attendance Status
@@ -298,9 +360,9 @@ export default function TeacherAttendancePage() {
                       index % 2 === 0 ? "bg-slate-50" : ""
                     }`}
                   >
-                    {/* Roll No */}
+                    {/* Student Id */}
                     <td className="px-6 py-4 font-medium text-slate-700">
-                      {s.rollNo ?? "-"}
+                      {s.studentId || "-"}
                     </td>
 
                     {/* Student */}

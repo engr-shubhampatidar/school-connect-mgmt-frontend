@@ -4,6 +4,7 @@ import { ADMIN_API } from "./api-routes";
 import { loginTeacher } from "./teacherApi";
 import studentApi from "./studentApi";
 import { setToken, setUser } from "./auth";
+import { email } from "zod";
 
 type Role = "admin" | "teacher" | "student";
 
@@ -67,11 +68,11 @@ export async function teacherLogin(values: {
 }
 
 export async function studentLogin(values: {
-  rollNumber: string;
+  email: string;
   password: string;
 }) {
-  const res = await studentApi.post("/api/student/auth/login", {
-    identifier: values.rollNumber,
+  const res = await studentApi.post("/auth/login", {
+    email: values.email,
     password: values.password,
   });
   return handleLoginResponse("student", res.data ?? {});

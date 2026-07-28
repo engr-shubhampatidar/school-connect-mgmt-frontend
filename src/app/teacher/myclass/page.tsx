@@ -6,61 +6,69 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getToken } from "../../../lib/auth";
 import { useToast } from "../../../components/ui/use-toast";
-import { getTeacherClass, type TeacherClass } from "../../../lib/teacherApi";
+import {
+  getTeacherClass,
+  type ClassAttendanceSummary,
+  type TeacherClass,
+  type TeacherClassStudent,
+} from "../../../lib/teacherApi";
+
+function mapToStudent(s: TeacherClassStudent): Student {
+  const statusRaw = (s.status ?? "Active").toString();
+  const status: Student["status"] =
+    statusRaw.toLowerCase() === "inactive" ? "Inactive" : "Active";
+
+  return {
+    studentId: s.studentId,
+    name: s.name ?? "",
+    email: s.email ?? "",
+    gender: s.gender ?? "",
+    status,
+  };
+}
 
 /**
  * Teacher My Class page
  * - Loads teacher and class data
  * - Extracts students and passes them to StudentListCard
  */
-function page() {
+function Page() {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Local UI state
   const [klass, setKlass] = useState<TeacherClass | null>(null);
-
-  // Students list matches the `Student` shape exported from StudentListCard
   const [students, setStudents] = useState<Student[]>([]);
+  const [attendanceTaken, setAttendanceTaken] = useState(false);
+  const [attendanceSummary, setAttendanceSummary] =
+    useState<ClassAttendanceSummary | null>(null);
 
-  // Keep a stable ref to toast so async callbacks can invoke it safely
   const toastRef = useRef(toast);
   useEffect(() => {
     toastRef.current = toast;
   }, [toast]);
 
   useEffect(() => {
-    // Ensure user is authenticated
-    const token = getToken("teacher");
+    getToken("teacher");
     let mounted = true;
 
     async function load() {
       try {
-        // getTeacherClass may return either { class, students } or the class directly
-        const raw = await getTeacherClass().catch(() => null);
-        if (!mounted || !raw) return;
+        const {
+          class: classData,
+          students: classStudents,
+          attendanceTaken: taken,
+          attendanceSummary: summary,
+        } = await getTeacherClass();
+        if (!mounted) return;
 
-        if (typeof raw === "object") {
-          const r = raw as Record<string, unknown>;
-          if ("class" in r) {
-            const parsed = raw as {
-              class?: TeacherClass;
-              students?: Student[];
-            };
-            setKlass(parsed.class ?? null);
-            setStudents(parsed.students ?? []);
-          } else {
-            // Legacy: response itself is a class and may include `students`
-            const parsed = raw as TeacherClass & { students?: Student[] };
-            setKlass(parsed);
-            setStudents(parsed.students ?? []);
-          }
-        }
+        setKlass(classData ?? null);
+        setStudents((classStudents ?? []).map(mapToStudent));
+        setAttendanceTaken(Boolean(taken));
+        setAttendanceSummary(summary ?? null);
       } catch (err: unknown) {
         let message = "Unable to load data";
         if (typeof err === "object" && err !== null && "message" in err) {
-          const maybeMessage = (err as unknown as { message?: unknown })
-            .message;
+          const maybeMessage = (err as { message?: unknown }).message;
           if (typeof maybeMessage === "string") message = maybeMessage;
         }
         toastRef.current?.({
@@ -68,8 +76,6 @@ function page() {
           description: message,
           type: "error",
         });
-      } finally {
-        // intentionally left blank; no local loading state used
       }
     }
 
@@ -83,22 +89,25 @@ function page() {
     <>
       <div className="p-6 gap-6 flex flex-col">
         <div className="flex flex-row gap-6">
-          <div className="min-w-2/3 ">
+          <div className={attendanceTaken ? "min-w-2/3" : "w-full"}>
             <ClassSummaryCard
               className={klass?.name ?? "-"}
               section={klass?.section ?? "-"}
               location="Second Floor, Room 204"
               academicYear="Academic Year 2025-26"
               totalStudents={students.length}
-              showAlert
+              showAlert={!attendanceTaken}
+              attendanceTaken={attendanceTaken}
             />
           </div>
-          <AttendanceTodayCard
-            total={students.length}
-            present={30}
-            absent={2}
-            leave={2}
-          />
+          {attendanceTaken && attendanceSummary && (
+            <AttendanceTodayCard
+              total={attendanceSummary.total}
+              present={attendanceSummary.present}
+              absent={attendanceSummary.absent}
+              leave={attendanceSummary.late}
+            />
+          )}
         </div>
         <StudentListCard students={students} />
       </div>
@@ -106,4 +115,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

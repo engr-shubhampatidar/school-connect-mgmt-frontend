@@ -10,13 +10,11 @@ import React, { useMemo, useState } from "react";
  * - `Student` type is intentionally small and only contains fields the UI needs
  */
 export type Student = {
-  rollNo: string;
+  studentId: string;
   name: string;
   email: string;
   gender: string;
   status: "Active" | "Inactive";
-  /** optional unique id used for routing */
-  id?: string;
 };
 
 type StudentListCardProps = {
@@ -40,8 +38,11 @@ export default function StudentListCard({
     if (!q) return students;
     return students.filter((s) => {
       const name = (s.name ?? "").toString().toLowerCase();
-      const roll = (s.rollNo ?? "").toString().toLowerCase();
-      return name.includes(q) || roll.includes(q);
+      const email = (s.email ?? "").toString().toLowerCase();
+      const studentId = (s.studentId ?? "").toString().toLowerCase();
+      return (
+        name.includes(q) || email.includes(q) || studentId.includes(q)
+      );
     });
   }, [students, searchTerm]);
 
@@ -51,9 +52,8 @@ export default function StudentListCard({
       onViewProfile(student);
       return;
     }
-    const id = student.id ?? student.rollNo;
-    if (!id) return;
-    router.push(`/teacher/attendance/${id}`);
+    if (!student.studentId) return;
+    router.push(`/teacher/attendance/${student.studentId}`);
   };
   return (
     <div className="w-full rounded-xl border border-[#D7E3FC] bg-white">
@@ -99,7 +99,7 @@ export default function StudentListCard({
         <table className="w-full text-left text-sm">
           <thead className="border-t border-b border-slate-200 bg-white">
             <tr className="text-slate-700">
-              <th className="px-6 py-3">Roll No.</th>
+              <th className="px-6 py-3">Student ID</th>
               <th className="px-6 py-3">Student Name</th>
               <th className="px-6 py-3">Gender</th>
               <th className="px-6 py-3">Status</th>
@@ -108,12 +108,14 @@ export default function StudentListCard({
           </thead>
 
           <tbody>
-            {filteredStudents.map((student, index) => (
+            {filteredStudents.map((student) => (
               <tr
-                key={index}
+                key={student.studentId}
                 className="border-b border-slate-100 hover:bg-slate-50"
               >
-                <td className="px-6 py-4 font-medium">{student.rollNo}</td>
+                <td className="px-6 py-4 font-medium text-slate-700">
+                  {student.studentId || "-"}
+                </td>
 
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
