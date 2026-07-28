@@ -128,9 +128,18 @@ export type TeacherClass = {
   students?: TeacherClassStudent[];
 };
 
+export type ClassAttendanceSummary = {
+  present: number;
+  absent: number;
+  late: number;
+  total: number;
+};
+
 export type GetTeacherClassResponse = {
   class: TeacherClass;
   students: TeacherClassStudent[];
+  attendanceSummary?: ClassAttendanceSummary | null;
+  attendanceTaken?: boolean;
 };
 
 export async function getTeacherClass(): Promise<GetTeacherClassResponse> {
@@ -146,6 +155,8 @@ export async function getTeacherClass(): Promise<GetTeacherClassResponse> {
       students: Array.isArray(parsed.students)
         ? parsed.students.map(normalizeClassStudent)
         : [],
+      attendanceSummary: normalizeAttendanceSummary(parsed.attendanceSummary),
+      attendanceTaken: Boolean(parsed.attendanceTaken),
     };
   }
 
@@ -154,6 +165,8 @@ export async function getTeacherClass(): Promise<GetTeacherClassResponse> {
   return {
     class: legacy,
     students: embedded.map(normalizeClassStudent),
+    attendanceSummary: null,
+    attendanceTaken: false,
   };
 }
 
@@ -172,6 +185,19 @@ function normalizeClassStudent(
     gender: typeof so.gender === "string" ? so.gender : null,
     status: typeof so.status === "string" ? so.status : null,
     photoUrl: typeof so.photoUrl === "string" ? so.photoUrl : null,
+  };
+}
+
+function normalizeAttendanceSummary(
+  summary: ClassAttendanceSummary | Record<string, unknown> | null | undefined,
+): ClassAttendanceSummary | null {
+  if (!summary || typeof summary !== "object") return null;
+  const s = summary as Record<string, unknown>;
+  return {
+    present: Number(s.present ?? 0) || 0,
+    absent: Number(s.absent ?? 0) || 0,
+    late: Number(s.late ?? 0) || 0,
+    total: Number(s.total ?? 0) || 0,
   };
 }
 
