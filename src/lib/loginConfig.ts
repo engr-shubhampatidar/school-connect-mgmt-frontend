@@ -67,10 +67,10 @@ export const loginConfig: Record<
     submit: authServices.studentLogin,
     fields: [
       {
-        name: "rollNumber",
-        label: "Roll Number",
-        placeholder: "e.g. 1C-AA-8561",
-        type: "text",
+        name: "email",
+        label: "Email",
+        placeholder: "you@school.edu",
+        type: "email",
       },
       {
         name: "password",

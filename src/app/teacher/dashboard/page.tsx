@@ -5,45 +5,96 @@ import { useRouter } from "next/navigation";
 import { Card } from "../../../components/ui/Card";
 import { useToast } from "../../../components/ui/use-toast";
 import {
-  getTeacherMe,
-  getTeacherClass,
-  type TeacherClass,
-  type TeacherMe,
+  getTeacherDashboard,
+  type AssignedClass,
+  type AssignedSubject,
+  type TodayScheduleItem,
 } from "../../../lib/teacherApi";
-import { getToken } from "../../../lib/auth";
+import { getToken, getUser } from "../../../lib/auth";
 import StatCard from "@/components/admin/StatCard";
 import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
 import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
 import TodayScheduleCard from "../dashboard/Components/TodayScheduleCard";
-import { usePathname } from "next/navigation";
-import { get } from "http";
 
-type ApiResponse = {
-  class?: TeacherClass;
-  students?: Array<{
-    id: string;
-    name?: string;
-    rollNo?: string;
-    photoUrl?: string;
-  }>;
-};
+function formatTime(time: string): string {
+  const [hStr, mStr] = time.split(":");
+  const h = Number(hStr);
+  const m = Number(mStr);
+  if (Number.isNaN(h) || Number.isNaN(m)) return time;
+  const period = h >= 12 ? "pm" : "am";
+  const hour12 = h % 12 || 12;
+  return `${hour12.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")} ${period}`;
+}
 
-type Student = {
-  id?: string;
-  name?: string;
-  rollNo?: string;
-  photoUrl?: string;
-};
+function getScheduleStatus(
+  startTime: string,
+  endTime: string,
+): "completed" | "current" | "upcoming" {
+  const now = new Date();
+  const [sh, sm, ss] = startTime.split(":").map(Number);
+  const [eh, em, es] = endTime.split(":").map(Number);
+  const start = new Date(now);
+  start.setHours(sh || 0, sm || 0, ss || 0, 0);
+  const end = new Date(now);
+  end.setHours(eh || 0, em || 0, es || 0, 0);
+  if (now >= end) return "completed";
+  if (now >= start && now < end) return "current";
+  return "upcoming";
+}
+
+function formatTodayLabel(): string {
+  return new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function getDayLabel(): string {
+  return new Date().toLocaleDateString("en-US", { weekday: "long" });
+}
+
+function mapSubjects(subjects: AssignedSubject[]) {
+  return subjects.map((s) => ({
+    classSection: `${s.class}-${s.section}`,
+    subjectName: s.subject,
+    studentCount: s.totalStudents,
+  }));
+}
+
+function mapSchedule(schedule: TodayScheduleItem[]) {
+  return schedule.map((item) => ({
+    time: formatTime(item.startTime),
+    title: item.subject,
+    subtitle: `Class ${item.class}-${item.section}${item.room ? ` Room-${item.room}` : ""}`,
+    status: getScheduleStatus(item.startTime, item.endTime),
+  }));
+}
+
+function getNextClass(schedule: TodayScheduleItem[]): string {
+  const next =
+    schedule.find(
+      (item) => getScheduleStatus(item.startTime, item.endTime) === "current",
+    ) ??
+    schedule.find(
+      (item) => getScheduleStatus(item.startTime, item.endTime) === "upcoming",
+    );
+  return next?.subject ?? "—";
+}
 
 export default function TeacherDashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [teacher, setTeacher] = useState<TeacherMe | null>(null);
-  const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [students, setStudents] = useState<
-    NonNullable<ApiResponse["students"]>
-  >([]);
+  const [teacherName, setTeacherName] = useState("Teacher");
+  const [assignedClass, setAssignedClass] = useState<AssignedClass | null>(
+    null,
+  );
+  const [assignedSubjects, setAssignedSubjects] = useState<AssignedSubject[]>(
+    [],
+  );
+  const [todaySchedule, setTodaySchedule] = useState<TodayScheduleItem[]>([]);
 
   const toastRef = React.useRef(toast);
   React.useEffect(() => {
@@ -52,43 +103,30 @@ export default function TeacherDashboardPage() {
 
   useEffect(() => {
     if (!getToken("teacher")) {
-      // router.push("/login");
       return;
     }
+
+    const stored = getUser<{ name?: string }>("teacher");
+    if (stored?.name) setTeacherName(stored.name);
 
     let mounted = true;
     async function load() {
       try {
-        const me = await getTeacherMe().catch(() => null);
-        const subjects = await fetch("");
-        if (!mounted) return;
-        if (me) setTeacher(me);
-
-        // getTeacherClass may return either { class, students } or raw class
-        const raw = (await getTeacherClass()) as unknown;
+        const data = await getTeacherDashboard();
         if (!mounted) return;
 
-        if (raw && typeof raw === "object") {
-          const r = raw as Record<string, unknown>;
-          if ("class" in r) {
-            const parsed = r as ApiResponse;
-            setKlass((parsed.class ?? null) as TeacherClass | null);
-            setStudents(parsed.students ?? []);
-          } else {
-            // legacy: response itself is a class and may have students
-            const parsed = raw as TeacherClass & {
-              students?: ApiResponse["students"];
-            };
-            setKlass(parsed as TeacherClass);
-            setStudents(parsed.students ?? []);
-          }
-        }
+        setAssignedClass(data.assignedClass);
+        setAssignedSubjects(data.assignedSubjects);
+        setTodaySchedule(data.todaySchedule);
+
+        const nameFromSubjects = data.assignedSubjects.find(
+          (s) => s.teacherName,
+        )?.teacherName;
+        if (nameFromSubjects) setTeacherName(nameFromSubjects);
       } catch (err: unknown) {
         let message = "Error";
         if (typeof err === "object" && err !== null && "message" in err) {
-          // const maybeMessage = (err as { message?: unknown }).message;
-          const maybeMessage = (err as unknown as { message?: unknown })
-            .message;
+          const maybeMessage = (err as { message?: unknown }).message;
           if (typeof maybeMessage === "string") message = maybeMessage;
         }
         toastRef.current?.({
@@ -129,7 +167,6 @@ export default function TeacherDashboardPage() {
 
     return (
       <div className="p-4 pb-28 space-y-4 animate-pulse" aria-hidden>
-        {/* Top header / class card */}
         <div className="rounded-xl border bg-white p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="space-y-2">
@@ -145,9 +182,7 @@ export default function TeacherDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Left column: main cards */}
           <div className="lg:col-span-2 space-y-4">
-            {/* Class overview card */}
             <div className="rounded-xl border bg-white p-6 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
@@ -173,7 +208,6 @@ export default function TeacherDashboardPage() {
               </div>
             </div>
 
-            {/* Student list card skeleton */}
             <div className="rounded-xl border bg-white shadow-sm">
               <div className="flex items-start justify-between p-6">
                 <div className="space-y-2">
@@ -204,9 +238,7 @@ export default function TeacherDashboardPage() {
             </div>
           </div>
 
-          {/* Right column: sidebar cards */}
           <div className="space-y-4">
-            {/* Stats / small cards */}
             <div className="space-y-3">
               <div className="rounded-xl border bg-white p-4 shadow-sm">
                 <div className="flex items-center justify-between">
@@ -226,7 +258,6 @@ export default function TeacherDashboardPage() {
               </div>
             </div>
 
-            {/* Today's schedule skeleton */}
             <div className="rounded-xl border bg-white p-4 shadow-sm">
               <div className="space-y-3">
                 <div className="h-4 w-36 rounded bg-slate-300" />
@@ -245,33 +276,17 @@ export default function TeacherDashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* Bottom fixed action bar */}
-        <div className="border-t bg-white fixed bottom-0 left-0 w-full md:pl-64 lg:pl-72">
-          <div className="mx-auto flex max-h-20 items-center justify-between px-6 py-4">
-            <div className="h-4 w-64 rounded bg-slate-200" />
-            <div className="flex items-center gap-4">
-              <div className="h-8 w-20 rounded bg-slate-200" />
-              <div className="h-9 w-36 rounded bg-slate-300" />
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
 
-  if (!klass || !klass.id) {
-    return (
-      <div className="p-4">
-        <Card>
-          <h3 className="text-lg font-medium">No class assigned</h3>
-          <p className="text-sm text-slate-600">
-            You are not a class teacher of any class.
-          </p>
-        </Card>
-      </div>
-    );
-  }
+  const hasClass = Boolean(assignedClass?.classId);
+  const attendanceDone =
+    assignedClass?.attendanceStatus?.toUpperCase() === "COMPLETED";
+  const totalStudents = assignedClass?.totalStudents ?? 0;
+  const classLabel = hasClass
+    ? `${assignedClass!.class}${assignedClass!.section ? `-${assignedClass!.section}` : ""}`
+    : null;
 
   return (
     <div className="p-4 space-y-4">
@@ -279,40 +294,43 @@ export default function TeacherDashboardPage() {
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-4">
             <h3 className="text-[24px] text-[#021034] font-[600]">
-              Welcomeback, {teacher?.name ?? "Teacher"}!
+              Welcome back, {teacherName}!
             </h3>
-            <div className="flex gap-2">
-              <p className=" text-[14px] text-[#737373] font-[400]">
-                Monday, October 23, 2026 .
+            <div className="flex gap-2 flex-wrap">
+              <p className="text-[14px] text-[#737373] font-[400]">
+                {formatTodayLabel()}
+                {classLabel ? " ." : ""}
               </p>
-              <p className=" text-[14px] text-[#16A34A] font-[400]">
-                You are the class teacher of {klass.name}{" "}
-                {klass.section ? `- ${klass.section}` : ""}
-              </p>
+              {classLabel && (
+                <p className="text-[14px] text-[#16A34A] font-[400]">
+                  You are the class teacher of {classLabel}
+                </p>
+              )}
             </div>
           </div>
           <div className="text-sm text-slate-500">&nbsp;</div>
         </div>
       </section>
+
       <div className="flex w-full grid-cols-1 md:grid-cols-4 gap-[20px] mb-[20px] grid">
         <StatCard
           label="Total Students"
           progressLabel="+180 Last Month"
-          value={students.length}
+          value={totalStudents}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
           iconBgColor="bg-[#D3FFF1]"
         />
         <StatCard
-          label="Attenadance"
-          value="Pandding"
+          label="Attendance"
+          value={attendanceDone ? "Completed" : "Pending"}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={ClipboardCheck}
           progressLabel="+180 Last Month"
           iconBgColor="bg-[#F9EAD0]"
         />
         <StatCard
-          label="Pandding Marks"
+          label="Pending Marks"
           value="02"
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={MailQuestionMark}
@@ -321,119 +339,78 @@ export default function TeacherDashboardPage() {
         />
         <StatCard
           label="Next Class"
-          value="Physics"
+          value={getNextClass(todaySchedule)}
           className="bg-[#FFFFFF] border-[#D7E3FC]"
           icon={Users}
           progressLabel="+180 Last Month"
           iconBgColor="bg-[#E4D8FF]"
         />
       </div>
+
       <div className="flex flex-row gap-4">
         <section className="w-2/3 gap-4 mb-4 flex flex-col">
-          <div className="bg-[#FFFFFF] rounded-[8px] border border-[#D7E3FC]">
-            <div className="flex items-start justify-between px-6 py-6">
-              <div>
-                <div className="text-[24px] text-[#021034] font-semibold">
-                  My Class: {klass.name}{" "}
-                  {klass.section ? `- ${klass.section}` : ""}
+          {hasClass ? (
+            <div className="bg-[#FFFFFF] rounded-[8px] border border-[#D7E3FC]">
+              <div className="flex items-start justify-between px-6 py-6">
+                <div>
+                  <div className="text-[24px] text-[#021034] font-semibold">
+                    My Class: {classLabel}
+                  </div>
+                  <div className="mt-1 text-[14px] text-[#737373] font-[400]">
+                    Class Teacher Responsibilities
+                    {assignedClass?.room ? ` · Room ${assignedClass.room}` : ""}
+                  </div>
                 </div>
-                <div className="mt-1 text-[14px] text-[#737373] font-[400]">
-                  Class Teacher Responsibilities
+
+                <div className="flex flex-col text-right text-[14px] text-[#737373] font-[400]">
+                  <span className="mt-1 text-[24px] text-[#021034] font-semibold">
+                    {totalStudents}
+                  </span>
+                  Total Students
                 </div>
               </div>
 
-              <div className="flex flex-col text-right  text-[14px] text-[#737373] font-[400]">
-                <span className="mt-1 text-[24px] text-[#021034] font-semibold">
-                  {students.length ?? "NA"}
-                </span>
-                Total Students
-              </div>
-            </div>
-
-            <div className="  rounded-b-md border-t-2 border-slate-100 px-6 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="text-amber-600">{WarningIcon()}</div>
-                <div className="text-[14px] text-[#737373] font-[600]">
-                  {" Today's attendance not yet submitted."}
+              <div className="rounded-b-md border-t-2 border-slate-100 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {!attendanceDone && (
+                    <div className="text-amber-600">{WarningIcon()}</div>
+                  )}
+                  <div className="text-[14px] text-[#737373] font-[600]">
+                    {attendanceDone
+                      ? "Today's attendance has been submitted."
+                      : "Today's attendance not yet submitted."}
+                  </div>
                 </div>
+                {!attendanceDone && (
+                  <button
+                    onClick={() => router.push("/teacher/attendance")}
+                    className="inline-flex items-center gap-2 bg-[#021034] text-white px-4 py-2 rounded-md shadow-sm cursor-pointer hover:bg-[#021034]/90 transition"
+                  >
+                    <span>+ Take Attendance</span>
+                  </button>
+                )}
               </div>
-              <button
-                onClick={() => router.push("/teacher/attendance")}
-                className="inline-flex items-center gap-2 bg-[#021034] text-white px-4 py-2 rounded-md shadow-sm cursor-pointer hover:bg-[#021034]/90 transition"
-              >
-                {/* <span className="w-4 h-4">{PlusIcon()}</span> */}
-                <span>+ Take Attendance</span>
-              </button>
             </div>
-          </div>
+          ) : (
+            <Card>
+              <h3 className="text-lg font-medium">No class assigned</h3>
+              <p className="text-sm text-slate-600">
+                You are not a class teacher of any class.
+              </p>
+            </Card>
+          )}
+
           <AssignedSubjectsCard
-            subjects={[
-              {
-                classSection: "10-A",
-                subjectName: "Mathematics",
-                studentCount: 32,
-              },
-              {
-                classSection: "10-A",
-                subjectName: "Mathematics",
-                studentCount: 28,
-              },
-              {
-                classSection: "10-A",
-                subjectName: "Science",
-                studentCount: 35,
-              },
-              {
-                classSection: "10-A",
-                subjectName: "Physics",
-                studentCount: 30,
-              },
-              {
-                classSection: "10-A",
-                subjectName: "Physics",
-                studentCount: 30,
-              },
-            ]}
+            subjects={mapSubjects(assignedSubjects)}
             onViewStudents={(item) => console.log("View", item)}
             onEnterMarks={(item) => console.log("Enter marks", item)}
             onExport={() => console.log("Export report")}
           />
         </section>
+
         <TodayScheduleCard
-          schedules={[
-            {
-              time: "10:00 pm",
-              title: "Physics (lab)",
-              subtitle: "Class 11-A Lab1",
-              status: "completed",
-            },
-            {
-              time: "10:35 pm",
-              title: "Physics",
-              subtitle: "Class 11-A Room-102",
-              status: "current",
-            },
-            {
-              time: "10:35 pm",
-              title: "Lunch Break",
-              subtitle: "Staff Room-100",
-            },
-            {
-              time: "11:10 pm",
-              title: "Mathematics",
-              subtitle: "Class 10-B Room-103",
-            },
-            {
-              time: "11:40 pm",
-              title: "Mathematics",
-              subtitle: "Class 10-A Room-104",
-            },
-            {
-              time: "12:20 pm",
-              title: "Science",
-              subtitle: "Class 10-C Room-115",
-            },
-          ]}
+          dayLabel={getDayLabel()}
+          schedules={mapSchedule(todaySchedule)}
           onViewWeek={() => console.log("View full week")}
         />
       </div>

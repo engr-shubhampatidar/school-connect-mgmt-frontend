@@ -74,7 +74,7 @@ export default function Topbar({
         suppressHydrationWarning
         className="flex bg-white items-center justify-between  border-b border-slate-200 p-5 min-h-[85px] "
       >
-        <h2 className="text-md font-bold min-w-[10%] truncate">{topName}</h2>
+        <h2 className="text-md font-bold min-w-[10%]">{topName}</h2>
         <div className="w-full items-start- justify-center pl-8">
           {/* <button onClick={handleSearchToggle}> click</button> */}
           {showSearch && (
