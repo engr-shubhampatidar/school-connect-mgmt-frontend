@@ -1,43 +1,5 @@
-import axios, { AxiosError, type AxiosRequestHeaders } from "axios";
-import { BASE_URL, TEACHER_API, ATTENDANCE_API } from "./api-routes";
-import { getToken, removeToken } from "./auth";
-
-const TAPI = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: { "Content-Type": "application/json" },
-});
-
-TAPI.interceptors.request.use((config) => {
-  try {
-    const token = getToken("teacher");
-    if (token) {
-      config.headers = {
-        ...((config.headers as AxiosRequestHeaders) ?? {}),
-        Authorization: `Bearer ${token}`,
-      } as AxiosRequestHeaders;
-    }
-  } catch {
-    // ignore
-  }
-  return config;
-});
-
-TAPI.interceptors.response.use(
-  (res) => res,
-  (error: AxiosError) => {
-    if (!error.response) return Promise.reject(new Error("Network error"));
-    if (error.response.status === 401) {
-      try {
-        removeToken("teacher");
-      } catch {}
-      // if (typeof window !== "undefined") {
-      //   window.location.href = "/login";
-      // }
-    }
-    return Promise.reject(error);
-  },
-);
+import API from "./axios";
+import { TEACHER_API, ATTENDANCE_API } from "./api-routes";
 
 export type TeacherMe = {
   id: string;
@@ -51,16 +13,15 @@ export async function loginTeacher(payload: {
   email: string;
   password: string;
 }): Promise<unknown> {
-  const res = await TAPI.post<Record<string, unknown>>(
+  const res = await API.post<Record<string, unknown>>(
     TEACHER_API.LOGIN,
     payload,
   );
-  const data = res.data ?? {};
-  return data;
+  return res.data ?? {};
 }
 
 export async function getTeacherMe(): Promise<TeacherMe> {
-  const res = await TAPI.get<TeacherMe>(TEACHER_API.ME);
+  const res = await API.get<TeacherMe>(TEACHER_API.ME);
   return res.data;
 }
 
@@ -98,7 +59,7 @@ export type TeacherDashboard = {
 };
 
 export async function getTeacherDashboard(): Promise<TeacherDashboard> {
-  const res = await TAPI.get<TeacherDashboard>(TEACHER_API.DASHBOARD);
+  const res = await API.get<TeacherDashboard>(TEACHER_API.DASHBOARD);
   const data = res.data ?? {};
   return {
     assignedClass: data.assignedClass ?? null,
@@ -143,7 +104,7 @@ export type GetTeacherClassResponse = {
 };
 
 export async function getTeacherClass(): Promise<GetTeacherClassResponse> {
-  const res = await TAPI.get<GetTeacherClassResponse | TeacherClass>(
+  const res = await API.get<GetTeacherClassResponse | TeacherClass>(
     TEACHER_API.CLASS,
   );
   const data = res.data;
@@ -205,7 +166,7 @@ export async function fetchAttendanceForClassDate(
   classId: string,
   date: string,
 ): Promise<unknown> {
-  const res = await TAPI.get<unknown>(ATTENDANCE_API.BASE, {
+  const res = await API.get<unknown>(ATTENDANCE_API.BASE, {
     params: { classId, date },
   });
   return res.data;
@@ -215,7 +176,7 @@ export async function fetchAttendanceByClass(
   classId: string,
   params?: { startDate?: string; endDate?: string },
 ): Promise<unknown> {
-  const res = await TAPI.get<unknown>(ATTENDANCE_API.CLASS(classId), {
+  const res = await API.get<unknown>(ATTENDANCE_API.CLASS(classId), {
     params,
   });
   return res.data;
@@ -226,8 +187,8 @@ export async function markAttendance(payload: {
   date: string;
   students: Array<{ studentId: string; status: string }>;
 }): Promise<unknown> {
-  const res = await TAPI.post<unknown>(ATTENDANCE_API.BASE, payload);
+  const res = await API.post<unknown>(ATTENDANCE_API.BASE, payload);
   return res.data;
 }
 
-export default TAPI;
+export default API;

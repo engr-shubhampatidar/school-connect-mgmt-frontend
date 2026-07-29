@@ -22,13 +22,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get("token")?.value;
+  // Session flag cookie (not the JWT) — set by client auth on login/refresh
+  const hasSession =
+    request.cookies.get("sc_session")?.value === "1" ||
+    // legacy fallback during rollout
+    Boolean(request.cookies.get("token")?.value);
   const role = request.cookies.get("role")?.value;
 
   const cleanPath = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
 
   /* ---------------- NOT LOGGED IN ---------------- */
-  if (!token) {
+  if (!hasSession) {
     const isPublic = PUBLIC_ROUTES.some(
       (route) => cleanPath === route || cleanPath.startsWith(route + "/"),
     );
@@ -42,7 +46,7 @@ export function proxy(request: NextRequest) {
   }
 
   /* ---------------- LOGGED IN ---------------- */
-  if (token && PUBLIC_ROUTES.includes(cleanPath)) {
+  if (hasSession && PUBLIC_ROUTES.includes(cleanPath)) {
     return NextResponse.redirect(
       new URL(ROLE_ROUTES[role ?? ""] ?? "/", request.url),
     );

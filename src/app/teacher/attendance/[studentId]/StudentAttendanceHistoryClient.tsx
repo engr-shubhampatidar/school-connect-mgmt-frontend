@@ -2,9 +2,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { Card } from "../../../../components/ui/Card";
-import TAPI from "../../../../lib/teacherApi";
+import API from "../../../../lib/axios";
 import { ATTENDANCE_API } from "../../../../lib/api-routes";
-import { getToken } from "../../../../lib/auth";
+import {
+  ensureSessionReady,
+  getAccessToken,
+  getActiveRole,
+} from "../../../../lib/auth";
 import StudentInfoCard from "../../../../components/attendance/StudentInfoCard";
 import AttendanceHistoryHeader from "../../../../components/attendance/AttendanceHistoryHeader";
 import AttendanceDateFilter from "../../../../components/attendance/AttendanceDateFilter";
@@ -63,10 +67,8 @@ export default function StudentAttendanceHistoryClient({
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getToken("teacher")) {
-      // if (typeof window !== "undefined")
-      //   window.location.href = "/login";
-      // return;
+    if (!getAccessToken() || getActiveRole() !== "teacher") {
+      // Session missing — AuthBootstrap / proxy handle redirect
     }
 
     const effectiveStudentId = studentId ?? params?.studentId ?? null;
@@ -89,7 +91,10 @@ export default function StudentAttendanceHistoryClient({
           return;
         }
 
-        const res = await TAPI.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
+        await ensureSessionReady();
+        if (!mounted) return;
+
+        const res = await API.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
           params: date ? { date } : undefined,
         });
         const data = res?.data as ApiResponse | AttendanceApiItem[] | null;

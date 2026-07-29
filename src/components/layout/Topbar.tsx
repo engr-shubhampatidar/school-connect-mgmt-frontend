@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUser, clearAuthTokens } from "../../lib/auth";
+import { getUser, clearSession, getActiveRole } from "../../lib/auth";
 import { useRouter } from "next/navigation";
 export default function Topbar({
   onSearch,
@@ -24,17 +24,7 @@ export default function Topbar({
 
   const handleLogout = () => {
     try {
-      clearAuthTokens();
-      try {
-        localStorage.clear();
-        // remove cookies
-        document.cookie =
-          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie =
-          "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        cookieStore.set("token", "");
-        cookieStore.set("role", "");
-      } catch {}
+      clearSession();
     } finally {
       router.push("/");
     }
@@ -56,17 +46,19 @@ export default function Topbar({
 
   useEffect(() => {
     try {
-      // Prefer admin profile, then teacher, then student when deciding which user to show
-      const u = pathname.startsWith("/admin")
-        ? getUser("admin")
+      const role = getActiveRole();
+      const fromPath = pathname.startsWith("/admin")
+        ? "admin"
         : pathname.startsWith("/teacher")
-          ? getUser("teacher")
-          : getUser("student");
-      setUser(u);
+          ? "teacher"
+          : pathname.startsWith("/student")
+            ? "student"
+            : role;
+      setUser(fromPath ? getUser(fromPath) : null);
     } catch {
       setUser(null);
     }
-  }, []);
+  }, [pathname]);
 
   return (
     <div className="sticky top-0 z-10">

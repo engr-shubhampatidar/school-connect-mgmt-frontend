@@ -3,6 +3,7 @@ import React from "react";
 import studentApi from "../../../lib/studentApi";
 import { useToast } from "../../../components/ui/use-toast";
 import AttendanceSummary from "./components/AttendanceSummary";
+import { ensureSessionReady } from "../../../lib/auth";
 
 export default function Page() {
   return <Inner />;
@@ -22,6 +23,8 @@ function Inner() {
     let mounted = true;
     async function load() {
       try {
+        await ensureSessionReady();
+        if (!mounted) return;
         const [r1, r2] = await Promise.all([
           studentApi.get("/api/student/me"),
           studentApi.get("/api/student/attendance"),

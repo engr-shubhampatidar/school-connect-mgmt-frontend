@@ -11,7 +11,7 @@ import {
   markAttendance,
   type TeacherClass,
 } from "../../../lib/teacherApi";
-import { getToken } from "../../../lib/auth";
+import { ensureSessionReady, getAccessToken, getActiveRole } from "../../../lib/auth";
 import SuccessModal from "../../../components/ui/SuccessModal";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
@@ -54,14 +54,14 @@ export default function TeacherAttendancePage() {
   const notAssign: any = "N/A";
 
   useEffect(() => {
-    if (!getToken("teacher")) {
-      // // client side redirect if not authenticated
-      // if (typeof window !== "undefined")
-      //   window.location.href = "/login";
-      // return;
-    }
     let mounted = true;
     async function load() {
+      await ensureSessionReady();
+      if (!mounted) return;
+      if (!getAccessToken() || getActiveRole() !== "teacher") {
+        if (mounted) setLoading(false);
+        return;
+      }
       try {
         const { class: classData, students: classStudents } =
           await getTeacherClass();

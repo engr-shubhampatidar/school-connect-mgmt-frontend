@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
-import { removeToken } from "../../../lib/auth";
+import { clearSession } from "../../../lib/auth";
 import { useRouter } from "next/navigation";
 
 const schema = z
@@ -46,8 +46,8 @@ function Inner() {
         description: "You will be logged out",
         type: "success",
       });
-      removeToken("student");
-      // router.push("/login");
+      clearSession();
+      router.push("/login");
     } catch (err: any) {
       toast({
         title: "Error",

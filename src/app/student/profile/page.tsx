@@ -3,6 +3,7 @@ import React from "react";
 import studentApi from "../../../lib/studentApi";
 import { Card } from "../../../components/ui/Card";
 import Image from "next/image";
+import { ensureSessionReady } from "../../../lib/auth";
 
 export default function Page() {
   return (
@@ -18,6 +19,8 @@ function Inner() {
     let mounted = true;
     async function load() {
       try {
+        await ensureSessionReady();
+        if (!mounted) return;
         const res = await studentApi.get("/api/student/profile");
         if (!mounted) return;
         setMe(res.data);
