@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Topbar from "./Topbar";
 import { ToastProvider } from "../ui/use-toast";
+import AuthBootstrap from "../auth/AuthBootstrap";
 
 export default function ClientLayoutWrapper({
   children,
@@ -19,6 +20,7 @@ export default function ClientLayoutWrapper({
 
   return (
     <div className="flex">
+      <AuthBootstrap />
       {!hideNavbar && <Navbar />}
       <main className="flex-1 bg-[#F5F9FF] ">
         {!hideNavbar && <Topbar />}

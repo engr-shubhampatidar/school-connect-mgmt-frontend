@@ -1,61 +1,74 @@
-import axios from "axios";
 import API from "./axios";
-import { ADMIN_API } from "./api-routes";
-import { loginTeacher } from "./teacherApi";
-import studentApi from "./studentApi";
-import { setToken, setUser } from "./auth";
-import { email } from "zod";
+import { AUTH_API } from "./api-routes";
+import { setSession, type Role } from "./auth";
 
-type Role = "admin" | "teacher" | "student";
-
-function normalizeUser(respUser: any, role: Role) {
+function normalizeUser(respUser: Record<string, unknown>, role: Role) {
   return {
-    id: respUser?.id ?? respUser?._id ?? null,
-    name: respUser?.fullName ?? respUser?.name ?? respUser?.username ?? null,
-    email: respUser?.email ?? null,
-    role: respUser?.role ?? role,
-    school: respUser?.school ?? null,
+    id: (respUser?.id ?? respUser?._id ?? null) as string | null,
+    name: (respUser?.fullName ??
+      respUser?.name ??
+      respUser?.username ??
+      null) as string | null,
+    email: (respUser?.email ?? null) as string | null,
+    role: (respUser?.role ?? role) as string,
+    school: (respUser?.school ?? null) as unknown,
+    schoolId: (respUser?.schoolId ?? null) as string | null,
   };
 }
 
-function extractTokenFromData(data: any): {
+function extractTokenFromData(data: unknown): {
   access?: string;
   refresh?: string;
 } {
   if (!data || typeof data !== "object") return {};
-  const d = data as Record<string, any>;
+  const d = data as Record<string, unknown>;
+  const nested =
+    d.data && typeof d.data === "object"
+      ? (d.data as Record<string, unknown>)
+      : null;
   const access =
-    d.accessToken ?? d.token ?? d.access_token ?? d.data?.accessToken ?? null;
+    d.accessToken ?? d.token ?? d.access_token ?? nested?.accessToken ?? null;
   const refresh =
-    d.refreshToken ?? d.refresh_token ?? d.data?.refreshToken ?? null;
+    d.refreshToken ?? d.refresh_token ?? nested?.refreshToken ?? null;
   return {
     access: typeof access === "string" ? access : undefined,
     refresh: typeof refresh === "string" ? refresh : undefined,
   };
 }
 
-function handleLoginResponse(role: Role, data: any) {
+function handleLoginResponse(role: Role, data: unknown) {
   try {
-    const { access, refresh } = extractTokenFromData(data ?? {});
-    if (access) setToken(role, access);
-    if (refresh) setToken(role, refresh, "refresh");
+    const payload =
+      data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+    const { access, refresh } = extractTokenFromData(payload);
+    if (!access || !refresh) {
+      throw new Error("Login response missing tokens");
+    }
 
     const respUser =
-      data && typeof data === "object"
-        ? (data.user ?? data.teacher ?? data.student ?? data)
-        : null;
-    if (respUser && typeof respUser === "object") {
-      const userToStore = normalizeUser(respUser, role);
-      setUser(role, userToStore);
+      payload.user ?? payload.teacher ?? payload.student ?? payload;
+    const user =
+      respUser && typeof respUser === "object"
+        ? normalizeUser(respUser as Record<string, unknown>, role)
+        : undefined;
+
+    setSession({
+      accessToken: access,
+      refreshToken: refresh,
+      role,
+      user,
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message === "Login response missing tokens") {
+      throw err;
     }
-  } catch {
     // ignore storage errors
   }
   return data;
 }
 
 export async function adminLogin(values: { email: string; password: string }) {
-  const res = await API.post(ADMIN_API.LOGIN, values);
+  const res = await API.post(AUTH_API.LOGIN, values);
   return handleLoginResponse("admin", res.data ?? {});
 }
 
@@ -63,15 +76,15 @@ export async function teacherLogin(values: {
   email: string;
   password: string;
 }) {
-  const data = await loginTeacher(values);
-  return handleLoginResponse("teacher", data ?? {});
+  const res = await API.post(AUTH_API.LOGIN, values);
+  return handleLoginResponse("teacher", res.data ?? {});
 }
 
 export async function studentLogin(values: {
   email: string;
   password: string;
 }) {
-  const res = await studentApi.post("/auth/login", {
+  const res = await API.post(AUTH_API.LOGIN, {
     email: values.email,
     password: values.password,
   });

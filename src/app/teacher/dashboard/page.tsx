@@ -10,7 +10,7 @@ import {
   type AssignedSubject,
   type TodayScheduleItem,
 } from "../../../lib/teacherApi";
-import { getToken, getUser } from "../../../lib/auth";
+import { ensureSessionReady, getAccessToken, getActiveRole, getUser } from "../../../lib/auth";
 import StatCard from "@/components/admin/StatCard";
 import { Users, ClipboardCheck, MailQuestionMark } from "lucide-react";
 import AssignedSubjectsCard from "../dashboard/Components/AssignedSubjectsCard";
@@ -102,15 +102,19 @@ export default function TeacherDashboardPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!getToken("teacher")) {
-      return;
-    }
-
-    const stored = getUser<{ name?: string }>("teacher");
-    if (stored?.name) setTeacherName(stored.name);
-
     let mounted = true;
+
     async function load() {
+      await ensureSessionReady();
+      if (!mounted) return;
+
+      if (!getAccessToken() || getActiveRole() !== "teacher") {
+        return;
+      }
+
+      const stored = getUser<{ name?: string }>("teacher");
+      if (stored?.name) setTeacherName(stored.name);
+
       try {
         const data = await getTeacherDashboard();
         if (!mounted) return;

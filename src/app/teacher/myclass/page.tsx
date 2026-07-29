@@ -4,7 +4,7 @@ import AttendanceTodayCard from "./Components/AttendanceTodayCard";
 import StudentListCard, { Student } from "./Components/StudentListCard";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getToken } from "../../../lib/auth";
+import { ensureSessionReady, getAccessToken, getActiveRole } from "../../../lib/auth";
 import { useToast } from "../../../components/ui/use-toast";
 import {
   getTeacherClass,
@@ -48,10 +48,14 @@ function Page() {
   }, [toast]);
 
   useEffect(() => {
-    getToken("teacher");
     let mounted = true;
 
     async function load() {
+      await ensureSessionReady();
+      if (!mounted) return;
+      if (!getAccessToken() || getActiveRole() !== "teacher") {
+        return;
+      }
       try {
         const {
           class: classData,
