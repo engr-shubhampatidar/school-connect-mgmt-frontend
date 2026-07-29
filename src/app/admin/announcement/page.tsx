@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import AnnouncementCard from "./components/AnnouncementCard";
-import { Button } from "../../../components/ui/Button";
-import CreateAnnouncementDialog from "../../../components/admin/CreateAnnouncementDialog";
-import { fetchAnnouncements, Announcement } from "../../../lib/adminApi";
+import { Button } from "@/components/ui/Button";
+import {
+  AnnouncementCard,
+  CreateAnnouncementDialog,
+  AnnouncementsPageSkeleton,
+  fetchAnnouncements,
+  type Announcement,
+} from "@/modules/announcements";
 
 export default function Page() {
   const [openCreate, setOpenCreate] = useState(false);
   const [announcements, setAnnouncements] = useState<Announcement[] | null>(
     null,
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,6 +39,10 @@ export default function Page() {
       mounted = false;
     };
   }, []);
+
+  if (loading && !announcements && !error) {
+    return <AnnouncementsPageSkeleton />;
+  }
 
   return (
     <div className="mx-auto p-6 gap-6 flex flex-col">
@@ -61,7 +69,6 @@ export default function Page() {
         </div>
       </section>
 
-      {loading && <div>Loading announcements...</div>}
       {error && <div className="text-red-600">{error}</div>}
       {!loading && !error && announcements && announcements.length === 0 && (
         <div className="text-sm text-gray-600">No announcements found.</div>

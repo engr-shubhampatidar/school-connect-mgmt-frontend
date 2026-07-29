@@ -8,20 +8,18 @@ import React, {
 } from "react";
 import {
   fetchTeachers,
-  fetchSubjects,
-  Teacher,
-  TeachersQuery,
-  Subject,
-  ClassItem,
-  fetchClasses,
-} from "../../../lib/adminApi";
-import TeachersFilterBar, {
-  TeachersFilters,
-} from "../../../components/admin/TeachersFilterBar";
-import TeachersTable from "../../../components/admin/TeachersTable";
-import Button from "../../../components/ui/Button";
-import CreateTeacherDialog from "../../../components/admin/CreateTeacherDialog";
-import StatCard from "../../../components/admin/StatCard";
+  type Teacher,
+  type TeachersQuery,
+  TeachersFilterBar,
+  type TeachersFilters,
+  TeachersTable,
+  CreateTeacherDialog,
+  TeachersPageSkeleton,
+} from "@/modules/teachers";
+import { fetchSubjects, type Subject } from "@/modules/subjects";
+import { fetchClasses, type ClassItem } from "@/modules/classes";
+import Button from "@/components/ui/Button";
+import StatCard from "@/components/admin/StatCard";
 import { Users, BookOpen, ClipboardList } from "lucide-react";
 
 export default function AdminTeachersPage() {
@@ -36,16 +34,12 @@ export default function AdminTeachersPage() {
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [filters, setFilters] = useState<TeachersFilters>({});
 
-
   const controllerRef = useRef<AbortController | null>(null);
   const lastFetchRef = useRef<number | null>(null);
-  const hasMountedRef = useRef<boolean>(false);
-  // const [classes, setClasses] = useState<ClassItem[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [ classes, setClasses] = useState<ClassItem[]>([]);
   const fetchedRelatedRef = useRef<boolean>(false);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
-  // stable memoized subject options so child components receive a stable reference
   const subjectOptions = useMemo(
     () => subjects.map((s) => ({ id: s.id, name: s.name })),
     [subjects],
@@ -63,7 +57,6 @@ export default function AdminTeachersPage() {
       setLoading(true);
       setError(null);
       try {
-        // Cancel previous pending request to avoid duplicate fetches
         if (controllerRef.current) {
           controllerRef.current.abort();
         }
@@ -76,7 +69,6 @@ export default function AdminTeachersPage() {
         setTeachers(resp.teachers ?? []);
         setTotal(resp.total ?? resp.teachers.length ?? 0);
       } catch (err: unknown) {
-        // ignore abort errors
         if (err instanceof Error) {
           const e = err as unknown as Record<string, unknown>;
           const name = typeof e.name === "string" ? e.name : undefined;
@@ -91,14 +83,10 @@ export default function AdminTeachersPage() {
     [page, pageSize],
   );
 
-  // Effect: load teachers on mount and when filters/page change.
-  // Uses `controllerRef` to cancel in-flight requests and `lastFetchRef`
-  // to debounce rapid successive calls.
   useEffect(() => {
     const q: TeachersQuery = { ...filters, page, pageSize };
     void load(q);
     return () => {
-      // cancel any pending request when effect cleans up
       if (controllerRef.current) {
         controllerRef.current.abort();
         controllerRef.current = null;
@@ -106,11 +94,10 @@ export default function AdminTeachersPage() {
     };
   }, [filters, page, pageSize, load]);
 
-  // After teachers are fetched, load related data (classes, subjects) once.
   useEffect(() => {
-    if (loading) return; // wait until teachers request completes
-    if (!teachers || teachers.length === 0) return; // require teachers present
-    if (fetchedRelatedRef.current) return; // run only once
+    if (loading) return;
+    if (!teachers || teachers.length === 0) return;
+    if (fetchedRelatedRef.current) return;
     fetchedRelatedRef.current = true;
 
     let mounted = true;
@@ -123,9 +110,8 @@ export default function AdminTeachersPage() {
         if (!mounted) return;
         setClasses(clsResp.classes ?? []);
         setSubjects(subjResp.subjects ?? []);
-        // place further dependent API calls here if needed
-      } catch (e) {
-        // ignore or optionally set error state for related loads
+      } catch {
+        // ignore related load errors
       }
     })();
     return () => {
@@ -135,7 +121,6 @@ export default function AdminTeachersPage() {
 
   const handleApply = useCallback((f: TeachersFilters) => {
     setFilters(f);
-    console.log(f);
     setPage(1);
   }, []);
 
@@ -143,6 +128,12 @@ export default function AdminTeachersPage() {
     setFilters({});
     setPage(1);
   }, []);
+
+  const isInitialLoad = loading && teachers.length === 0 && !error;
+
+  if (isInitialLoad) {
+    return <TeachersPageSkeleton />;
+  }
 
   return (
     <div className=" mx-auto px-4 py-6">
@@ -172,75 +163,42 @@ export default function AdminTeachersPage() {
       </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-5">
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Total Staff"
-              value={teachers.length.toString()}
-              icon={Users}
-              className="bg-[#FFFFFF] border-[#D7E3FC]"
-              iconBgColor="bg-[#BFDBFE]"
-              progressLabel="+180 Last Month"
-              progressLabelColor="text-slate-500"
-            />
-          )}
-        </div>
-
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Present Today"
-              value={"08"}
-              icon={BookOpen}
-              className="bg-[#FFFFFF] border-[#D7E3FC]"
-              iconBgColor="bg-[#DDD6FE]"
-              progressLabel="80% Attendance Rate"
-              progressLabelColor="text-[#16A34A]"
-            />
-          )}
-        </div>
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="On Leave"
-              value={"02"}
-              icon={ClipboardList}
-              className="bg-[#FFFFFF] border-[#D7E3FC]"
-              iconBgColor="bg-[#FED7AA]"
-              progressLabel="1 sick leave 1 casual leave"
-              progressLabelColor="text-slate-500"
-            />
-          )}
-        </div>
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Avg Faculty Load"
-              value={"22h"}
-              icon={BookOpen}
-              className="bg-[#FFFFFF] border-[#D7E3FC]"
-              iconBgColor="bg-[#DDD6FE]"
-              progressLabel="Peer weak / Teacher"
-              progressLabelColor="text-slate-500"
-            />
-          )}
-        </div>
+        <StatCard
+          label="Total Staff"
+          value={teachers.length.toString()}
+          icon={Users}
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          iconBgColor="bg-[#BFDBFE]"
+          progressLabel="+180 Last Month"
+          progressLabelColor="text-slate-500"
+        />
+        <StatCard
+          label="Present Today"
+          value={"08"}
+          icon={BookOpen}
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          iconBgColor="bg-[#DDD6FE]"
+          progressLabel="80% Attendance Rate"
+          progressLabelColor="text-[#16A34A]"
+        />
+        <StatCard
+          label="On Leave"
+          value={"02"}
+          icon={ClipboardList}
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          iconBgColor="bg-[#FED7AA]"
+          progressLabel="1 sick leave 1 casual leave"
+          progressLabelColor="text-slate-500"
+        />
+        <StatCard
+          label="Avg Faculty Load"
+          value={"22h"}
+          icon={BookOpen}
+          className="bg-[#FFFFFF] border-[#D7E3FC]"
+          iconBgColor="bg-[#DDD6FE]"
+          progressLabel="Peer weak / Teacher"
+          progressLabelColor="text-slate-500"
+        />
       </section>
 
       <div className="mb-5">

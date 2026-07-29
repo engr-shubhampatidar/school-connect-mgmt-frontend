@@ -1,17 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card } from "../../../../components/ui/Card";
+import { Card } from "@/components/ui/Card";
+import { getTeacherClass } from "@/modules/teachers";
+import { useToast } from "@/components/ui/use-toast";
 import {
-  getTeacherClass,
   fetchAttendanceByClass,
-} from "../../../../lib/teacherApi";
-import { useToast } from "../../../../components/ui/use-toast";
-
-type AttendanceRecord = {
-  date: string;
-  students?: Array<{ studentId?: string; status?: string }>;
-  status?: string;
-};
+  ClassAttendanceHistorySkeleton,
+  type AttendanceHistoryRecord,
+} from "@/modules/attendance";
 
 function formatDate(iso?: string) {
   if (!iso) return "-";
@@ -27,11 +23,17 @@ function formatDate(iso?: string) {
   }
 }
 
+function studentStatus(
+  s: { studentId?: string; status?: string } | Record<string, unknown>,
+): string {
+  return String(("status" in s ? s.status : "") ?? "");
+}
+
 export default function AttendanceHistoryPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [records, setRecords] = useState<AttendanceHistoryRecord[]>([]);
   const [klassId, setKlassId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function AttendanceHistoryPage() {
         const cls = await getTeacherClass();
         const maybeClass = (cls as Record<string, unknown>)?.class ?? cls;
         const mc = maybeClass as Record<string, unknown> | null | undefined;
-        const id = mc ? mc["id"] ?? mc["classId"] ?? mc["id"] : undefined;
+        const id = mc ? (mc["id"] ?? mc["classId"] ?? mc["id"]) : undefined;
         if (!id) {
           if (!mounted) return;
           setKlassId(null);
@@ -56,19 +58,17 @@ export default function AttendanceHistoryPage() {
         setKlassId(idStr);
 
         const data = (await fetchAttendanceByClass(idStr)) as
-          | AttendanceRecord[]
+          | AttendanceHistoryRecord[]
           | null;
         if (!mounted) return;
-        const arr = Array.isArray(data) ? data : [];
+        const arr = Array.isArray(data) ? [...data] : [];
 
-        // sort by date desc
         arr.sort((a, b) => {
-          const da = new Date(a.date).getTime();
-          const db = new Date(b.date).getTime();
+          const da = new Date(String(a.date ?? "")).getTime();
+          const db = new Date(String(b.date ?? "")).getTime();
           return db - da;
         });
 
-        // default show latest 7 entries
         setRecords(arr.slice(0, 7));
       } catch (err: unknown) {
         let message = "Unable to load attendance";
@@ -88,15 +88,7 @@ export default function AttendanceHistoryPage() {
   }, [toast]);
 
   if (loading) {
-    return (
-      <div className="p-4">
-        <Card>
-          <div className="text-sm text-slate-600">
-            Loading attendance history…
-          </div>
-        </Card>
-      </div>
-    );
+    return <ClassAttendanceHistorySkeleton />;
   }
 
   if (!klassId) {
@@ -150,14 +142,14 @@ export default function AttendanceHistoryPage() {
       <div className="space-y-3">
         {records.map((r) => {
           const present = (r.students ?? []).filter(
-            (s) => (s.status ?? "") === "PRESENT"
+            (s) => studentStatus(s) === "PRESENT",
           ).length;
           const absent = (r.students ?? []).filter(
-            (s) => (s.status ?? "") === "ABSENT"
+            (s) => studentStatus(s) === "ABSENT",
           ).length;
           const isMarked = (r.status ?? "") === "MARKED";
           return (
-            <Card key={r.date} className="p-3">
+            <Card key={String(r.date)} className="p-3">
               <div className="flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="text-sm font-medium">

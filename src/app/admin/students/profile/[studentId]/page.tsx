@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getStudentById, StudentDetails } from "@/lib/adminApi";
+import { getStudentById, type StudentDetails, StudentProfileSkeleton } from "@/modules/students";
 import Image from "next/image";
 import { Card } from "@/components/ui";
 import { CalendarCheck } from "lucide-react";
@@ -29,61 +29,7 @@ export default function StudentDetailsPage() {
     loadStudent();
   }, [studentId]);
 
-  if (loading)
-    return (
-      <div className="p-3 md:p-6">
-        <div className="animate-pulse space-y-6">
-          <div className="flex items-center gap-6 mb-4">
-            <div className="w-[62px] h-[62px] rounded-full bg-gray-200" />
-            <div className="flex-1 space-y-2">
-              <div className="h-5 bg-gray-200 rounded w-1/3" />
-              <div className="h-4 bg-gray-200 rounded w-1/4" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-1/4" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-1/4" />
-              <div className="grid grid-cols-1 gap-4">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-1/4" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-1/4" />
-              <div className="grid grid-cols-1 gap-4">
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-                <div className="h-12 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (loading) return <StudentProfileSkeleton />;
 
   return (
     <div className="p-3 md:p-6 ">

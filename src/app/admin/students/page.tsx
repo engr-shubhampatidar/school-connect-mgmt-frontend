@@ -1,20 +1,18 @@
 "use client";
-import UpdateStudentDialog from "@/components/admin/UpdateStudentDialog";
-// import StudentDetailsDrawer from "@/components/admin/StudentDetailsDrawer";
-import { useCallback, useEffect, useRef, useState } from "react";
-import CreateStudentDialog from "../../../components/admin/CreateStudentDialog";
-import StudentsFilterBar, {
-  StudentsFilters,
-} from "../../../components/admin/StudentsFilterBar";
-import StudentsTable from "../../../components/admin/StudentsTable";
-import Button from "../../../components/ui/Button";
 import {
-  ClassItem,
-  fetchClasses,
+  CreateStudentDialog,
+  UpdateStudentDialog,
+  StudentsFilterBar,
+  type StudentsFilters,
+  StudentsTable,
+  StudentsPageSkeleton,
   fetchStudents,
-  Student,
-  StudentsQuery,
-} from "../../../lib/adminApi";
+  type Student,
+  type StudentsQuery,
+} from "@/modules/students";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Button from "@/components/ui/Button";
+import { type ClassItem, fetchClasses } from "@/modules/classes";
 import { useRouter } from "next/navigation";
 
 export default function AdminStudentsPage() {
@@ -22,7 +20,6 @@ export default function AdminStudentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState<number>(0);
-  // const [open, setOpen] = useState(false);
 
   const router = useRouter();
 
@@ -89,9 +86,12 @@ export default function AdminStudentsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
   const [classes, setClasses] = useState<ClassItem[]>([]);
-  // const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-  //   null,
-  // );
+
+  const isInitialLoad = loading && students.length === 0 && !error;
+
+  if (isInitialLoad) {
+    return <StudentsPageSkeleton />;
+  }
 
   return (
     <div className="mx-auto px-4 py-6">
@@ -114,7 +114,6 @@ export default function AdminStudentsPage() {
             classes={classes}
             onClose={() => setCreatingOpen(false)}
             onCreated={() => {
-              // refresh list after creation
               void load({ ...filters, page, pageSize });
             }}
           />

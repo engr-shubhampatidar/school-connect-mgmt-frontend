@@ -3,7 +3,8 @@ import { Search } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { getUser, clearSession, getActiveRole } from "../../lib/auth";
+import { getUser, clearSession, getActiveRole } from "@/modules/auth";
+import { roleFromPath } from "@/lib/roleFromPath";
 import { useRouter } from "next/navigation";
 export default function Topbar({
   onSearch,
@@ -46,19 +47,32 @@ export default function Topbar({
 
   useEffect(() => {
     try {
-      const role = getActiveRole();
-      const fromPath = pathname.startsWith("/admin")
-        ? "admin"
-        : pathname.startsWith("/teacher")
-          ? "teacher"
-          : pathname.startsWith("/student")
-            ? "student"
-            : role;
+      const fromPath = roleFromPath(pathname) ?? getActiveRole();
       setUser(fromPath ? getUser(fromPath) : null);
     } catch {
       setUser(null);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (target instanceof Element && target.closest("[data-topbar-menu]")) {
+        return;
+      }
+      setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   return (
     <div className="sticky top-0 z-10">
@@ -116,17 +130,23 @@ export default function Topbar({
               </div>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative" data-topbar-menu>
             <button
               aria-label="Open menu"
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
               onClick={() => setMenuOpen((v) => !v)}
               className="p-2 text-black rounded-md hover:bg-slate-100"
             >
               {DotsVerticalIcon()}
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-md bg-white border shadow-md z-20">
+              <div
+                role="menu"
+                className="absolute right-0 mt-2 w-40 rounded-md bg-white border shadow-md z-20"
+              >
                 <button
+                  role="menuitem"
                   onClick={handleLogout}
                   className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                 >
@@ -159,28 +179,6 @@ function IconButton({
 }
 
 /* Simple inline SVG icons */
-function SquareIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <rect
-        x="3"
-        y="3"
-        width="18"
-        height="18"
-        rx="3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
-}
-
 function BellIcon() {
   return (
     <svg
@@ -208,33 +206,6 @@ function BellIcon() {
   );
 }
 
-function MailIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M3 8l9 6 9-6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M21 19H3V5h18v14z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function DotsVerticalIcon() {
   return (
     <svg
@@ -246,60 +217,6 @@ function DotsVerticalIcon() {
     >
       <path
         d="M12 6v.01M12 12v.01M12 18v.01"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function WarningIcon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 9v4"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 17h.01"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 5v14M5 12h14"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"

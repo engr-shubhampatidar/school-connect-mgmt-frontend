@@ -1,18 +1,39 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/", "/login", "/register-school"];
+/** Unauthenticated-accessible routes (exact or prefix). */
+const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/register-school",
+  "/contact",
+  "/unauthorized",
+];
 
-const ROLE_ROUTES: Record<string, string> = {
+/** Dashboard redirect targets after login when hitting a public auth page. */
+const ROLE_DASHBOARDS: Record<string, string> = {
   admin: "/admin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
 };
 
+/** Role → allowed path prefix (not just dashboard). */
+const ROLE_PREFIXES: Record<string, string> = {
+  admin: "/admin",
+  teacher: "/teacher",
+  student: "/student",
+};
+
+function isPublicPath(cleanPath: string): boolean {
+  return PUBLIC_ROUTES.some(
+    (route) => cleanPath === route || cleanPath.startsWith(route + "/"),
+  );
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ✅ Ignore Next.js internals & static files
+  // Ignore Next.js internals & static files
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
@@ -33,36 +54,33 @@ export function proxy(request: NextRequest) {
 
   /* ---------------- NOT LOGGED IN ---------------- */
   if (!hasSession) {
-    const isPublic = PUBLIC_ROUTES.some(
-      (route) => cleanPath === route || cleanPath.startsWith(route + "/"),
-    );
-
-    // 🚨 allow login/register WITHOUT redirect
-    if (isPublic) {
+    if (isPublicPath(cleanPath)) {
       return NextResponse.next();
     }
 
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  /* ---------------- LOGGED IN ---------------- */
-  if (hasSession && PUBLIC_ROUTES.includes(cleanPath)) {
+  /* ---------------- LOGGED IN on auth/landing pages ---------------- */
+  const authLandingExact = ["/", "/login", "/register-school"];
+  if (hasSession && authLandingExact.includes(cleanPath)) {
     return NextResponse.redirect(
-      new URL(ROLE_ROUTES[role ?? ""] ?? "/", request.url),
+      new URL(ROLE_DASHBOARDS[role ?? ""] ?? "/", request.url),
     );
   }
 
-  /* ---------------- ROLE GUARD ---------------- */
-  if (role && ROLE_ROUTES[role]) {
-    const allowedBase = ROLE_ROUTES[role];
+  /* ---------------- ROLE GUARD (prefix-based) ---------------- */
+  if (role && ROLE_PREFIXES[role]) {
+    const allowedPrefix = ROLE_PREFIXES[role];
 
     const isOwnRoute =
-      cleanPath === allowedBase || cleanPath.startsWith(allowedBase + "/");
+      cleanPath === allowedPrefix ||
+      cleanPath.startsWith(allowedPrefix + "/");
 
-    const isOtherRoleRoute = Object.values(ROLE_ROUTES).some(
-      (route) =>
-        route !== allowedBase &&
-        (cleanPath === route || cleanPath.startsWith(route + "/")),
+    const isOtherRoleRoute = Object.values(ROLE_PREFIXES).some(
+      (prefix) =>
+        prefix !== allowedPrefix &&
+        (cleanPath === prefix || cleanPath.startsWith(prefix + "/")),
     );
 
     if (!isOwnRoute && isOtherRoleRoute) {
@@ -73,7 +91,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next();
 }
 
-/* ✅ CRITICAL: matcher */
+/* CRITICAL: matcher */
 export const config = {
   matcher: ["/((?!_next/static|_next/images|favicon.ico).*)"],
 };

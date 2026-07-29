@@ -1,17 +1,16 @@
 "use client";
-import ClassSummaryCard from "./Components/ClassSummaryCard";
-import AttendanceTodayCard from "./Components/AttendanceTodayCard";
-import StudentListCard, { Student } from "./Components/StudentListCard";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ensureSessionReady, getAccessToken, getActiveRole } from "../../../lib/auth";
-import { useToast } from "../../../components/ui/use-toast";
+import ClassSummaryCard from "./components/ClassSummaryCard";
+import AttendanceTodayCard from "./components/AttendanceTodayCard";
+import StudentListCard, { Student } from "./components/StudentListCard";
+import { useCallback } from "react";
+import { useAuthenticatedLoad } from "@/hooks/useAuthenticatedLoad";
 import {
   getTeacherClass,
+  MyClassPageSkeleton,
   type ClassAttendanceSummary,
   type TeacherClass,
   type TeacherClassStudent,
-} from "../../../lib/teacherApi";
+} from "@/modules/teachers";
 
 function mapToStudent(s: TeacherClassStudent): Student {
   const statusRaw = (s.status ?? "Active").toString();
@@ -27,67 +26,47 @@ function mapToStudent(s: TeacherClassStudent): Student {
   };
 }
 
+type MyClassData = {
+  klass: TeacherClass | null;
+  students: Student[];
+  attendanceTaken: boolean;
+  attendanceSummary: ClassAttendanceSummary | null;
+};
+
 /**
  * Teacher My Class page
  * - Loads teacher and class data
  * - Extracts students and passes them to StudentListCard
  */
 function Page() {
-  const router = useRouter();
-  const { toast } = useToast();
+  const load = useCallback(async (): Promise<MyClassData> => {
+    const {
+      class: classData,
+      students: classStudents,
+      attendanceTaken: taken,
+      attendanceSummary: summary,
+    } = await getTeacherClass();
 
-  const [klass, setKlass] = useState<TeacherClass | null>(null);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [attendanceTaken, setAttendanceTaken] = useState(false);
-  const [attendanceSummary, setAttendanceSummary] =
-    useState<ClassAttendanceSummary | null>(null);
-
-  const toastRef = useRef(toast);
-  useEffect(() => {
-    toastRef.current = toast;
-  }, [toast]);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function load() {
-      await ensureSessionReady();
-      if (!mounted) return;
-      if (!getAccessToken() || getActiveRole() !== "teacher") {
-        return;
-      }
-      try {
-        const {
-          class: classData,
-          students: classStudents,
-          attendanceTaken: taken,
-          attendanceSummary: summary,
-        } = await getTeacherClass();
-        if (!mounted) return;
-
-        setKlass(classData ?? null);
-        setStudents((classStudents ?? []).map(mapToStudent));
-        setAttendanceTaken(Boolean(taken));
-        setAttendanceSummary(summary ?? null);
-      } catch (err: unknown) {
-        let message = "Unable to load data";
-        if (typeof err === "object" && err !== null && "message" in err) {
-          const maybeMessage = (err as { message?: unknown }).message;
-          if (typeof maybeMessage === "string") message = maybeMessage;
-        }
-        toastRef.current?.({
-          title: "Unable to load",
-          description: message,
-          type: "error",
-        });
-      }
-    }
-
-    load();
-    return () => {
-      mounted = false;
+    return {
+      klass: classData ?? null,
+      students: (classStudents ?? []).map(mapToStudent),
+      attendanceTaken: Boolean(taken),
+      attendanceSummary: summary ?? null,
     };
-  }, [router]);
+  }, []);
+
+  const { data, loading } = useAuthenticatedLoad("teacher", load, {
+    errorTitle: "Unable to load",
+  });
+
+  const klass = data?.klass ?? null;
+  const students = data?.students ?? [];
+  const attendanceTaken = data?.attendanceTaken ?? false;
+  const attendanceSummary = data?.attendanceSummary ?? null;
+
+  if (loading) {
+    return <MyClassPageSkeleton />;
+  }
 
   return (
     <>

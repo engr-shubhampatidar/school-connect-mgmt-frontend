@@ -5,7 +5,7 @@ type Toast = {
   id?: string;
   title?: string;
   description?: string;
-  type?: "success" | "error";
+  type?: "success" | "error" | "info";
 };
 
 const ToastContext = React.createContext<{
@@ -36,7 +36,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className={`rounded-md p-3 shadow ${
               t.type === "error"
                 ? "bg-red-50 border border-red-200"
-                : "bg-green-50 border border-green-200"
+                : t.type === "info"
+                  ? "bg-blue-50 border border-blue-200"
+                  : "bg-green-50 border border-green-200"
             }`}
           >
             {t.title && <div className="font-medium text-sm">{t.title}</div>}

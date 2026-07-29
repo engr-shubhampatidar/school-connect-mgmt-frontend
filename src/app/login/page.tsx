@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import UnifiedLoginForm from "../../components/ui/UnifiedLoginForm";
+import UnifiedLoginForm from "@/modules/auth/components/UnifiedLoginForm";
 import Button from "../../components/ui/Button";
 
 export default function Page() {

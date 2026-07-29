@@ -1,0 +1,14 @@
+export * from "./api/adminDashboard";
+export { useTeacherDashboard } from "./hooks/useTeacherDashboard";
+export { default as AttendanceOverviewCard } from "./components/admin/AttendanceOverviewCard";
+export { default as QuickActionsCard } from "./components/admin/QuickActionsCard";
+export { default as RecentStudents } from "./components/admin/RecentStudents";
+export { default as NoticeBoardCard } from "./components/admin/NoticeBoardCard";
+export { default as AdminDashboardSkeleton } from "./components/skeletons/AdminDashboardSkeleton";
+export { default as DashboardHeader } from "./components/teacher/DashboardHeader";
+export { default as DashboardStats } from "./components/teacher/DashboardStats";
+export { default as MyClassCard } from "./components/teacher/MyClassCard";
+export { default as TodayScheduleCard } from "./components/teacher/TodayScheduleCard";
+export { default as TeacherDashboardSkeleton } from "./components/skeletons/TeacherDashboardSkeleton";
+export { default as WarningIcon } from "./components/teacher/WarningIcon";
+export { default as AttendanceSummary } from "./components/student/AttendanceSummary";

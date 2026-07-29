@@ -1,5 +1,5 @@
 "use client";
-import Portal from "@/app/Portal";
+import Portal from "@/components/Portal";
 import { Check } from "lucide-react";
 
 type SuccessModalProps = {
