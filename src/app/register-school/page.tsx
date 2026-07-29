@@ -1,12 +1,10 @@
 "use client";
 import React from "react";
-import RegisterSchoolForm from "../../components/RegisterSchoolForm";
-import { ToastProvider } from "../../components/ui/use-toast";
-import RegisterNavbar from "./components/RegisterNavbar";
+import { RegisterNavbar, RegisterSchoolForm } from "@/modules/schools";
 
 export default function RegisterPage() {
   return (
-    <ToastProvider>
+    <>
       <RegisterNavbar />
       <div className="min-h-full bg-slate-50 grid grid-cols-1 lg:grid-cols-2 ">
         <div className="w-full hidden lg:flex items-center justify-center p-8 bg-[#EEF4FF]">
@@ -81,6 +79,6 @@ export default function RegisterPage() {
           <RegisterSchoolForm />
         </div>
       </div>
-    </ToastProvider>
+    </>
   );
 }

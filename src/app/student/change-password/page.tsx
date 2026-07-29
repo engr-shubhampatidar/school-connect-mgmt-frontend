@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
-import studentApi from "../../../lib/studentApi";
+import { changePassword } from "@/modules/students";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "../../../components/ui/Button";
 import { useToast } from "../../../components/ui/use-toast";
-import { clearSession } from "../../../lib/auth";
+import { clearSession } from "@/modules/auth";
 import { useRouter } from "next/navigation";
 
 const schema = z
@@ -22,22 +22,20 @@ const schema = z
 
 type Form = z.infer<typeof schema>;
 
-export default function Page() {
-  return (
-      <Inner />
-  );
-}
-
-function Inner() {
+export default function ChangePasswordPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { register, handleSubmit, formState } = useForm<Form>({
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<Form>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: Form) => {
     try {
-      await studentApi.post("/api/student/auth/change-password", {
+      await changePassword({
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
       });
@@ -64,37 +62,46 @@ function Inner() {
           <h2 className="text-lg font-semibold mb-4">Change Password</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm text-slate-600">
+              <label
+                htmlFor="oldPassword"
+                className="block text-sm text-slate-600"
+              >
                 Old Password
               </label>
               <input
+                id="oldPassword"
                 type="password"
                 {...register("oldPassword")}
                 className="mt-1 w-full rounded-md border px-3 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-600">
+              <label
+                htmlFor="newPassword"
+                className="block text-sm text-slate-600"
+              >
                 New Password
               </label>
               <input
+                id="newPassword"
                 type="password"
                 {...register("newPassword")}
                 className="mt-1 w-full rounded-md border px-3 py-2"
               />
             </div>
             <div>
-              <label className="block text-sm text-slate-600">
+              <label htmlFor="confirm" className="block text-sm text-slate-600">
                 Confirm New Password
               </label>
               <input
+                id="confirm"
                 type="password"
                 {...register("confirm")}
                 className="mt-1 w-full rounded-md border px-3 py-2"
               />
             </div>
             <div className="flex items-center gap-2">
-              <Button type="submit" disabled={formState.isSubmitting}>
+              <Button type="submit" disabled={isSubmitting}>
                 Change Password
               </Button>
             </div>

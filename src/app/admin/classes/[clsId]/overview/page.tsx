@@ -1,4 +1,4 @@
-import ClassOverviewContainer from "@/components/admin/ClassOverviewContainer";
+import { ClassOverviewContainer } from "@/modules/classes";
 
 export const metadata = {
   title: "Class Overview",

@@ -1,4 +1,3 @@
-import { Label } from "@radix-ui/react-select";
 import {
   LayoutDashboard,
   Users,
@@ -87,16 +86,6 @@ export const teacherNav = [
     href: "/teacher/class/attendance-history",
     icon: ClipboardCheck,
   },
-  // {
-  //   label: "Assignments",
-  //   href: "/teacher/assignments",
-  //   icon: GraduationCap,
-  // },
-  {
-    label: "historyOfAttandance",
-    href: "/teacher/dashboard/attendance/history",
-    icon: ClipboardList,
-  }
 ];
 
 export const studentNav = [

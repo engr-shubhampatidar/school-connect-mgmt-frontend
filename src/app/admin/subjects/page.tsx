@@ -1,9 +1,16 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { fetchSubjects, Subject, SubjectsQuery } from "../../../lib/adminApi";
-import Button from "../../../components/ui/Button";
-import AddSubjectDialog from "../../../components/admin/AddSubjectDialog";
-import Card from "../../../components/ui/Card";
+import {
+  fetchSubjects,
+  type Subject,
+  type SubjectsQuery,
+  AddSubjectDialog,
+  SubjectsTable,
+  SubjectsPageSkeleton,
+} from "@/modules/subjects";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import { DataTableSkeleton } from "@/components/skeletons";
 
 export default function AdminSubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -12,8 +19,6 @@ export default function AdminSubjectsPage() {
   const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
-
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   const load = useCallback(
     async (q?: SubjectsQuery) => {
@@ -38,7 +43,6 @@ export default function AdminSubjectsPage() {
     void load(q);
   }, [page, pageSize, load]);
 
-  // Ensure current page is within available range when total changes
   useEffect(() => {
     const tp = Math.max(1, Math.ceil(total / pageSize));
     if (page > tp) {
@@ -48,18 +52,26 @@ export default function AdminSubjectsPage() {
 
   const [creatingOpen, setCreatingOpen] = useState(false);
 
+  const isInitialLoad = loading && subjects.length === 0 && !error;
+
+  if (isInitialLoad) {
+    return <SubjectsPageSkeleton />;
+  }
+
   return (
     <div className="mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Subjects</h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <h1 className="text-[24px] font-[600] text-[#021034]">Subjects</h1>
+          <p className="mt-1 text-[14px] text-[#737373]">
             Manage subjects offered by the school
           </p>
         </div>
 
         <div>
-          <Button onClick={() => setCreatingOpen(true)}>Add Subject</Button>
+          <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+            + Add Subject
+          </Button>
           <AddSubjectDialog
             open={creatingOpen}
             onClose={() => setCreatingOpen(false)}
@@ -72,34 +84,16 @@ export default function AdminSubjectsPage() {
 
       <div>
         {loading ? (
-          <Card>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead className="sticky top-0 bg-white">
-                  <tr>
-                    <th className="text-left py-2">Subject Name</th>
-                    <th className="text-left py-2">Subject Code</th>
-                    <th className="text-left py-2">Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: pageSize }).map((_, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="py-3">
-                        <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
-                      </td>
-                      <td className="py-3">
-                        <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
-                      </td>
-                      <td className="py-3">
-                        <div className="h-4 w-28 animate-pulse rounded bg-slate-200" />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+          <div className="animate-pulse" aria-hidden>
+            <DataTableSkeleton
+              rows={pageSize}
+              columns={[
+                { headerWidth: "w-32", cellWidth: "w-40" },
+                { headerWidth: "w-28", cellWidth: "w-24" },
+                { headerWidth: "w-24", cellWidth: "w-28", hideOnMobile: true },
+              ]}
+            />
+          </div>
         ) : error ? (
           <Card>
             <div className="flex flex-col items-start gap-4">
@@ -117,58 +111,20 @@ export default function AdminSubjectsPage() {
                 Add subjects to get started.
               </p>
               <div className="mt-4">
-                <Button onClick={() => setCreatingOpen(true)}>
-                  Add Subject
+                <Button variant="dark" onClick={() => setCreatingOpen(true)}>
+                  + Add Subject
                 </Button>
               </div>
             </div>
           </Card>
         ) : (
-          <Card>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <thead className="sticky top-0 bg-white">
-                  <tr>
-                    <th className="text-left py-2">Subject Name</th>
-                    <th className="text-left py-2">Subject Code</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {subjects.map((s) => (
-                    <tr key={s.id} className="border-t hover:bg-slate-50">
-                      <td className="py-3">{s.name}</td>
-                      <td className="py-3">{s.code}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-slate-600">
-                Showing {subjects.length} of {total ?? subjects.length}
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    if (page > 1) setPage(page - 1);
-                  }}
-                  disabled={page <= 1}
-                >
-                  Previous
-                </Button>
-                <div className="text-sm text-slate-700">Page {page}</div>
-                <Button
-                  onClick={() => {
-                    if (page < totalPages) setPage(page + 1);
-                  }}
-                  disabled={page >= totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </Card>
+          <SubjectsTable
+            subjects={subjects}
+            total={total}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={setPage}
+          />
         )}
       </div>
     </div>

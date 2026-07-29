@@ -1,20 +1,22 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
-import { Card } from "../../../../components/ui/Card";
-import API from "../../../../lib/axios";
-import { ATTENDANCE_API } from "../../../../lib/api-routes";
+import { Card } from "@/components/ui/Card";
+import API from "@/services/axios";
+import { ATTENDANCE_API } from "@/config/api-routes";
 import {
   ensureSessionReady,
   getAccessToken,
   getActiveRole,
-} from "../../../../lib/auth";
-import StudentInfoCard from "../../../../components/attendance/StudentInfoCard";
-import AttendanceHistoryHeader from "../../../../components/attendance/AttendanceHistoryHeader";
-import AttendanceDateFilter from "../../../../components/attendance/AttendanceDateFilter";
-import AttendanceTable from "../../../../components/attendance/AttendanceTable";
-import LoadingState from "../../../../components/attendance/LoadingState";
-import EmptyState from "../../../../components/attendance/EmptyState";
+} from "@/modules/auth";
+import {
+  StudentInfoCard,
+  AttendanceHistoryHeader,
+  AttendanceDateFilter,
+  AttendanceTable,
+  EmptyState,
+  StudentAttendanceHistorySkeleton,
+  type AttendanceRecord,
+} from "@/modules/attendance";
 
 type AttendanceApiItem = {
   id: string;
@@ -40,21 +42,11 @@ type ApiResponse = {
   [k: string]: unknown;
 };
 
-type AttendanceRecord = {
-  id?: string;
-  date: string;
-  status: string;
-  attendanceId?: string;
-  createdAt?: string;
-  [k: string]: unknown;
-};
-
 export default function StudentAttendanceHistoryClient({
   studentId,
 }: {
-  studentId?: string | null;
+  studentId: string;
 }) {
-  const params = useParams() as { studentId?: string };
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
@@ -71,9 +63,7 @@ export default function StudentAttendanceHistoryClient({
       // Session missing — AuthBootstrap / proxy handle redirect
     }
 
-    const effectiveStudentId = studentId ?? params?.studentId ?? null;
-
-    if (!effectiveStudentId) {
+    if (!studentId) {
       setError("Missing studentId");
       setLoading(false);
       return;
@@ -84,17 +74,10 @@ export default function StudentAttendanceHistoryClient({
       setLoading(true);
       setError(null);
       try {
-        // ensure we don't pass a null/undefined id to ATTENDANCE_API.STUDENT
-        if (!effectiveStudentId) {
-          setError("Missing student id");
-          setLoading(false);
-          return;
-        }
-
         await ensureSessionReady();
         if (!mounted) return;
 
-        const res = await API.get(ATTENDANCE_API.STUDENT(effectiveStudentId), {
+        const res = await API.get(ATTENDANCE_API.STUDENT(studentId), {
           params: date ? { date } : undefined,
         });
         const data = res?.data as ApiResponse | AttendanceApiItem[] | null;
@@ -128,9 +111,11 @@ export default function StudentAttendanceHistoryClient({
               createdAt: r.createdAt,
             } as AttendanceRecord;
           })
-          .filter((r) => r.date)
+          .filter((r) => Boolean(r.date))
           .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            (a, b) =>
+              new Date(String(b.date)).getTime() -
+              new Date(String(a.date)).getTime(),
           );
 
         const final = date ? normalized : normalized.slice(0, 7);
@@ -150,7 +135,7 @@ export default function StudentAttendanceHistoryClient({
     return () => {
       mounted = false;
     };
-  }, [studentId, selectedDate, params]);
+  }, [studentId, selectedDate]);
 
   const studentMeta = useMemo(() => {
     if (student)
@@ -173,6 +158,10 @@ export default function StudentAttendanceHistoryClient({
     return null;
   }, [student, records]);
 
+  if (loading && !student && records.length === 0) {
+    return <StudentAttendanceHistorySkeleton />;
+  }
+
   return (
     <div className="p-4 space-y-4">
       <StudentInfoCard student={studentMeta} />
@@ -188,7 +177,11 @@ export default function StudentAttendanceHistoryClient({
 
       <Card>
         {loading ? (
-          <LoadingState />
+          <div className="animate-pulse space-y-3 p-2" aria-hidden>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-10 rounded bg-slate-200" />
+            ))}
+          </div>
         ) : error ? (
           <EmptyState message={error} />
         ) : records.length === 0 ? (

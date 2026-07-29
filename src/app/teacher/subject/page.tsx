@@ -1,46 +1,50 @@
-import AssignedSubjectsCard from "./Components/AssignedSubjectsCard";
+"use client";
 
-export default function TeacherDashboard() {
-  const assignedSubjects = [
-    {
-      className: "Class 10",
-      section: "Section A",
-      subject: "Mathematics",
-      studentCount: 32,
-    },
-    {
-      className: "Class 10",
-      section: "Section B",
-      subject: "Mathematics",
-      studentCount: 28,
-    },
-    {
-      className: "Class 9",
-      section: "Section C",
-      subject: "Science",
-      studentCount: 35,
-    },
-    {
-      className: "Class 11",
-      section: "Section B",
-      subject: "Physics",
-      studentCount: 30,
-    },
-    {
-      className: "Class 11",
-      section: "Section A",
-      subject: "Physics",
-      studentCount: 30,
-    },
-  ];
+import { useEffect, useState } from "react";
+import {
+  AssignedSubjectsCard,
+  mapAssignedSubjects,
+  TeacherSubjectsPageSkeleton,
+  getTeacherDashboard,
+} from "@/modules/teachers";
+import { ensureSessionReady, getAccessToken, getActiveRole } from "@/modules/auth";
+
+export default function TeacherSubjectsPage() {
+  const [subjects, setSubjects] = useState(
+    [] as ReturnType<typeof mapAssignedSubjects>,
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      await ensureSessionReady();
+      if (!mounted) return;
+      if (!getAccessToken() || getActiveRole() !== "teacher") {
+        setLoading(false);
+        return;
+      }
+      try {
+        const data = await getTeacherDashboard();
+        if (!mounted) return;
+        setSubjects(mapAssignedSubjects(data.assignedSubjects ?? []));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return <TeacherSubjectsPageSkeleton />;
+  }
+
   return (
     <div className="p-6">
-      <AssignedSubjectsCard
-        subjects={assignedSubjects}
-        // onSearch={(v) => console.log(v)}
-        // onClassFilter={() => console.log("Class Filter")}
-        // onSubjectFilter={() => console.log("Subject Filter")}
-      />
+      <AssignedSubjectsCard subjects={subjects} showFilters />
     </div>
   );
 }

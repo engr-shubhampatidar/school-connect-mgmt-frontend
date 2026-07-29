@@ -1,0 +1,44 @@
+export type Teacher = {
+  id: string;
+  user?: {
+    id?: string;
+    fullName?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subjects?: string[] | null;
+  employeeId?: string;
+  assignedClasses?: string[] | null;
+  classTeacher?: { id: string; name: string; section?: string | null } | null;
+  classes?: TeacherClassRaw[] | null;
+  invitedAt?: string | null;
+};
+
+export type TeacherClassRaw = {
+  classId?: string;
+  className?: string;
+  classSection?: string | null;
+  subjectName?: string | null;
+  id?: string;
+  name?: string;
+  section?: string | null;
+};
+
+export type TeachersResponse = {
+  teachers: Teacher[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+};
+
+export type TeachersQuery = {
+  search?: string;
+  email?: string;
+  subjectId?: string;
+  classId?: string;
+  page?: number;
+  pageSize?: number;
+};
