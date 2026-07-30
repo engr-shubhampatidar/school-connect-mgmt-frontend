@@ -48,7 +48,7 @@ export default function page() {
         <Card className="flex items-center gap-6 ">
           <div className="bg-slate-400 rounded-full overflow-hidden w-[62px] h-[62px] items-center flex-shrink-0">
             <Image
-              src={me?.photoUrl || me?.photoUrl || "/images/avatar.png"}
+              src={me?.photoUrl || "/images/avatar.png"}
               alt="avatar"
               width={62}
               height={62}

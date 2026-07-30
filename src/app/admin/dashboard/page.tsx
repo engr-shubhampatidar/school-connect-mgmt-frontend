@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import API from "../../../lib/axios";
-import { ADMIN_API } from "../../../lib/api-routes";
 import { useRouter } from "next/navigation";
 import {
   BookOpen,
@@ -12,23 +10,20 @@ import {
   CreditCard,
   FileText,
 } from "lucide-react";
-import StatCard from "../../../components/admin/StatCard";
-import AttendanceOverviewCard from "./Components/AttendanceOverviewCard";
-import QuickActionsCard from "./Components/QuickActionsCard";
-import RecentStudents from "@/app/admin/dashboard/Components/RecentStudents";
-import NoticeBoardCard from "./Components/NoticeBoardCard";
-import { getUser } from "../../../lib/auth";
-
-type DashboardResp = {
-  schoolId: string;
-  totalStudents: number;
-  totalClasses: number;
-  totalTeachers: number;
-  recentStudents: { id: string; name: string; createdAt: string }[];
-};
+import StatCard from "@/components/admin/StatCard";
+import {
+  AttendanceOverviewCard,
+  QuickActionsCard,
+  RecentStudents,
+  NoticeBoardCard,
+  AdminDashboardSkeleton,
+  getAdminDashboard,
+  type AdminDashboardResponse,
+} from "@/modules/dashboard";
+import { getUser } from "@/modules/auth";
 
 export default function AdminDashboardPage() {
-  const [data, setData] = useState<DashboardResp | null>(null);
+  const [data, setData] = useState<AdminDashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(false);
@@ -44,8 +39,8 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await API.get<DashboardResp>(ADMIN_API.DASHBOARD);
-      setData(res.data);
+      const dashboardData = await getAdminDashboard();
+      setData(dashboardData);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(
@@ -76,6 +71,9 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  if (loading) {
+    return <AdminDashboardSkeleton />;
+  }
 
   return (
     <div className=" px-6 py-6 ">
@@ -87,76 +85,42 @@ export default function AdminDashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Total Students"
-              value={data?.totalStudents ?? "-"}
-              icon={Users}
-              className="bg-[#FFFFFF] border-[#BFDBFE]"
-              iconBgColor="bg-[#BFDBFE]"
-              progressLabel="+180 Last Month"
-              progressLabelColor="text-[#16A34A]"
-            />
-          )}
-        </div>
-
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Total Staff"
-              value={data?.totalTeachers ?? "-"}
-              icon={BookOpen}
-              className="bg-[#FFFFFF] border-[#FED7AA]"
-              iconBgColor="bg-[#DDD6FE]"
-              progressLabel="+2 new Hire"
-              progressLabelColor="text-[#16A34A]"
-            />
-          )}
-        </div>
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Today’s Attendance"
-              value={"95.60%"}
-              icon={ClipboardList}
-              className="bg-[#FFFFFF] border-[#DDD6FE]"
-              iconBgColor="bg-[#FED7AA]"
-              progressLabel="+1.2% from yesterday"
-              progressLabelColor="text-[#16A34A]"
-            />
-          )}
-        </div>
-
-        <div>
-          {loading ? (
-            <div className="animate-pulse">
-              <div className="h-20 rounded bg-slate-200" />
-            </div>
-          ) : (
-            <StatCard
-              label="Pending Fees"
-              className="bg-[#FFFFFF] border-[#FECACA]"
-              value={"$12,875"}
-              iconBgColor="bg-[#FECACA]"
-              icon={CreditCard}
-              progressLabel="Due within 7 days"
-              progressLabelColor="text-[#FF3838]"
-            />
-          )}
-        </div>
+        <StatCard
+          label="Total Students"
+          value={data?.totalStudents ?? "-"}
+          icon={Users}
+          className="bg-[#FFFFFF] border-[#BFDBFE]"
+          iconBgColor="bg-[#BFDBFE]"
+          progressLabel="+180 Last Month"
+          progressLabelColor="text-[#16A34A]"
+        />
+        <StatCard
+          label="Total Staff"
+          value={data?.totalTeachers ?? "-"}
+          icon={BookOpen}
+          className="bg-[#FFFFFF] border-[#FED7AA]"
+          iconBgColor="bg-[#DDD6FE]"
+          progressLabel="+2 new Hire"
+          progressLabelColor="text-[#16A34A]"
+        />
+        <StatCard
+          label="Today’s Attendance"
+          value={"95.60%"}
+          icon={ClipboardList}
+          className="bg-[#FFFFFF] border-[#DDD6FE]"
+          iconBgColor="bg-[#FED7AA]"
+          progressLabel="+1.2% from yesterday"
+          progressLabelColor="text-[#16A34A]"
+        />
+        <StatCard
+          label="Pending Fees"
+          className="bg-[#FFFFFF] border-[#FECACA]"
+          value={"$12,875"}
+          iconBgColor="bg-[#FECACA]"
+          icon={CreditCard}
+          progressLabel="Due within 7 days"
+          progressLabelColor="text-[#FF3838]"
+        />
       </section>
       <div className="flex flex-col">
         <section className="flex flex-row  gap-6 mt-6">
@@ -200,7 +164,7 @@ export default function AdminDashboardPage() {
           <div className="w-full">
             <RecentStudents
               students={data?.recentStudents ?? null}
-              loading={loading}
+              loading={false}
               error={error}
               onRetry={fetchData}
             />

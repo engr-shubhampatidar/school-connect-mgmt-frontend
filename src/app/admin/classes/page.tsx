@@ -1,14 +1,18 @@
 "use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { fetchClasses, ClassItem, ClassesQuery } from "../../../lib/adminApi";
-import ClassesTable from "../../../components/admin/ClassesTable";
-import Button from "../../../components/ui/Button";
-import CreateClassDialog from "../../../components/admin/CreateClassDialog";
-import API from "../../../lib/axios";
+import {
+  fetchClasses,
+  fetchClassDashboard,
+  type ClassItem,
+  type ClassesQuery,
+  ClassesTable,
+  CreateClassDialog,
+  ClassesFilterBar,
+  CreateNewClass,
+  ClassesPageSkeleton,
+} from "@/modules/classes";
+import Button from "@/components/ui/Button";
 import { UsersIcon, BookOpen, ClipboardList } from "lucide-react";
-import ClassesFilterBar from "../../../components/admin/ClassesFilterBar";
-import CreateNewClass from "@/components/admin/CreateNewClass";
-import { ADMIN_API } from "@/lib/api-routes";
 
 export default function AdminClassesPage() {
   const [classes, setClasses] = useState<ClassItem[]>([]);
@@ -45,9 +49,9 @@ export default function AdminClassesPage() {
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const res = await API.get(ADMIN_API.CLASS_DASHBOARD);
-      setStats(res.data ?? null);
-    } catch (err) {
+      const data = await fetchClassDashboard();
+      setStats(data ?? null);
+    } catch {
       setStats(null);
     } finally {
       setStatsLoading(false);
@@ -63,6 +67,13 @@ export default function AdminClassesPage() {
   }, [load, page, pageSize]);
 
   const [creatingOpen, setCreatingOpen] = useState(false);
+
+  const isInitialLoad =
+    (loading || statsLoading) && classes.length === 0 && !error && !stats;
+
+  if (isInitialLoad) {
+    return <ClassesPageSkeleton />;
+  }
 
   return (
     <div className="mx-auto px-4 py-6">

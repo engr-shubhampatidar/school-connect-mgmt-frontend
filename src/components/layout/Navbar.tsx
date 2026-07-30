@@ -4,22 +4,19 @@ import Link from "next/link";
 import { adminNav, studentNav, teacherNav, managementNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
-import { getUser } from "../../lib/auth";
-import { get } from "http";
+import { getUser } from "@/modules/auth";
+import { roleFromPath } from "@/lib/roleFromPath";
 
 export default function Navbar() {
   const pathname = usePathname();
   let navItems = [];
-  let managementNavItems: any[] = [];
+  let managementNavItems: typeof managementNav = [];
   const [openSidebar, setOpenSidebar] = useState(false);
 
   const [userName] = useState<string | null>(() => {
     try {
-      const u = pathname.startsWith("/admin")
-        ? getUser("admin")
-        : pathname.startsWith("/teacher")
-          ? getUser("teacher")
-          : getUser("student");
+      const role = roleFromPath(pathname) ?? "student";
+      const u = getUser(role);
       return (u && (u.school?.name ?? u.name)) || null;
     } catch {
       return null;
@@ -30,9 +27,7 @@ export default function Navbar() {
 
   if (pathname.startsWith("/admin")) {
     navItems = adminNav;
-    if (pathname.startsWith("/admin")) {
-      managementNavItems = managementNav;
-    }
+    managementNavItems = managementNav;
   } else if (pathname.startsWith("/teacher")) {
     navItems = teacherNav;
   } else if (pathname.startsWith("/student")) {

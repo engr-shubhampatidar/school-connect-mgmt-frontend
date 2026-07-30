@@ -3,7 +3,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Topbar from "./Topbar";
-import { ToastProvider } from "../ui/use-toast";
+import { AuthBootstrap } from "@/providers";
 
 export default function ClientLayoutWrapper({
   children,
@@ -15,14 +15,16 @@ export default function ClientLayoutWrapper({
     pathname === "/login" ||
     pathname === "/register-school" ||
     pathname === "/" ||
-    pathname === "/unauthorized";
+    pathname === "/unauthorized" ||
+    pathname === "/contact";
 
   return (
     <div className="flex">
+      <AuthBootstrap />
       {!hideNavbar && <Navbar />}
       <main className="flex-1 bg-[#F5F9FF] ">
         {!hideNavbar && <Topbar />}
-        <ToastProvider>{children}</ToastProvider>
+        {children}
       </main>
     </div>
   );

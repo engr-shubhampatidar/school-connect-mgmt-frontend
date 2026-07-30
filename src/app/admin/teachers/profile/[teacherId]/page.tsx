@@ -3,11 +3,14 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Card from "../../../../../components/ui/Card";
-import ClassSubjectAllocationTable from "./components/ClassSubjectAllocationTable";
-import Button from "../../../../../components/ui/Button";
-import EditTeacherDialog from "../../../../../components/admin/EditTeacherDialog";
-import { fetchTeacherById } from "@/services/teacher.service";
+import Card from "@/components/ui/Card";
+import {
+  ClassSubjectAllocationTable,
+  fetchTeacherById,
+  TeacherProfileSkeleton,
+} from "@/modules/teachers";
+import Button from "@/components/ui/Button";
+import EditTeacherDialog from "@/modules/teachers/components/EditTeacherDialog";
 
 const allocations: {
   grade: string;
@@ -28,6 +31,7 @@ const allocations: {
     role: "Subject Teacher",
   },
 ];
+
 interface Teacher {
   fullName: string;
   employee_id: string;
@@ -39,12 +43,13 @@ interface Teacher {
   address: string;
   subject_speciality: string[];
 }
+
 export default function Page() {
   const params = useParams();
   const teacherId = params?.teacherId;
   const teacherIdStr = Array.isArray(teacherId) ? teacherId[0] : teacherId;
   const [profile, setProfile] = useState<Teacher | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
   const subjectCount = profile?.subject_speciality?.length ?? 0;
@@ -63,109 +68,15 @@ export default function Page() {
 
   useEffect(() => {
     if (!teacherIdStr) return;
-    fetchProfile(teacherIdStr as string);
+    fetchProfile(teacherIdStr);
   }, [teacherIdStr]);
 
   if (loading) {
-    return (
-      <div className="p-3 md:p-6 animate-pulse">
-        {/* Header Skeleton */}
-        <section>
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div>
-              <div className="h-8 w-64 bg-slate-200 rounded mb-2" />
-              <div className="h-4 w-48 bg-slate-200 rounded" />
-            </div>
-            <div className="h-10 w-32 bg-slate-200 rounded" />
-          </div>
-        </section>
-
-        {/* Profile Card Skeleton */}
-        <Card className="flex items-center gap-6 mb-[20px]">
-          <div className="rounded-full bg-slate-200 w-[62px] h-[62px] flex-shrink-0" />
-          <div className="flex-1 gap-2 flex flex-col">
-            <div className="h-7 w-48 bg-slate-200 rounded" />
-            <div className="h-4 w-36 bg-slate-200 rounded" />
-            <div className="flex gap-2">
-              <div className="h-5 w-28 bg-slate-200 rounded-full" />
-              <div className="h-5 w-16 bg-slate-200 rounded-full" />
-            </div>
-          </div>
-        </Card>
-
-        {/* Personal Info Skeleton */}
-        <div className="bg-white rounded-xl border border-blue-200 p-[16px] mb-[20px]">
-          <div className="h-6 w-48 bg-slate-200 rounded mb-5" />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="border border-blue-200 rounded-lg p-3 bg-blue-50/50">
-                <div className="h-3 w-20 bg-slate-200 rounded mb-2" />
-                <div className="h-4 w-36 bg-slate-200 rounded" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 border border-blue-200 rounded-lg p-3 bg-blue-50/50">
-            <div className="h-3 w-20 bg-slate-200 rounded mb-2" />
-            <div className="h-4 w-3/4 bg-slate-200 rounded" />
-          </div>
-        </div>
-
-        {/* Class & Subject Allocation Table Skeleton */}
-        <div className="w-full bg-white border border-[#D7E3FC] rounded-xl overflow-hidden mb-[20px]">
-          <div className="flex items-center justify-between px-4 py-6 border-b border-[#D7E3FC]">
-            <div className="h-8 w-64 bg-slate-200 rounded" />
-            <div className="h-10 w-56 bg-slate-200 rounded" />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead>
-                <tr className="bg-white text-left">
-                  <th className="px-4 py-4 text-xs font-semibold text-gray-500">Class</th>
-                  <th className="px-4 py-4 text-xs font-semibold text-gray-500">Section</th>
-                  <th className="py-4 text-xs font-semibold text-gray-500">Subject Allocate</th>
-                  <th className="py-4 text-xs font-semibold text-gray-500">Role Allocate</th>
-                  <th className="text-right pr-4 py-4 text-xs font-semibold text-gray-500">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 2 }).map((_, idx) => (
-                  <tr key={idx} className="border-t border-[#D7E3FC]">
-                    <td className="px-4 py-4">
-                      <div className="h-4 w-20 bg-slate-200 rounded" />
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="h-6 w-16 bg-slate-200 rounded-full" />
-                    </td>
-                    <td className="py-4">
-                      <div className="h-4 w-32 bg-slate-200 rounded" />
-                    </td>
-                    <td className="py-4">
-                      <div className="h-6 w-24 bg-slate-200 rounded-full" />
-                    </td>
-                    <td className="text-right pr-4 py-4">
-                      <div className="flex items-center justify-end gap-4">
-                        <div className="h-4 w-20 bg-slate-200 rounded" />
-                        <div className="h-8 w-16 bg-slate-200 rounded" />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Footer Skeleton */}
-        <div className="flex w-full p-3 md:p-6">
-          <div className="h-4 w-96 bg-slate-200 rounded mx-auto" />
-        </div>
-      </div>
-    );
+    return <TeacherProfileSkeleton />;
   }
 
   return (
     <div className="p-3 md:p-6">
-      {/* Header */}
       <section>
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
@@ -183,16 +94,15 @@ export default function Page() {
 
           <EditTeacherDialog
             open={open}
-            teacherId={teacherIdStr as any}
+            teacherId={teacherIdStr as string}
             onClose={() => setOpen(false)}
             onUpdated={() =>
-              teacherIdStr && fetchProfile(teacherIdStr as string)
+              teacherIdStr && fetchProfile(teacherIdStr)
             }
           />
         </div>
       </section>
 
-      {/* Profile Card */}
       <Card className="flex items-center gap-6 mb-[20px]">
         <div className="bg-slate-400 rounded-full overflow-hidden w-[62px] h-[62px] flex-shrink-0">
           <Image
@@ -230,7 +140,6 @@ export default function Page() {
         </div>
       </Card>
 
-      {/* Personal Info */}
       <div className="bg-white rounded-xl border border-blue-200 p-[16px] mb-[20px]">
         <h2 className="text-[16px] lg:text-[20px] font-semibold mb-5">
           Personal Information
@@ -250,12 +159,10 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Class & Subject Allocation */}
       <div className="mb-[20px]">
         <ClassSubjectAllocationTable data={allocations} />
       </div>
 
-      {/* Footer */}
       <div className="flex w-full p-3 md:p-6">
         <p className="text-[10px] lg:text-[14px] text-[#737373] font-[600] text-center mx-auto">
           If any information is incorrect, please contact the school office.
@@ -264,8 +171,6 @@ export default function Page() {
     </div>
   );
 }
-
-/* ---------------- Helper Component ---------------- */
 
 function InfoCard({ label, value }: { label: string; value?: string | null }) {
   return (
