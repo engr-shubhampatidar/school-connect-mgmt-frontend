@@ -19,7 +19,7 @@ export default function CreateTeacherDialog({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/40" onClick={onClose} />
         <div className="relative w-[777px] p-4 max-h-full overflow-hidden no-scrollbar overflow-y-auto">
           <div className="rounded-lg">

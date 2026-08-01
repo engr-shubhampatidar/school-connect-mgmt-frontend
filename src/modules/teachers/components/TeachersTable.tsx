@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { Teacher } from "@/modules/teachers/types/admin";
@@ -35,19 +36,13 @@ export default function TeachersTable({
   page = 1,
   pageSize = 10,
   onPageChange,
-  onEdit,
-  onResendInvite,
+  // onEdit,
+  // onResendInvite,
 }: Props) {
-<<<<<<< HEAD:src/components/admin/TeachersTable.tsx
-  const totalPages = Math.max(
-    1,
-    Math.ceil((total || teachers.length) / pageSize),
-  );
-=======
   const totalCount = total || teachers.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
   const showPagination = totalCount > pageSize && totalPages > 1;
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334:src/modules/teachers/components/TeachersTable.tsx
 
   const getPageNumbers = () => {
     const pages: (number | "ellipsis")[] = [];
@@ -79,6 +74,7 @@ export default function TeachersTable({
 
       pages.push(totalPages);
     }
+
     return pages;
   };
 
@@ -86,69 +82,13 @@ export default function TeachersTable({
 
   if (loading) {
     return (
-<<<<<<< HEAD:src/components/admin/TeachersTable.tsx
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full table-auto">
-            <thead className="sticky top-0 bg-white">
-              <tr>
-                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 pl-6 w-48 hidden lg:table-cell">
-                  Teacher ID
-                </th>
-                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
-                  Teacher Name & Mail
-                </th>
-                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 px-4">
-                  Contact No.
-                </th>
-                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
-                  Class Teacher
-                </th>
-                <th className="text-left text-[#021034] font-[500] text-[14px] py-4 hidden lg:table-cell">
-                  Assigned Classes & Subjects
-                </th>
-                <th className="text-right text-[#021034] font-[500] text-[14px] py-4 pr-10">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.from({ length: pageSize }).map((_, i) => (
-                <tr key={i} className="border-t">
-                  <td className="py-3">
-                    <div className="h-4 w-40 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-48 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-28 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
-                  </td>
-                  <td className="py-3">
-                    <div className="h-8 w-24 animate-pulse rounded bg-slate-200" />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-=======
       <div className="animate-pulse" aria-hidden>
         <TeachersTableSkeleton rows={pageSize} />
       </div>
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334:src/modules/teachers/components/TeachersTable.tsx
     );
   }
-  // Empty state when there are no teachers to show
+
   if (!teachers || teachers.length === 0) {
-    // Main table rendering
     return (
       <Card>
         <div className="text-center">
@@ -166,10 +106,10 @@ export default function TeachersTable({
   console.log(teachers);
 
   return (
-    <div className="rounded-lg bg-white border border-[#D7E3FC] ">
-      <div className="overflow-x-auto ">
-        <table className="w-full table-auto ">
-          <thead className="sticky top-0  ">
+    <div className="rounded-lg bg-white border border-[#D7E3FC]">
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto">
+          <thead className="sticky top-0">
             <tr>
               <th className="text-left text-[#021034] font-[500] text-[14px] py-4 pl-6 w-48 hidden lg:table-cell">
                 Teacher ID
@@ -191,6 +131,7 @@ export default function TeachersTable({
               </th>
             </tr>
           </thead>
+
           <tbody>
             {teachers.map((t) => (
               <tr
@@ -200,6 +141,7 @@ export default function TeachersTable({
                 <td className="py-3 hidden text-[#64748B] lg:table-cell p-6">
                   {t?.employeeId}
                 </td>
+
                 <td className="p-3">
                   <div className="flex items-center gap-3">
                     <button
@@ -209,15 +151,14 @@ export default function TeachersTable({
                       <div className="font-medium text-slate-900 flex items-center gap-3 cursor-pointer">
                         <div className="w-12 h-12">
                           <Image
-                            src={
-                              "https://i.pinimg.com/736x/2a/bd/c4/2abdc427589317e312e55100ac612ace.jpg"
-                            }
+                            src="https://i.pinimg.com/736x/2a/bd/c4/2abdc427589317e312e55100ac612ace.jpg"
                             alt="Avatar"
                             width={72}
                             height={72}
                             className="rounded-full h-full w-full object-cover"
                           />
                         </div>
+
                         <div className="flex flex-col text-left">
                           <div className="text-[14px]">{t.name ?? "-"}</div>
                           <div className="text-[12px] text-[#737373]">
@@ -228,10 +169,12 @@ export default function TeachersTable({
                     </button>
                   </div>
                 </td>
+
                 <td className="py-3 hidden lg:table-cell text-[14px] font-[500] text-[#64748B]">
                   {t?.phone}
                 </td>
-                <td className="py-3 hidden  lg:table-cell">
+
+                <td className="py-3 hidden lg:table-cell">
                   <span className="bg-[#D7E3FC] font-[600] text-[12px] text-[#021034] px-2 py-1 rounded-full">
                     {t.classTeacher?.name
                       ? `${t.classTeacher.name}${
@@ -248,16 +191,18 @@ export default function TeachersTable({
                         : "-"}
                   </span>
                 </td>
+
                 <td className="py-3 hidden lg:table-cell">
                   {t.assignedClasses ?? "-"}
                 </td>
+
                 <td className="flex justify-end items-center py-5 pr-6">
                   <Button
                     className="cursor-pointer"
                     variant="outlineNone"
-                    onClick={() => {
-                      router.push(`/admin/teachers/profile/${t.id}`);
-                    }}
+                    onClick={() =>
+                      router.push(`/admin/teachers/profile/${t.id}`)
+                    }
                   >
                     Veiw Profile
                   </Button>
@@ -268,37 +213,25 @@ export default function TeachersTable({
         </table>
       </div>
 
-      {showPagination && (
+      {
         <>
           <div className="border-t border-[#D7E3FC] mt-4" />
+
           <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 pb-4">
             <div className="text-sm text-slate-600">
               Showing {teachers.length} of {totalCount}
             </div>
+
             <Pagination className="mx-0 w-auto">
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
-                    disabled={(page || 1) <= 1}
+                    onClick={() => onPageChange(Math.max(1, page - 1))}
+                    disabled={page <= 1}
                     className="cursor-pointer"
                   />
                 </PaginationItem>
 
-<<<<<<< HEAD:src/components/admin/TeachersTable.tsx
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  onPageChange(Math.min(totalPages, (page || 1) + 1))
-                }
-                disabled={(page || 1) >= totalPages}
-                className="cursor-pointer"
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-=======
                 {getPageNumbers().map((pageNumber, idx) => (
                   <PaginationItem key={idx}>
                     {pageNumber === "ellipsis" ? (
@@ -317,10 +250,8 @@ export default function TeachersTable({
 
                 <PaginationItem>
                   <PaginationNext
-                    onClick={() =>
-                      onPageChange(Math.min(totalPages, (page || 1) + 1))
-                    }
-                    disabled={(page || 1) >= totalPages}
+                    onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                    disabled={page >= totalPages}
                     className="cursor-pointer"
                   />
                 </PaginationItem>
@@ -328,10 +259,7 @@ export default function TeachersTable({
             </Pagination>
           </div>
         </>
-      )}
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334:src/modules/teachers/components/TeachersTable.tsx
+      }
     </div>
   );
 }
-
-// Drawer is rendered above and controlled via state in this component.

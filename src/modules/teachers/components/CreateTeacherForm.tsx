@@ -329,6 +329,19 @@ export default function CreateTeacherForm({ onClose, onCreated }: Props) {
                 </FormMessage>
               </FormField>
               <FormField>
+                <FormLabel>Rewirte Email Address</FormLabel>
+                <FormControl>
+                  <Input
+                    {...form.register("email")}
+                    placeholder="sarah.j@school.edu.in"
+                  />
+                </FormControl>
+                <FormMessage>
+                  {errors.email?.message as React.ReactNode}
+                </FormMessage>
+              </FormField>
+              
+              <FormField>
                 <FormLabel>Date of Birth</FormLabel>
                 <Controller
                   control={form.control}
