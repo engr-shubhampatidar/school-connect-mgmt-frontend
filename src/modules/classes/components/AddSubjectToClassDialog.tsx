@@ -52,15 +52,17 @@ function AddSubjectToClassDialog({
           : Array.isArray(subjData?.items)
             ? subjData.items
             : [];
-        const normalizedSubjects = subjList.map((s: {
-          id: string;
-          name?: string;
-          title?: string;
-          subjectName?: string;
-        }) => ({
-          id: s.id,
-          name: s.name || s.title || s.subjectName || "Unnamed Subject",
-        }));
+        const normalizedSubjects = subjList.map(
+          (s: {
+            id: string;
+            name?: string;
+            code?: string;
+            subjectName?: string;
+          }) => ({
+            id: s.id,
+            name: s.name || s.code || s.subjectName || "Unnamed Subject",
+          }),
+        );
         if (!cancelled) setSubjects(normalizedSubjects);
 
         const teachRes = await API.get(ADMIN_API.TEACHERS);
@@ -70,22 +72,27 @@ function AddSubjectToClassDialog({
           : Array.isArray(teachData?.items)
             ? teachData.items
             : [];
-        const normalizedTeachers = teachList.map((t: {
-          id: string;
-          fullName?: string;
-          firstName?: string;
-          lastName?: string;
-          user?: { fullName?: string; full_name?: string };
-        }) => ({
-          id: t.id,
-          name:
-            t.fullName ||
-            t.user?.fullName ||
-            t.user?.full_name ||
-            [t.firstName, t.lastName].filter(Boolean).join(" ") ||
-            "Unnamed Teacher",
-        }));
-        if (!cancelled) setTeachers(normalizedTeachers);
+        const normalizedTeachers = teachList.map(
+          (t: {
+            id: string;
+            fullName?: string;
+            firstName?: string;
+            lastName?: string;
+            user?: { fullName?: string; full_name?: string };
+          }) => ({
+            id: t.id,
+            name:
+              t.fullName ||
+              t.user?.fullName ||
+              t.user?.full_name ||
+              [t.firstName, t.lastName].filter(Boolean).join(" ") ||
+              "Unnamed Teacher",
+          }),
+        );
+        if (!cancelled) {
+          console.log("subjject" + normalizedSubjects);
+          setTeachers(normalizedTeachers);
+        }
       } catch (err: unknown) {
         if (isAxiosError(err)) {
           setError(

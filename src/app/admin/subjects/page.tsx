@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-<<<<<<< HEAD
-import { fetchSubjects, Subject, SubjectsQuery } from "../../../lib/adminApi";
+import { fetchSubjects, Subject, SubjectsQuery } from "@/modules/subjects";
 import Button from "../../../components/ui/Button";
-import AddSubjectDialog from "../../../components/admin/AddSubjectDialog";
-import Card from "../../../components/ui/Card";
+import { AddSubjectDialog } from "@/modules/subjects";
+import { Card } from "@/components/ui";
 import {
   Pagination,
   PaginationContent,
@@ -15,19 +14,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-=======
-import {
-  fetchSubjects,
-  type Subject,
-  type SubjectsQuery,
-  AddSubjectDialog,
-  SubjectsTable,
-  SubjectsPageSkeleton,
-} from "@/modules/subjects";
-import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
-import { DataTableSkeleton } from "@/components/skeletons";
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334
+import { SubjectsPageSkeleton } from "@/modules/subjects";
 
 export default function AdminSubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -38,7 +25,6 @@ export default function AdminSubjectsPage() {
   const [pageSize] = useState(10);
   const [creatingOpen, setCreatingOpen] = useState(false);
 
-<<<<<<< HEAD
   const totalPages = Math.max(
     1,
     Math.ceil((total || subjects.length) / pageSize),
@@ -76,8 +62,6 @@ export default function AdminSubjectsPage() {
     return pages;
   };
 
-=======
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334
   const load = useCallback(
     async (q?: SubjectsQuery) => {
       setLoading(true);
@@ -126,7 +110,6 @@ export default function AdminSubjectsPage() {
           </p>
         </div>
 
-<<<<<<< HEAD
         <Button variant="dark" onClick={() => setCreatingOpen(true)}>
           Add Subject
         </Button>
@@ -172,9 +155,7 @@ export default function AdminSubjectsPage() {
         <Card>
           <div className="flex flex-col gap-4">
             <p>Error: {error}</p>
-            <Button onClick={() => void load({ page, pageSize })}>
-              Retry
-            </Button>
+            <Button onClick={() => void load({ page, pageSize })}>Retry</Button>
           </div>
         </Card>
       ) : subjects.length === 0 ? (
@@ -185,10 +166,7 @@ export default function AdminSubjectsPage() {
               Add subjects to get started.
             </p>
 
-            <Button
-              className="mt-4"
-              onClick={() => setCreatingOpen(true)}
-            >
+            <Button className="mt-4" onClick={() => setCreatingOpen(true)}>
               Add Subject
             </Button>
           </div>
@@ -217,9 +195,7 @@ export default function AdminSubjectsPage() {
                     <td className="p-6 font-semibold text-[#021034]">
                       {subject.name}
                     </td>
-                    <td className="p-6 text-[#64748B]">
-                      {subject.code}
-                    </td>
+                    <td className="p-6 text-[#64748B]">{subject.code}</td>
                   </tr>
                 ))}
               </tbody>
@@ -259,9 +235,7 @@ export default function AdminSubjectsPage() {
 
                 <PaginationItem>
                   <PaginationNext
-                    onClick={() =>
-                      setPage(Math.min(totalPages, page + 1))
-                    }
+                    onClick={() => setPage(Math.min(totalPages, page + 1))}
                     disabled={page >= totalPages}
                     className="cursor-pointer"
                   />
@@ -271,67 +245,6 @@ export default function AdminSubjectsPage() {
           </div>
         </div>
       )}
-=======
-        <div>
-          <Button variant="dark" onClick={() => setCreatingOpen(true)}>
-            + Add Subject
-          </Button>
-          <AddSubjectDialog
-            open={creatingOpen}
-            onClose={() => setCreatingOpen(false)}
-            onCreated={() => {
-              void load({ page, pageSize });
-            }}
-          />
-        </div>
-      </div>
-
-      <div>
-        {loading ? (
-          <div className="animate-pulse" aria-hidden>
-            <DataTableSkeleton
-              rows={pageSize}
-              columns={[
-                { headerWidth: "w-32", cellWidth: "w-40" },
-                { headerWidth: "w-28", cellWidth: "w-24" },
-                { headerWidth: "w-24", cellWidth: "w-28", hideOnMobile: true },
-              ]}
-            />
-          </div>
-        ) : error ? (
-          <Card>
-            <div className="flex flex-col items-start gap-4">
-              <div className="text-sm text-slate-700">Error: {error}</div>
-              <Button onClick={() => load({ page, pageSize })}>Retry</Button>
-            </div>
-          </Card>
-        ) : subjects.length === 0 ? (
-          <Card>
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-slate-900">
-                No subjects found
-              </h3>
-              <p className="mt-1 text-sm text-slate-600">
-                Add subjects to get started.
-              </p>
-              <div className="mt-4">
-                <Button variant="dark" onClick={() => setCreatingOpen(true)}>
-                  + Add Subject
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ) : (
-          <SubjectsTable
-            subjects={subjects}
-            total={total}
-            page={page}
-            pageSize={pageSize}
-            onPageChange={setPage}
-          />
-        )}
-      </div>
->>>>>>> c1cc93ee2eb9123dc290eba292710d8fe6429334
     </div>
   );
 }
