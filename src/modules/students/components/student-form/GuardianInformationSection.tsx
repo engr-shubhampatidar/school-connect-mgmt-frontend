@@ -4,8 +4,8 @@ import React from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { FormField, FormLabel, FormMessage, FormControl } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
-import Textarea from "@/components/ui/Textarea";
 import FormSectionCard from "./FormSectionCard";
+import MobileInputField from "./MobileInputField";
 import type { UpdateStudentForm } from "@/modules/students/schemas/updateStudentSchema";
 
 type Props = {
@@ -16,72 +16,66 @@ export default function GuardianInformationSection({ form }: Props) {
   const { errors } = form.formState;
 
   return (
-    <FormSectionCard title="Parent Information">
+    <FormSectionCard title="Parent / Guardian Information">
       <FormField>
         <FormLabel>{"Father's Name"}</FormLabel>
         <FormControl>
           <Input
             placeholder="Full name"
-            {...form.register("guardian.father_name")}
+            {...form.register("father_name")}
           />
         </FormControl>
         <FormMessage>
-          {errors.guardian?.father_name?.message as React.ReactNode}
+          {errors.father_name?.message as React.ReactNode}
         </FormMessage>
       </FormField>
 
+      <MobileInputField
+        control={form.control}
+        name="father_mobile"
+        label="Father's Mobile"
+        error={errors.father_mobile?.message}
+      />
+
       <FormField>
-        <FormLabel>{"Mother's Name (Optional)"}</FormLabel>
+        <FormLabel>{"Mother's Name"}</FormLabel>
         <FormControl>
           <Input
             placeholder="Full name"
-            {...form.register("guardian.mother_name")}
+            {...form.register("mother_name")}
           />
         </FormControl>
         <FormMessage>
-          {errors.guardian?.mother_name?.message as React.ReactNode}
+          {errors.mother_name?.message as React.ReactNode}
         </FormMessage>
       </FormField>
 
+      <MobileInputField
+        control={form.control}
+        name="mother_mobile"
+        label="Mother's Mobile"
+        error={errors.mother_mobile?.message}
+      />
+
       <FormField>
-        <FormLabel>Emergency Contact Phone</FormLabel>
+        <FormLabel>Guardian Name</FormLabel>
         <FormControl>
           <Input
-            placeholder="Phone number"
-            {...form.register("guardian.phone_no")}
+            placeholder="Full name"
+            {...form.register("guardian_name")}
           />
         </FormControl>
         <FormMessage>
-          {errors.guardian?.phone_no?.message as React.ReactNode}
+          {errors.guardian_name?.message as React.ReactNode}
         </FormMessage>
       </FormField>
 
-      <FormField>
-        <FormLabel>Parent Email</FormLabel>
-        <FormControl>
-          <Input
-            placeholder="parent@gmail.com"
-            {...form.register("guardian.email")}
-          />
-        </FormControl>
-        <FormMessage>
-          {errors.guardian?.email?.message as React.ReactNode}
-        </FormMessage>
-      </FormField>
-
-      <FormField>
-        <FormLabel>Parent Permanent Address (Optional)</FormLabel>
-        <FormControl>
-          <Textarea
-            rows={3}
-            placeholder="Same as student address if blank"
-            {...form.register("guardian.address")}
-          />
-        </FormControl>
-        <FormMessage>
-          {errors.guardian?.address?.message as React.ReactNode}
-        </FormMessage>
-      </FormField>
+      <MobileInputField
+        control={form.control}
+        name="guardian_mobile"
+        label="Guardian Mobile"
+        error={errors.guardian_mobile?.message}
+      />
     </FormSectionCard>
   );
 }

@@ -1,5 +1,5 @@
 import type { StudentsQuery, StudentsResponse } from "@/modules/students/types/admin";
-import { ADMIN_API } from "@/config/api-routes";
+import { ADMIN_API, STUDENT_API } from "@/config/api-routes";
 import API from "@/services/axios";
 
 export type {
@@ -85,19 +85,22 @@ export async function createStudent(payload: CreateStudentPayload) {
 }
 
 export type UpdateStudentPayload = {
-  email: string;
-  fullName: string;
-  phoneNumber: string;
-  gender: string;
-  category: string;
-  admissionDate: string | null;
-  addressLine: string;
-  aadhaarNumber: string;
-  fatherName: string;
-  fatherMobile: string;
-  motherName: string;
-  parentEmail: string;
-  documentUrls: string[];
+  firstName: string;
+  lastName: string;
+  phoneNumber?: string;
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  admissionDate?: string;
+  classId?: string;
+  addressLine?: string;
+  aadhaarNumber?: string;
+  fatherName?: string;
+  fatherMobile?: string;
+  motherName?: string;
+  motherMobile?: string;
+  guardianName?: string;
+  guardianMobile?: string;
+  bloodGroup?: string;
+  medicalNotes?: string;
 };
 
 export async function updateStudent(
@@ -105,7 +108,7 @@ export async function updateStudent(
   payload: UpdateStudentPayload,
   options?: { signal?: AbortSignal },
 ) {
-  const res = await API.put(`/api/admin/students/${studentId}`, payload, {
+  const res = await API.patch(STUDENT_API.UPDATE(studentId), payload, {
     signal: options?.signal,
   });
   return res.data;

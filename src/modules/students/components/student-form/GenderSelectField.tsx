@@ -31,9 +31,9 @@ export default function GenderSelectField({ form }: Props) {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="male">Male</SelectItem>
-              <SelectItem value="female">Female</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              <SelectItem value="MALE">Male</SelectItem>
+              <SelectItem value="FEMALE">Female</SelectItem>
+              <SelectItem value="OTHER">Other</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

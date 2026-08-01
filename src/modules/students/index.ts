@@ -18,6 +18,7 @@ export {
 export { useStudentProfileLoader } from "./hooks/useStudentProfileLoader";
 export { default as CreateStudentDialog } from "./components/CreateStudentDialog";
 export { default as UpdateStudentDialog } from "./components/UpdateStudentDialog";
+export { default as StudentProfileDocuments } from "./components/StudentProfileDocuments";
 export { default as StudentsTable } from "./components/StudentsTable";
 export {
   default as StudentsFilterBar,

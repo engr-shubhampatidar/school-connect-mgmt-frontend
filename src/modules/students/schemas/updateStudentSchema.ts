@@ -1,75 +1,63 @@
 import { z } from "zod";
 
 const nameRegex = /^[A-Za-z ]+$/;
+/** Indian mobile: exactly 10 digits, starting with 6–9 */
+const mobileRegex = /^[6-9]\d{9}$/;
 
-export const GENDER_VALUES = ["male", "female", "other"];
+const optionalMobile = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || mobileRegex.test(v), {
+    message: "Enter a valid 10-digit mobile number",
+  });
+
+export const GENDER_VALUES = ["MALE", "FEMALE", "OTHER"] as const;
+export type GenderValue = (typeof GENDER_VALUES)[number];
 export const CATEGORY_VALUES = ["General", "OBC", "SC", "ST", "EWS"];
 
-export const guardianSchema = z.object({
-  father_name: z
-    .string()
-    .trim()
-    .min(3, "Father name must be at least 3 characters")
-    .max(100, "Too long"),
-  mother_name: z
-    .string()
-    .trim()
-    .min(3, "Mother name must be at least 3 characters")
-    .max(100, "Too long")
-    .optional()
-    .or(z.literal("")),
-  phone_no: z
-    .string()
-    .min(10, "Guardian phone must be 10-15 digits")
-    .max(15, "Guardian phone must be 10-15 digits")
-    .regex(/^[0-9]+$/, "Digits only"),
-  email: z.string().trim().email("Invalid guardian email"),
-  address: z
-    .string()
-    .trim()
-    .max(300, "Max 300 characters")
-    .optional()
-    .or(z.literal("")),
-});
-
-export const documentSchema = z.object({
-  document_type: z.string().min(1, "Document type is required").max(120),
-  url: z.string().url("Invalid document URL"),
-});
-
 export const updateStudentSchema = z.object({
-  name: z
+  firstName: z
     .string()
     .trim()
-    .min(3, "Name must be at least 3 characters")
-    .max(100, "Name must be at most 100 characters")
+    .min(1, "First name is required")
+    .max(50, "Too long")
     .regex(nameRegex, "Only alphabets and spaces are allowed"),
-  email: z.string().trim().email("Invalid email"),
-  phone_no: z
+  lastName: z
     .string()
-    .min(10, "Phone must be 10-15 digits")
-    .max(15, "Phone must be 10-15 digits")
-    .regex(/^[0-9]+$/, "Digits only"),
-  gender: z.string().refine((val) => GENDER_VALUES.includes(val), {
-    message: "Select gender",
-  }),
-  category: z.string().refine((val) => CATEGORY_VALUES.includes(val), {
-    message: "Select Category",
-  }),
-  admission_date: z.string().refine((v) => {
-    if (!v) return false;
-    const d = new Date(v);
-    if (isNaN(d.getTime())) return false;
-    const today = new Date();
-    return d <= today;
-  }, "Admission date cannot be in future"),
-  address: z.string().trim().min(1, "Address is required").max(300),
+    .trim()
+    .min(1, "Last name is required")
+    .max(50, "Too long")
+    .regex(nameRegex, "Only alphabets and spaces are allowed"),
+  email: z.string().trim().email("Invalid email").or(z.literal("")),
+  phone_no: optionalMobile,
+  gender: z.enum(GENDER_VALUES, { message: "Select gender" }),
+  category: z.string().optional().or(z.literal("")),
+  admission_date: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => {
+      if (!v) return true;
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return false;
+      return d <= new Date();
+    }, "Admission date cannot be in future"),
+  classId: z.string().optional().or(z.literal("")),
+  address: z.string().trim().max(300).optional().or(z.literal("")),
   aadhar: z
     .string()
-    .length(12, "Aadhar must be 12 digits")
-    .regex(/^[0-9]{12}$/g, "Aadhar must be numeric"),
-  guardian: guardianSchema,
-  student_documents: z.array(documentSchema),
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v === "" || /^[0-9]{12}$/.test(v), {
+      message: "Aadhar must be exactly 12 digits",
+    }),
+  father_name: z.string().trim().max(100).optional().or(z.literal("")),
+  father_mobile: optionalMobile,
+  mother_name: z.string().trim().max(100).optional().or(z.literal("")),
+  mother_mobile: optionalMobile,
+  guardian_name: z.string().trim().max(100).optional().or(z.literal("")),
+  guardian_mobile: optionalMobile,
+  bloodGroup: z.string().trim().max(10).optional().or(z.literal("")),
+  medicalNotes: z.string().trim().max(500).optional().or(z.literal("")),
   class_name: z.string().optional(),
   admission_locked: z.boolean().optional(),
 });
@@ -77,22 +65,24 @@ export const updateStudentSchema = z.object({
 export type UpdateStudentForm = z.infer<typeof updateStudentSchema>;
 
 export const updateStudentDefaultValues: UpdateStudentForm = {
-  name: "",
+  firstName: "",
+  lastName: "",
   email: "",
   phone_no: "",
-  gender: "male",
-  category: "General",
+  gender: "MALE",
+  category: "",
   admission_date: "",
+  classId: "",
   address: "",
   aadhar: "",
-  guardian: {
-    father_name: "",
-    mother_name: "",
-    phone_no: "",
-    email: "",
-    address: "",
-  },
-  student_documents: [],
+  father_name: "",
+  father_mobile: "",
+  mother_name: "",
+  mother_mobile: "",
+  guardian_name: "",
+  guardian_mobile: "",
+  bloodGroup: "",
+  medicalNotes: "",
   class_name: "",
   admission_locked: false,
 };

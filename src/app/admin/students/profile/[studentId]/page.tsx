@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getStudentById, type StudentDetails, StudentProfileSkeleton } from "@/modules/students";
+import {
+  getStudentById,
+  type StudentDetails,
+  StudentProfileDocuments,
+  StudentProfileSkeleton,
+} from "@/modules/students";
 import Image from "next/image";
 import { Card } from "@/components/ui";
 import { CalendarCheck } from "lucide-react";
@@ -122,7 +127,7 @@ export default function StudentDetailsPage() {
                   Blood Group
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student ? "-" : "-"}
+                  {student?.bloodGroup ?? "-"}
                 </p>
               </div>
 
@@ -142,7 +147,7 @@ export default function StudentDetailsPage() {
                   Aadhaar Number
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.aadhaar ?? "-"}
+                  {student?.aadhaarNumber ?? student?.aadhaar ?? "-"}
                 </p>
               </div>
 
@@ -213,20 +218,38 @@ export default function StudentDetailsPage() {
 
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
-                  Parent Mail
+                  Mother Contact
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.fatherEmail ?? "-"}
+                  {student?.motherMobile ?? "-"}
+                </p>
+              </div>
+
+              <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                <p className="text-xs lg:text-sm text-gray-500 mb-1">
+                  Guardian Name
+                </p>
+                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
+                  {student?.guardianName ?? "-"}
+                </p>
+              </div>
+
+              <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                <p className="text-xs lg:text-sm text-gray-500 mb-1">
+                  Guardian Contact
+                </p>
+                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
+                  {student?.guardianMobile ?? "-"}
                 </p>
               </div>
             </div>
             {/* Address (Full Width) */}
             <div className="c border border-blue-200 rounded-lg p-3 bg-blue-50 mt-4">
               <p className="text-xs lg:text-sm text-gray-500 mb-1">
-                Local Address
+                Medical Notes
               </p>
               <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {student?.emergencyContact ?? student?.address ?? "-"}
+                {student?.medicalNotes ?? "-"}
               </p>
             </div>
           </div>
@@ -344,97 +367,9 @@ export default function StudentDetailsPage() {
         </section>
       </div>
 
-      <div className="w-full max-w-full bg-white rounded-xl border border-blue-200 p-[20px]">
-        {/* Title */}
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Uploaded Documents
-        </h2>
-
-        {/* Document Item */}
-        <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Aadhaar Card */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Aadhar Card</p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
-          </div>
-
-          {/* Previous Marksheet */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Previous Marksheet
-                </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
-          </div>
-
-          {/* Birth Certificate */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Birth Certificate
-                </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
-          </div>
-
-          {/* Transfer Certificate */}
-          <div className="flex items-center justify-between border border-blue-200 rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 flex items-center justify-center rounded-lg bg-white border border-blue-200">
-                📄
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">
-                  Transfer Certificate
-                </p>
-                <span className="inline-block mt-1 px-2 py-[2px] text-xs font-medium text-blue-600 border border-blue-300 rounded-full">
-                  PDF
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm cursor-pointer hover:text-blue-600">
-              👁
-              <span>View</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {typeof studentId === "string" ? (
+        <StudentProfileDocuments studentId={studentId} />
+      ) : null}
       <div className="flex w-full p-3 md:p-6">
         <p className="texr-[10px] text-[#737373] font-[600] text-center mx-auto">
           If any information is incorrect, please contact the accounts

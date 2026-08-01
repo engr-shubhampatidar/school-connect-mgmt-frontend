@@ -1,22 +1,28 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, X } from "lucide-react";
 import { updateStudent } from "@/modules/students/api/adminStudents";
 import { useToast } from "@/components/ui/use-toast";
 import Button from "@/components/ui/Button";
 import { Form } from "@/components/ui/Form";
 import GuardianInformationSection from "./student-form/GuardianInformationSection";
-import { StudentDocumentsSection } from "@/modules/documents";
+import {
+  EntityDocumentsSection,
+  STUDENT_DOCUMENT_TYPES,
+  useEntityDocuments,
+} from "@/modules/documents";
 import StudentInformationSection from "./student-form/StudentInformationSection";
 import StudentLoadError from "./student-form/StudentLoadError";
 import UpdateStudentSkeleton from "./student-form/UpdateStudentSkeleton";
-import { cleanDigits, toLower } from "@/modules/students/utils/formatters";
-import { useStudentDocuments } from "@/modules/documents";
+import { cleanDigits, formatGenderForApi } from "@/modules/students/utils/formatters";
 import { useStudentProfileLoader } from "@/modules/students/hooks/useStudentProfileLoader";
+import type { UpdateStudentPayload } from "@/modules/students/api/adminStudents";
 import {
   updateStudentDefaultValues,
+  updateStudentSchema,
   type UpdateStudentForm,
 } from "@/modules/students/schemas/updateStudentSchema";
 
@@ -40,18 +46,27 @@ export default function UpdateStudentDialog({
   const submitController = useRef<AbortController | null>(null);
 
   const form = useForm<UpdateStudentForm>({
-    // resolver: zodResolver(updateStudentSchema),
+    resolver: zodResolver(updateStudentSchema),
+    mode: "onSubmit",
+    reValidateMode: "onChange",
     defaultValues: updateStudentDefaultValues,
   });
 
   const {
     documents,
-    setDocuments,
     uploading,
+    deletingIds,
+    loading: documentsLoading,
+    selectedDocumentType,
+    setSelectedDocumentType,
     handleDocumentUpload,
-    removeDocument,
-    resetDocuments,
-  } = useStudentDocuments();
+    handleDocumentDelete,
+    getLabelForType,
+  } = useEntityDocuments({
+    entityType: "STUDENT",
+    entityId: open && studentId ? studentId : "",
+    documentTypes: STUDENT_DOCUMENT_TYPES,
+  });
 
   const {
     loading,
@@ -62,74 +77,65 @@ export default function UpdateStudentDialog({
     studentIdDisplay,
     retry,
     abortFetch,
-  } = useStudentProfileLoader({ open, studentId, form, setDocuments });
+  } = useStudentProfileLoader({ open, studentId, form });
 
   const handleClose = () => {
     abortFetch();
     submitController.current?.abort();
     form.reset();
-    resetDocuments();
     setFetchError(null);
     onClose();
   };
 
-  useEffect(() => {
-    form.setValue("student_documents", documents);
-  }, [documents, form]);
-
   const onSubmit = async (values: UpdateStudentForm) => {
     if (!studentId) return;
-    console.log("Submitting form with values:", values);
     setSubmitting(true);
     submitController.current?.abort();
     const controller = new AbortController();
     submitController.current = controller;
 
-    const payload = {
-      email: toLower(values.email),
-      fullName: values.name.trim(),
-      phoneNumber: cleanDigits(values.phone_no),
-      gender: values.gender,
-      category: values.category,
-      admissionDate: values.admission_date,
-      addressLine: values.address.trim(),
-      aadhaarNumber: cleanDigits(values.aadhar),
-      fatherName: values.guardian.father_name.trim(),
-      fatherMobile: cleanDigits(values.guardian.phone_no),
-      motherName: values.guardian.mother_name?.trim() || "",
-      parentEmail: toLower(values.guardian.email),
-      documentUrls: documents.map((d) => d.url),
+    const payload: UpdateStudentPayload = {
+      firstName: values.firstName.trim(),
+      lastName: values.lastName.trim(),
+      phoneNumber: cleanDigits(values.phone_no ?? "") || undefined,
+      gender: formatGenderForApi(values.gender),
+      admissionDate: values.admission_date || undefined,
+      classId: values.classId?.trim() || undefined,
+      addressLine: values.address?.trim() || undefined,
+      aadhaarNumber: cleanDigits(values.aadhar ?? "") || undefined,
+      fatherName: values.father_name?.trim() || undefined,
+      fatherMobile: cleanDigits(values.father_mobile ?? "") || undefined,
+      motherName: values.mother_name?.trim() || undefined,
+      motherMobile: cleanDigits(values.mother_mobile ?? "") || undefined,
+      guardianName: values.guardian_name?.trim() || undefined,
+      guardianMobile: cleanDigits(values.guardian_mobile ?? "") || undefined,
+      bloodGroup: values.bloodGroup?.trim() || undefined,
+      medicalNotes: values.medicalNotes?.trim() || undefined,
     };
 
     try {
-      // DEBUG: log payload before sending
-      // eslint-disable-next-line no-console
-      console.debug("Updating student", { studentId, payload });
-
       await updateStudent(studentId, payload, {
         signal: controller.signal,
       });
-
-      // DEBUG: log response and status
-      // eslint-disable-next-line no-console
-      console.debug("Update response", "ok");
 
       toast({ title: "Student updated successfully", type: "success" });
       onUpdated?.();
       handleClose();
     } catch (err: unknown) {
-      // eslint-disable-next-line no-console
-      console.error("Update error", err);
-      if ((err as any)?.code === "ERR_CANCELED") return;
-      if ((err as any)?.response?.data) {
-        const data = (err as any).response.data as Record<string, any>;
-        // eslint-disable-next-line no-console
-        console.debug("Server error body", data);
+      if ((err as { code?: string })?.code === "ERR_CANCELED") return;
+      const axiosErr = err as {
+        response?: { data?: Record<string, unknown> };
+        message?: string;
+      };
+      if (axiosErr?.response?.data) {
+        const data = axiosErr.response.data;
         if (data?.fieldErrors && typeof data.fieldErrors === "object") {
           Object.entries(data.fieldErrors as Record<string, string>).forEach(
             ([key, message]) => {
-              const path = key.replace("guardian.", "guardian.");
-              form.setError(path as any, { type: "server", message });
+              form.setError(key as keyof UpdateStudentForm, {
+                type: "server",
+                message,
+              });
             },
           );
         }
@@ -159,7 +165,6 @@ export default function UpdateStudentDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black/40" onClick={handleClose} />
@@ -169,10 +174,10 @@ export default function UpdateStudentDialog({
               <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg py-[24px] px-[16px] justify-between gap-4">
                 <div className="space-y-1">
                   <h1 className="text-2xl font-bold text-white">
-                    Create & Update Student
+                    Update Student
                   </h1>
                   <p className="text-sm text-white/80">
-                    Update and create new student information
+                    Update student information and documents
                   </p>
                 </div>
                 <button
@@ -198,7 +203,6 @@ export default function UpdateStudentDialog({
                       onSubmit={form.handleSubmit(onSubmit)}
                       className="space-y-6"
                     >
-                      {/* student_id and class_id are not submitted — display only */}
                       <StudentInformationSection
                         form={form}
                         classDisplay={classDisplay}
@@ -207,14 +211,25 @@ export default function UpdateStudentDialog({
                       />
 
                       <GuardianInformationSection form={form} />
-
-                      <StudentDocumentsSection
-                        documents={documents}
-                        uploading={uploading}
-                        onUpload={handleDocumentUpload}
-                        onRemove={removeDocument}
-                      />
                     </Form>
+
+                    {studentId ? (
+                      <div className="mt-6">
+                        <EntityDocumentsSection
+                          title="Student Documents"
+                          documentTypes={STUDENT_DOCUMENT_TYPES}
+                          selectedDocumentType={selectedDocumentType}
+                          onDocumentTypeChange={setSelectedDocumentType}
+                          documents={documents}
+                          uploading={uploading}
+                          deletingIds={deletingIds}
+                          loading={documentsLoading}
+                          onUpload={handleDocumentUpload}
+                          onDelete={handleDocumentDelete}
+                          getLabelForType={getLabelForType}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -226,12 +241,7 @@ export default function UpdateStudentDialog({
                   type="button"
                   variant="dark"
                   onClick={() => {
-                    // DEBUG: log click and current form values
-                    // eslint-disable-next-line no-console
-                    console.debug("Save button clicked", form.getValues());
-                    // Trigger RHF submit and log client-side validation errors
                     form.handleSubmit(onSubmit, (errs) => {
-                      // eslint-disable-next-line no-console
                       console.error("Client validation errors on click:", errs);
                     })();
                   }}

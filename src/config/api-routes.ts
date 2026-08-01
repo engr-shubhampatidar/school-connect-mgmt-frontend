@@ -30,6 +30,9 @@ export const ADMIN_API = {
   ANNOUNCEMENTS: "/admin/announcements",
   GRAPH: "/admin/attendance/graph",
   CLASS_DASHBOARD: "/admin/classes/dashboard",
+  DOCUMENTS: "/admin/documents",
+  DOCUMENTS_UPLOAD: "/admin/documents/upload",
+  DOCUMENT_BY_ID: (id: string) => `/admin/documents/${id}`,
 };
 
 export const TEACHER_API = {
@@ -52,6 +55,8 @@ export const STUDENT_API = {
   CHANGE_PASSWORD: "/api/student/auth/change-password",
   /** Admin-facing student profile by id */
   BY_ID: (id: string) => `/admin/students/${id}`,
+  /** Update student (admin or class teacher) */
+  UPDATE: (id: string) => `/students/${id}`,
 };
 
 const routes = {

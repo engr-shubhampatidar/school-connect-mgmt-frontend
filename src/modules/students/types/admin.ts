@@ -24,22 +24,30 @@ export type StudentsQuery = {
   pageSize?: number;
 };
 
+/** GET /admin/students/{id} response */
 export interface StudentDetails {
   id: string;
   name: string;
   email: string;
   studentId: string;
-  phoneNo: string;
+  phoneNo: string | null;
   gender: string | null;
-  category: string | null;
   admissionDate: string | null;
-  aadhaar: string | null;
+  aadhaarNumber: string | null;
   address: string | null;
-  rollNo: string | null;
   fatherName: string | null;
   fatherMobile: string | null;
-  fatherEmail: string | null;
   motherName: string | null;
-  emergencyContact: string | null;
+  motherMobile: string | null;
+  guardianName: string | null;
+  guardianMobile: string | null;
+  bloodGroup: string | null;
+  medicalNotes: string | null;
   dob: string | null;
+  /** Optional class fields when API includes them */
+  classId?: string | null;
+  className?: string | null;
+  category?: string | null;
+  /** @deprecated Prefer aadhaarNumber */
+  aadhaar?: string | null;
 }

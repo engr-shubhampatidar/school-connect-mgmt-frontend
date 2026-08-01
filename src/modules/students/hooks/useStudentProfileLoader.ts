@@ -1,26 +1,47 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import API from "@/services/axios";
 import { STUDENT_API } from "@/config/api-routes";
-import type { StudentDocument, StudentProfileResponse } from "@/modules/students/types/form";
+import type { StudentProfileResponse } from "@/modules/students/types/form";
 import type { UpdateStudentForm } from "@/modules/students/schemas/updateStudentSchema";
+import {
+  cleanDigits,
+  normalizeGenderForForm,
+  normalizeMobileForForm,
+  splitFullName,
+} from "@/modules/students/utils/formatters";
 
 type Params = {
   open: boolean;
   studentId: string | null;
   form: UseFormReturn<UpdateStudentForm>;
-  setDocuments: Dispatch<SetStateAction<StudentDocument[]>>;
 };
 
-export function useStudentProfileLoader({
-  open,
-  studentId,
-  form,
-  setDocuments,
-}: Params) {
+function pickClassId(data: StudentProfileResponse): string {
+  if (typeof data.classId === "string" && data.classId) return data.classId;
+  if (typeof data.class_id === "string" && data.class_id) return data.class_id;
+  if (data.class_id && typeof data.class_id === "object") {
+    return (
+      data.class_id.id ??
+      (data.class_id as { classId?: string }).classId ??
+      ""
+    );
+  }
+  return "";
+}
+
+function pickClassName(data: StudentProfileResponse): string {
+  if (data.className?.trim()) return data.className;
+  if (data.class_name?.trim()) return data.class_name;
+  if (data.class_id && typeof data.class_id === "object") {
+    return data.class_id.name ?? data.class_id.className ?? "";
+  }
+  return "";
+}
+
+export function useStudentProfileLoader({ open, studentId, form }: Params) {
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [classDisplay, setClassDisplay] = useState<string>("");
@@ -30,71 +51,54 @@ export function useStudentProfileLoader({
 
   const hydrateForm = useCallback(
     (data: StudentProfileResponse) => {
-      const admissionDate = data.admission_date
-        ? data.admission_date.split("T")[0]
+      const rawAdmission =
+        data.admissionDate ?? data.admission_date ?? null;
+      const admissionDate = rawAdmission
+        ? String(rawAdmission).split("T")[0]
         : "";
-      const locked = Boolean(data.admission_date);
-      // Ensure class_id is a string (API may sometimes return an object)
-      let classIdValue: string = "";
-      if (typeof data.class_id === "string") {
-        classIdValue = data.class_id;
-      } else if (data.class_id && typeof data.class_id === "object") {
-        // try common id keys
-        // eslint-disable-next-line no-console
-        console.warn(
-          "hydrateForm: class_id is an object, normalizing to string id",
-          data.class_id,
-        );
-        classIdValue =
-          (data.class_id as any).id ??
-          (data.class_id as any).classId ??
-          (data.class_id as any)._id ??
-          String(data.class_id);
-      }
+      const locked = Boolean(rawAdmission);
+      const { firstName, lastName } = splitFullName(data.name ?? "");
+      const classIdValue = pickClassId(data);
+      const classNameValue = pickClassName(data);
 
       form.reset({
-        name: data.name ?? "",
+        firstName,
+        lastName,
         email: data.email ?? "",
-        phone_no: data.phone_no ?? "",
-        gender: data.gender ?? "male",
-        category: data.category ?? "General",
+        phone_no: normalizeMobileForForm(data.phoneNo ?? data.phone_no),
+        gender: normalizeGenderForForm(data.gender),
+        category: data.category ?? "",
         admission_date: admissionDate,
+        classId: classIdValue,
         address: data.address ?? "",
-        aadhar: data.aadhar ?? "",
-        guardian: {
-          father_name: data.guardian?.father_name ?? "",
-          mother_name: data.guardian?.mother_name ?? "",
-          phone_no: data.guardian?.phone_no ?? "",
-          email: data.guardian?.email ?? "",
-          address: data.guardian?.address ?? "",
-        },
-        student_documents: data.student_documents ?? [],
-        class_name: data.class_name ?? "",
+        aadhar: cleanDigits(
+          data.aadhaarNumber ?? data.aadhaar ?? data.aadhar ?? "",
+        ).slice(0, 12),
+        father_name: data.fatherName ?? data.guardian?.father_name ?? "",
+        father_mobile: normalizeMobileForForm(
+          data.fatherMobile ?? data.guardian?.phone_no,
+        ),
+        mother_name: data.motherName ?? data.guardian?.mother_name ?? "",
+        mother_mobile: normalizeMobileForForm(data.motherMobile),
+        guardian_name: data.guardianName ?? "",
+        guardian_mobile: normalizeMobileForForm(data.guardianMobile),
+        bloodGroup: data.bloodGroup ?? "",
+        medicalNotes: data.medicalNotes ?? "",
+        class_name: classNameValue,
         admission_locked: locked,
       });
-      setDocuments(data.student_documents ?? []);
+
       setStudentIdDisplay(data.studentId ?? "");
-      // If API included a class display name use it, otherwise try to derive from object
-      if (data.class_name && data.class_name.trim()) {
-        setClassDisplay(data.class_name);
-      } else if (data.class_id && typeof data.class_id === "object") {
-        const cname =
-          (data.class_id as any).name ?? (data.class_id as any).className ?? "";
-        console.log(cname + "class name of student");
-        setClassDisplay(cname || "");
-      } else {
-        setClassDisplay("");
-      }
+      setClassDisplay(classNameValue);
       setAdmissionLocked(locked);
     },
-    [form, setDocuments],
+    [form],
   );
 
   useEffect(() => {
     if (!open || !studentId) return;
     setLoading(true);
     setFetchError(null);
-    setDocuments([]);
     fetchController.current?.abort();
     const controller = new AbortController();
     fetchController.current = controller;
@@ -106,7 +110,7 @@ export function useStudentProfileLoader({
         });
         hydrateForm(res.data as StudentProfileResponse);
       } catch (err: unknown) {
-        if ((err as any)?.code === "ERR_CANCELED") return;
+        if ((err as { code?: string })?.code === "ERR_CANCELED") return;
         const message =
           err instanceof Error ? err.message : "Failed to load student";
         setFetchError(message);
@@ -114,7 +118,7 @@ export function useStudentProfileLoader({
         setLoading(false);
       }
     })();
-  }, [open, studentId, hydrateForm, setDocuments]);
+  }, [open, studentId, hydrateForm]);
 
   const retry = useCallback(() => {
     if (!studentId) return;
@@ -123,11 +127,13 @@ export function useStudentProfileLoader({
     fetchController.current?.abort();
     const controller = new AbortController();
     fetchController.current = controller;
-    API.get(`/api/admin/students/${studentId}`, {
+    API.get(STUDENT_API.BY_ID(studentId), {
       signal: controller.signal,
     })
       .then((res) => hydrateForm(res.data as StudentProfileResponse))
-      .catch((err) => setFetchError(err?.message ?? "Failed to load"))
+      .catch((err: { message?: string }) =>
+        setFetchError(err?.message ?? "Failed to load"),
+      )
       .finally(() => setLoading(false));
   }, [studentId, hydrateForm]);
 
