@@ -2,6 +2,28 @@ export function cleanDigits(value: string) {
   return value.replace(/\D+/g, "");
 }
 
+/** Normalize a phone for form display: digits only, keep last 10 if longer (e.g. +91…). */
+export function normalizeMobileForForm(value?: string | null): string {
+  const digits = cleanDigits(value ?? "");
+  if (!digits) return "";
+  return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+/** Display 10 digits as "XXXXX XXXXX" (space between 5-digit groups). */
+export function formatMobileDisplay(value: string): string {
+  const digits = cleanDigits(value).slice(0, 10);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)} ${digits.slice(5)}`;
+}
+
+/** Display 12-digit Aadhaar as "XXXX XXXX XXXX". */
+export function formatAadharDisplay(value: string): string {
+  const digits = cleanDigits(value).slice(0, 12);
+  return digits.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, p1, p2, p3) =>
+    [p1, p2, p3].filter(Boolean).join(" "),
+  );
+}
+
 export function toLower(value: string) {
   return value.trim().toLowerCase();
 }
@@ -16,4 +38,29 @@ export function parseLocalDate(value?: string) {
   if (!value) return undefined;
   const [y, m, d] = value.split("-").map(Number);
   return new Date(y, m - 1, d);
+}
+
+/** Split a full name into first + remaining last name parts. */
+export function splitFullName(name: string): {
+  firstName: string;
+  lastName: string;
+} {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { firstName: "", lastName: "" };
+  if (parts.length === 1) return { firstName: parts[0], lastName: "" };
+  return { firstName: parts[0], lastName: parts.slice(1).join(" ") };
+}
+
+/** Normalize gender for API payload (MALE / FEMALE / OTHER). */
+export function formatGenderForApi(gender: string): "MALE" | "FEMALE" | "OTHER" {
+  const value = gender.trim().toUpperCase();
+  if (value === "MALE" || value === "FEMALE" || value === "OTHER") return value;
+  return "MALE";
+}
+
+/** Normalize API gender (MALE / Male / male) to form value (MALE). */
+export function normalizeGenderForForm(
+  gender?: string | null,
+): "MALE" | "FEMALE" | "OTHER" {
+  return formatGenderForApi(gender ?? "");
 }
