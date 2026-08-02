@@ -14,24 +14,6 @@ import {
 } from "@/modules/timetable";
 import type { ClassDashboardDetails } from "@/modules/classes/types/classes";
 
-interface ClassMeta {
-  name: string;
-  academicYear: string;
-  teacher: { name: string; avatar?: string };
-  totalStudents: number;
-  room: string;
-  status: "Active" | "Inactive";
-}
-
-const CLASS_META: ClassMeta = {
-  name: "Class 10 – Section A",
-  academicYear: "2025–2026",
-  teacher: { name: "Mr. Anderson", avatar: undefined },
-  totalStudents: 34,
-  room: "Building A, Room-305",
-  status: "Active",
-};
-
 interface Props {
   subjects: ClassSubjectAllocation[];
   isLoading: boolean;
@@ -94,6 +76,7 @@ export default function ClassOverview({
           <AddSubjectToClassDialog
             open={isDialogOpen}
             classId={classId ?? details?.id}
+            allocatedSubjectIds={subjects.map((s) => s.subjectId)}
             onClose={() => setIsDialogOpen(false)}
             onSuccess={() => {
               setIsDialogOpen(false);
@@ -106,7 +89,6 @@ export default function ClassOverview({
             items={subjects}
             isLoading={isLoading}
             error={error ?? null}
-            room={CLASS_META.room}
           />
         </div>
       </div>

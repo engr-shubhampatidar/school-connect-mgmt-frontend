@@ -18,20 +18,31 @@ export async function fetchSubjects(
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
   if (query.page) params.page = query.page;
-  if (query.pageSize) params.pageSize = query.pageSize;
-  const res = await API.get<SubjectsResponse>(ADMIN_API.SUBJECTS, { params });
-  const data = res.data as unknown;
+  if (query.pageSize) {
+    params.pageSize = query.pageSize;
+    params.limit = query.pageSize;
+  }
+  const res = await API.get<{
+    subjects?: Subject[];
+    data?: Subject[];
+    total?: number;
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+  }>(ADMIN_API.SUBJECTS, { params });
 
-  const subjects: Subject[] = (data as SubjectsResponse)?.subjects ?? [];
-  const total: number = (data as SubjectsResponse)?.total ?? 0;
-  const page: number = (data as SubjectsResponse)?.page ?? 1;
-  const pageSize: number = (data as unknown as { limit: number })?.limit ?? 10;
+  const body = res.data ?? {};
+  const subjects: Subject[] = Array.isArray(body.subjects)
+    ? body.subjects
+    : Array.isArray(body.data)
+      ? body.data
+      : [];
 
   return {
     subjects,
-    total,
-    page,
-    pageSize,
+    total: body.total ?? subjects.length,
+    page: body.page ?? 1,
+    pageSize: body.pageSize ?? body.limit ?? query.pageSize ?? 10,
   };
 }
 

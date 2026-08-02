@@ -251,10 +251,14 @@ export async function fetchClassById(id: string): Promise<ClassDetail> {
 export async function fetchClassDetails(
   classId: string,
 ): Promise<ClassDashboardDetails> {
-  const res = await API.get<ClassDashboardDetails>(
+  const res = await API.get<ClassDashboardDetails & { room?: string | null }>(
     `${ADMIN_API.CLASSES}/${classId}/details`,
   );
-  return res.data;
+  const data = res.data;
+  return {
+    ...data,
+    room: data.room ?? data.roomNo ?? null,
+  };
 }
 
 export async function fetchClassDashboard(): Promise<ClassDashboardStats | null> {

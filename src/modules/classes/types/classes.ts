@@ -46,6 +46,9 @@ export type ClassDashboardDetails = {
   section: string;
   classTeacherName: string | null;
   totalStudents: number;
+  /** Room / home room from GET /admin/classes/:id/details */
+  room?: string | null;
+  /** @deprecated Prefer `room` */
   roomNo?: string | null;
 };
 

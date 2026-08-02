@@ -7,7 +7,6 @@ import {
   type ClassesQuery,
   ClassesTable,
   CreateClassDialog,
-  ClassesFilterBar,
   CreateNewClass,
   ClassesPageSkeleton,
 } from "@/modules/classes";
@@ -142,10 +141,6 @@ export default function AdminClassesPage() {
           </div>
         </div>
       </section>
-
-      <div className="mb-6">
-        <ClassesFilterBar />
-      </div>
 
       <ClassesTable
         classes={groups ?? classes}

@@ -7,10 +7,9 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
 import Avatar from "@/components/ui/Avatar";
-import { Edit2, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
+// import { Edit2 } from "lucide-react";
 
 export interface ClassSubjectAllocation {
   id: string;
@@ -25,14 +24,12 @@ interface Props {
   items: ClassSubjectAllocation[];
   isLoading: boolean;
   error?: string | null;
-  room: string;
 }
 
 export default function SubjectAllocationTable({
   items,
   isLoading,
   error,
-  room,
 }: Props) {
   return (
     <div>
@@ -43,8 +40,6 @@ export default function SubjectAllocationTable({
           <TableRow className="text-left text-sm text-slate-600 border-t">
             <TableHead className="py-2 pl-4">Subject Name</TableHead>
             <TableHead className="py-2">Assigned Teacher</TableHead>
-            <TableHead className="py-2">Room No.</TableHead>
-            <TableHead className="py-2">Status</TableHead>
             <TableHead className="py-2 pr-4 text-right">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -59,15 +54,8 @@ export default function SubjectAllocationTable({
                 <TableCell className="py-3">
                   <div className="h-4 w-28 bg-slate-200 rounded animate-pulse" />
                 </TableCell>
-                <TableCell className="py-3">
-                  <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
-                </TableCell>
-                <TableCell className="py-3">
-                  <div className="h-6 w-20 bg-slate-200 rounded animate-pulse" />
-                </TableCell>
                 <TableCell className="py-3 text-right">
-                  <div className="inline-flex items-center gap-2">
-                    <div className="h-8 w-8 bg-slate-200 rounded animate-pulse" />
+                  <div className="inline-flex items-center gap-2 justify-end">
                     <div className="h-8 w-8 bg-slate-200 rounded animate-pulse" />
                   </div>
                 </TableCell>
@@ -76,7 +64,7 @@ export default function SubjectAllocationTable({
           ) : items.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={3}
                 className="py-8 text-center text-sm text-slate-500"
               >
                 No subjects assigned to this class yet
@@ -98,23 +86,16 @@ export default function SubjectAllocationTable({
                     </div>
                   )}
                 </TableCell>
-                <TableCell className="py-3">{room}</TableCell>
-                <TableCell className="py-3">
-                  <Badge variant={s.teacherId ? "success" : "warning"}>
-                    {s.teacherId ? "Active" : "Pending"}
-                  </Badge>
-                </TableCell>
                 <TableCell className="py-3 text-right pr-4">
                   <div className="inline-flex items-center gap-2">
-                    <button
-                      
+                    {/* <button
                       className="px-2 py-1 flex items-center gap-1"
                       onClick={() => console.log("replace", s.id)}
                     >
                       <Edit2 size={14} />
                       Replace
-                    </button>
-                    <button 
+                    </button> */}
+                    <button
                       className="px-2 py-1 text-red-600 flex items-center gap-1"
                       onClick={() => console.log("delete", s.id)}
                     >
