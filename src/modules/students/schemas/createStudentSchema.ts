@@ -12,20 +12,22 @@ const optionalEmail = z
   .transform((v) => (v === "" ? undefined : v))
   .pipe(z.string().email("Invalid email address").optional());
 
-const optionalPhone = z
+/** Indian mobile: exactly 10 digits, starting with 6–9 */
+const mobileRegex = /^[6-9]\d{9}$/;
+
+const optionalMobile = z
   .string()
   .trim()
-  .transform((v) => (v === "" ? undefined : v))
-  .pipe(
-    z.string().min(10, "Phone number must be 10 digits").max(15).optional(),
-  );
+  .refine((v) => v === "" || mobileRegex.test(v), {
+    message: "Enter a valid 10-digit mobile number",
+  });
 
 export const createStudentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   classId: z.string().min(1, "Class is required"),
   email: optionalEmail,
-  phoneNumber: optionalPhone,
+  phoneNumber: optionalMobile,
   profileUrl: z
     .string()
     .optional()
