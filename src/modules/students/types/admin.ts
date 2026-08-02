@@ -19,7 +19,6 @@ export type StudentsResponse = {
 export type StudentsQuery = {
   search?: string;
   classId?: string;
-  status?: string;
   page?: number;
   pageSize?: number;
 };

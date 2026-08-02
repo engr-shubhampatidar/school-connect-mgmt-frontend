@@ -1,19 +1,10 @@
 import { z } from "zod";
+import { GENDER_VALUES, optionalMobile, type GenderValue } from "./shared";
+
+export { GENDER_VALUES, type GenderValue } from "./shared";
+export const CATEGORY_VALUES = ["General", "OBC", "SC", "ST", "EWS"];
 
 const nameRegex = /^[A-Za-z ]+$/;
-/** Indian mobile: exactly 10 digits, starting with 6–9 */
-const mobileRegex = /^[6-9]\d{9}$/;
-
-const optionalMobile = z
-  .string()
-  .trim()
-  .refine((v) => v === "" || mobileRegex.test(v), {
-    message: "Enter a valid 10-digit mobile number",
-  });
-
-export const GENDER_VALUES = ["MALE", "FEMALE", "OTHER"] as const;
-export type GenderValue = (typeof GENDER_VALUES)[number];
-export const CATEGORY_VALUES = ["General", "OBC", "SC", "ST", "EWS"];
 
 export const updateStudentSchema = z.object({
   firstName: z
@@ -69,7 +60,7 @@ export const updateStudentDefaultValues: UpdateStudentForm = {
   lastName: "",
   email: "",
   phone_no: "",
-  gender: "MALE",
+  gender: "MALE" satisfies GenderValue,
   category: "",
   admission_date: "",
   classId: "",

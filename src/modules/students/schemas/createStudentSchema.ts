@@ -1,26 +1,13 @@
 import { z } from "zod";
+import { GENDER_VALUES, optionalMobile } from "./shared";
 
-export const GENDER_OPTIONS = [
-  { id: "MALE", name: "Male" },
-  { id: "FEMALE", name: "Female" },
-  { id: "OTHER", name: "Other" },
-] as const;
+export { GENDER_OPTIONS } from "./shared";
 
 const optionalEmail = z
   .string()
   .trim()
   .transform((v) => (v === "" ? undefined : v))
   .pipe(z.string().email("Invalid email address").optional());
-
-/** Indian mobile: exactly 10 digits, starting with 6–9 */
-const mobileRegex = /^[6-9]\d{9}$/;
-
-const optionalMobile = z
-  .string()
-  .trim()
-  .refine((v) => v === "" || mobileRegex.test(v), {
-    message: "Enter a valid 10-digit mobile number",
-  });
 
 export const createStudentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -45,7 +32,7 @@ export const createStudentSchema = z.object({
   gender: z
     .string()
     .min(1, "Gender is required")
-    .pipe(z.enum(["MALE", "FEMALE", "OTHER"])),
+    .pipe(z.enum(GENDER_VALUES)),
 });
 
 export type CreateStudentValues = z.infer<typeof createStudentSchema>;

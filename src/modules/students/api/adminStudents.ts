@@ -5,6 +5,7 @@ import type {
 } from "@/modules/students/types/admin";
 import { ADMIN_API, STUDENT_API } from "@/config/api-routes";
 import API from "@/services/axios";
+import { mapStudentListItem } from "@/modules/students/utils/mappers";
 
 export type {
   Student,
@@ -19,14 +20,17 @@ export async function fetchStudents(
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
   if (query.classId) params.classId = query.classId;
-  if (query.status) params.status = query.status;
   if (query.page) params.page = query.page;
-  if (query.pageSize) params.pageSize = query.pageSize;
+  // Backend PaginationStudentDto expects `limit`
+  if (query.pageSize) params.limit = query.pageSize;
+
   const res = await API.get<{
     data: Array<{
       id: string;
       name: string;
       studentId?: string | number | null;
+      className?: string | null;
+      section?: string | null;
       currentClass?: { name: string; section?: string | null } | null;
       createdAt: string;
     }>;
@@ -40,21 +44,10 @@ export async function fetchStudents(
     total = 0,
     page = 1,
     limit = 10,
-  } = res.data as {
-    data: Array<{
-      id: string;
-      name: string;
-      studentId?: string | number | null;
-      currentClass?: { name: string; section?: string | null } | null;
-      createdAt: string;
-    }>;
-    total?: number;
-    page?: number;
-    limit?: number;
-  };
+  } = res.data;
 
   return {
-    students: data,
+    students: data.map(mapStudentListItem),
     total,
     page,
     pageSize: limit,

@@ -2,32 +2,28 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import type { ClassItem } from "@/modules/classes";
 import { Input } from "@/components/ui/Input";
-import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Select from "@/components/ui/Select";
 
 export type StudentsFilters = {
   search?: string;
   classId?: string;
-  status?: string;
 };
 
 type Props = {
   initial?: StudentsFilters;
   onApply: (f: StudentsFilters) => void;
-  onClear: () => void;
+  onClear?: () => void;
   classes?: ClassItem[];
 };
 
 export default function StudentsFilterBar({
   initial,
   onApply,
-  onClear,
   classes: parentClasses,
 }: Props) {
   const [search, setSearch] = useState(initial?.search ?? "");
   const [klass, setKlass] = useState(initial?.classId ?? "");
-  const [status, setStatus] = useState(initial?.status ?? "");
 
   const classOptions = useMemo(() => {
     if (parentClasses && parentClasses.length > 0) {
@@ -42,7 +38,6 @@ export default function StudentsFilterBar({
     return [{ id: "", name: "All classes" }];
   }, [parentClasses]);
 
-  // Debounce search and auto-apply — skip initial mount to avoid duplicate calls
   const didMountRef = useRef(false);
   useEffect(() => {
     if (!didMountRef.current) {
@@ -50,10 +45,10 @@ export default function StudentsFilterBar({
       return;
     }
     const t = setTimeout(() => {
-      onApply({ search: search.trim(), classId: klass, status });
+      onApply({ search: search.trim(), classId: klass || undefined });
     }, 500);
     return () => clearTimeout(t);
-  }, [search, klass, status, onApply]);
+  }, [search, klass, onApply]);
 
   return (
     <Card>
@@ -70,7 +65,7 @@ export default function StudentsFilterBar({
           </div>
         </div>
 
-        <div className="">
+        <div>
           <label className="sr-only">Class</label>
           <Select
             className="bg-[#F5F9FF] min-w-44"
