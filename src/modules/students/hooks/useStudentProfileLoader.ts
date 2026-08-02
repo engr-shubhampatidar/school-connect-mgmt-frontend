@@ -72,7 +72,7 @@ export function useStudentProfileLoader({ open, studentId, form }: Params) {
         classId: classIdValue,
         address: data.address ?? "",
         aadhar: cleanDigits(
-          data.aadhaarNumber ?? data.aadhaar ?? data.aadhar ?? "",
+          data.aadhaarNumber ?? data.aadhar ?? "",
         ).slice(0, 12),
         father_name: data.fatherName ?? data.guardian?.father_name ?? "",
         father_mobile: normalizeMobileForForm(

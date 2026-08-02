@@ -25,6 +25,7 @@ import {
   createStudentSchema,
   type CreateStudentValues,
 } from "@/modules/students/schemas/createStudentSchema";
+import { cleanDigits } from "@/modules/students/utils/formatters";
 
 type Props = {
   open: boolean;
@@ -84,7 +85,7 @@ export default function CreateStudentDialog({
           lastName: values.lastName,
           classId: values.classId,
           email: values.email ?? undefined,
-          phoneNumber: values.phoneNumber ?? undefined,
+          phoneNumber: cleanDigits(values.phoneNumber ?? "") || undefined,
           profileUrl:
             values.profileUrl && values.profileUrl.trim() !== ""
               ? values.profileUrl

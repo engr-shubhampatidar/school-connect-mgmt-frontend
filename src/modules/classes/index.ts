@@ -10,9 +10,6 @@ export { default as CreateClassForm } from "./components/CreateClassForm";
 export { default as CreateClassDialog } from "./components/CreateClassDialog";
 export { default as EditClassDialog } from "./components/EditClassDialog";
 export { default as ClassesTable } from "./components/ClassesTable";
-export {
-  default as ClassesFilterBar,
-} from "./components/ClassesFilterBar";
 export { default as CreateNewClass } from "./components/CreateNewClass";
 export { default as ClassOverviewContainer } from "./components/ClassOverviewContainer";
 export { default as ClassOverview } from "./components/ClassOverview";

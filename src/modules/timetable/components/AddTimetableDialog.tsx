@@ -1,17 +1,29 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Portal from "@/components/Portal";
+import React, { useEffect, useMemo, useState } from "react";
 import DefaultSelect from "@/components/ui/Select";
 import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
 import SuccessModal from "@/components/ui/SuccessModal";
-import Input from "@/components/ui/Input";
-import API from "@/services/axios";
-import { ADMIN_API } from "@/config/api-routes";
+import { Input } from "@/components/ui/Input";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
+import { updateTimetableBySubject } from "@/modules/timetable/api/timetable";
+import type { ClassTimetableEntry } from "@/modules/timetable/types/timetable";
+import type { ClassSubjectAllocation } from "@/modules/classes/components/SubjectAllocationTable";
 
-type Option = { id: string; name: string };
+type Props = {
+  open: boolean;
+  classId?: string;
+  onClose?: () => void;
+  onSuccess?: () => void;
+  /** Subjects already allocated to the class. */
+  allocatedSubjects?: ClassSubjectAllocation[];
+  /** Existing timetable entries — subjects present here are excluded. */
+  timetableItems?: ClassTimetableEntry[];
+  /** Optional room from class details. */
+  room?: string | null;
+};
 
 function isTimeLess(a: string, b: string) {
   if (!a || !b) return false;
@@ -23,111 +35,100 @@ export default function AddTimetableDialog({
   classId,
   onClose,
   onSuccess,
-}: {
-  open: boolean;
-  classId?: string;
-  onClose?: () => void;
-  onSuccess?: () => void;
-}) {
-  const params = useParams?.() as any;
+  allocatedSubjects = [],
+  timetableItems = [],
+  room: classRoom = null,
+}: Props) {
+  const params = useParams?.() as {
+    classId?: string;
+    id?: string;
+    clsId?: string;
+  } | null;
   const router = useRouter?.();
-  const resolvedClassId = classId || params?.classId || params?.id || "";
+  const resolvedClassId =
+    classId || params?.classId || params?.clsId || params?.id || "";
 
-  const [subjects, setSubjects] = useState<Option[]>([]);
-  const [teachers, setTeachers] = useState<Option[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingTeachers, setLoadingTeachers] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [subjectId, setSubjectId] = useState("");
   const [teacherId, setTeacherId] = useState("");
-  const [dayOfWeek, setDayOfWeek] = useState("");
+  const [teacherName, setTeacherName] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [room, setRoom] = useState("");
   const [successOpen, setSuccessOpen] = useState(false);
 
+  const availableSubjects = useMemo(() => {
+    const timedSubjectIds = new Set(
+      timetableItems.map((t) => t.subjectId).filter(Boolean),
+    );
+    return allocatedSubjects.filter(
+      (s) => s.subjectId && !timedSubjectIds.has(s.subjectId),
+    );
+  }, [allocatedSubjects, timetableItems]);
+
+  const subjectOptions = useMemo(
+    () => [
+      { id: "", name: "-- Select --" },
+      ...availableSubjects.map((s) => ({
+        id: s.subjectId,
+        name: s.subjectName || "Unnamed Subject",
+      })),
+    ],
+    [availableSubjects],
+  );
+
+  const teacherOptions = useMemo(() => {
+    if (!teacherId) {
+      return [{ id: "", name: "No teacher assigned" }];
+    }
+    return [
+      {
+        id: teacherId,
+        name: teacherName || "Assigned Teacher",
+      },
+    ];
+  }, [teacherId, teacherName]);
+
   useEffect(() => {
-    let cancelled = false;
-    const fetch = async () => {
-      if (!open) return;
-      setLoading(true);
-      setLoadingTeachers(true);
-      setError(null);
-      try {
-        const subjUrl = `${ADMIN_API.CLASSES}/${resolvedClassId}/timetable/subjects`;
-        let subjRes;
-        try {
-          subjRes = await API.get(subjUrl);
-        } catch (err) {
-          subjRes = await API.get(ADMIN_API.SUBJECTS);
-        }
-        const subjData = subjRes.data;
-        const subjList = Array.isArray(subjData)
-          ? subjData
-          : Array.isArray(subjData?.items)
-            ? subjData.items
-            : [];
-        const normalizedSubjects = subjList.map((s: any) => ({
-          id: s.id,
-          name: s.name || s.title || s.subjectName || "Unnamed Subject",
-        }));
-        if (!cancelled) setSubjects(normalizedSubjects);
+    if (!open) return;
+    setSubjectId("");
+    setTeacherId("");
+    setTeacherName("");
+    setStartTime("");
+    setEndTime("");
+    setError(null);
+  }, [open]);
 
-        const teachRes = await API.get(ADMIN_API.TEACHERS);
-        const teachData = teachRes.data;
-        const teachList = Array.isArray(teachData)
-          ? teachData
-          : Array.isArray(teachData?.items)
-            ? teachData.items
-            : [];
-        const normalizedTeachers = teachList.map((t: any) => ({
-          id: t.id,
-          name:
-            t.fullName ||
-            t.user?.fullName ||
-            t.user?.full_name ||
-            [t.firstName, t.lastName].filter(Boolean).join(" ") ||
-            "Unnamed Teacher",
-        }));
-        if (!cancelled) setTeachers(normalizedTeachers);
-      } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          setError(
-            err.response?.data?.message ?? err.message ?? "Failed to fetch",
-          );
-        } else if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Failed to fetch");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-          setLoadingTeachers(false);
-        }
-      }
-    };
-
-    fetch();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, resolvedClassId]);
+  const handleSubjectChange = (id: string) => {
+    setSubjectId(id);
+    const selected = availableSubjects.find((s) => s.subjectId === id);
+    setTeacherId(selected?.teacherId ?? "");
+    setTeacherName(selected?.teacherName ?? "");
+  };
 
   const resetAndClose = () => {
     setSubjectId("");
     setTeacherId("");
-    setDayOfWeek("");
+    setTeacherName("");
     setStartTime("");
     setEndTime("");
-    setRoom("");
     setError(null);
     onClose?.();
   };
 
   const handleSubmit = async () => {
+    if (!subjectId) {
+      setError("Please select a subject");
+      return;
+    }
+    if (!teacherId) {
+      setError("Selected subject has no assigned teacher");
+      return;
+    }
+    if (!startTime || !endTime) {
+      setError("Start time and end time are required");
+      return;
+    }
     if (!isTimeLess(startTime, endTime)) {
       setError("Start time must be earlier than end time");
       return;
@@ -136,19 +137,17 @@ export default function AddTimetableDialog({
       setError("Class id is missing");
       return;
     }
+
     setSubmitting(true);
     setError(null);
     try {
-      const payload: any = {
-        subjectId,
+      await updateTimetableBySubject(resolvedClassId, subjectId, {
+        teacherId,
         dayOfWeek: 0,
         startTime,
         endTime,
-        room,
-      };
-      if (teacherId) payload.teacherId = teacherId;
-      const url = `${ADMIN_API.CLASSES}/${resolvedClassId}/timetable`;
-      await API.post(url, payload);
+        room: classRoom ?? null,
+      });
       setSuccessOpen(true);
       onSuccess?.();
       router?.refresh?.();
@@ -172,100 +171,131 @@ export default function AddTimetableDialog({
   if (!open) return null;
 
   return (
-    <Portal>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="absolute inset-0 bg-black/40" onClick={resetAndClose} />
-
-        <div className="relative z-50 w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Add Timetable Entry</h3>
-            <button onClick={resetAndClose} className="text-slate-500">
-              ✕
-            </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={resetAndClose} />
+      <div className="relative w-full max-w-lg p-4 max-h-full overflow-hidden no-scrollbar overflow-y-auto">
+        <div className="rounded-lg">
+          <div className="flex items-start sticky top-0 bg-[#021034] rounded-t-lg py-[24px] px-[16px] justify-between gap-4">
+            <div>
+              <h3 className="text-[24px] font-[700] text-white">
+                Add Timetable Entry
+              </h3>
+              <p className="text-[14px] font-[400] text-white">
+                Schedule a period for a subject that does not have a timetable
+                yet.
+              </p>
+            </div>
+            <div>
+              <button
+                aria-label="close"
+                onClick={resetAndClose}
+                className="text-white hover:text-white/80"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4 space-y-4">
-            <label className="block text-sm text-slate-700">Subject</label>
-            {loading ? (
-              <div className="text-sm text-slate-500">Loading subjects...</div>
-            ) : (
-              <DefaultSelect
-                options={[{ id: "", name: "-- Select --" }, ...subjects]}
-                value={subjectId}
-                onChange={(v) => setSubjectId(v)}
-                placeholder="Select Subject"
-              />
-            )}
+          <div className="p-[16px] bg-white overflow-hidden rounded-b-lg max-h-full">
+            <Card>
+              <h1 className="text-[16px] text-[#0F172A] font-semibold font-[600] mb-[24px]">
+                Period Information
+              </h1>
 
-            <div>
-              <label className="block text-sm text-slate-700">Teacher</label>
-              {loadingTeachers ? (
-                <div className="text-sm text-slate-500">
-                  Loading teachers...
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">
+                    Subject
+                  </label>
+                  {availableSubjects.length === 0 ? (
+                    <div className="text-sm text-slate-500">
+                      All allocated subjects already have a timetable entry.
+                    </div>
+                  ) : (
+                    <DefaultSelect
+                      options={subjectOptions}
+                      value={subjectId}
+                      onChange={handleSubjectChange}
+                      placeholder="Select Subject"
+                    />
+                  )}
                 </div>
-              ) : (
-                <DefaultSelect
-                  options={[{ id: "", name: "-- Select --" }, ...teachers]}
-                  value={teacherId}
-                  onChange={(v) => setTeacherId(v)}
-                  placeholder="Select Teacher"
-                />
-              )}
-            </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-sm text-slate-700">
-                  Start Time
-                </label>
-                <Input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                />
+                <div>
+                  <label className="block text-sm text-slate-700 mb-2">
+                    Teacher
+                  </label>
+                  <DefaultSelect
+                    options={teacherOptions}
+                    value={teacherId}
+                    onChange={() => undefined}
+                    placeholder="Assigned Teacher"
+                    disabled
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2">
+                      Start Time
+                    </label>
+                    <Input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-slate-700 mb-2">
+                      End Time
+                    </label>
+                    <Input
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {error ? (
+                  <div className="text-sm text-red-600">{error}</div>
+                ) : null}
               </div>
-              <div>
-                <label className="block text-sm text-slate-700">End Time</label>
-                <Input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
+            </Card>
+
+            <div className="mt-6 flex sticky bottom-0 justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={resetAndClose}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="dark"
+                onClick={handleSubmit}
+                disabled={
+                  submitting ||
+                  !subjectId ||
+                  !teacherId ||
+                  !startTime ||
+                  !endTime ||
+                  availableSubjects.length === 0
+                }
+              >
+                {submitting ? "Adding…" : "Add Timetable"}
+              </Button>
             </div>
-
-            <div>
-              <label className="block text-sm text-slate-700">Room</label>
-              <Input
-                value={room}
-                onChange={(e) => setRoom(e.target.value)}
-                placeholder="e.g. Room 101"
-              />
-            </div>
-
-            {error ? <div className="text-sm text-red-600">{error}</div> : null}
-          </div>
-
-          <div className="mt-6 flex items-center justify-end gap-2">
-            <Button variant="ghost" onClick={resetAndClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={submitting}>
-              {submitting ? "Adding..." : "Add Timetable"}
-            </Button>
           </div>
         </div>
-
-        <SuccessModal
-          open={successOpen}
-          onClose={() => {
-            setSuccessOpen(false);
-            resetAndClose();
-          }}
-          title="Timetable entry added"
-          description="The timetable entry has been successfully added."
-        />
       </div>
-    </Portal>
+
+      <SuccessModal
+        open={successOpen}
+        onClose={() => {
+          setSuccessOpen(false);
+          resetAndClose();
+        }}
+        title="Timetable entry added"
+        description="The timetable entry has been successfully added."
+      />
+    </div>
   );
 }

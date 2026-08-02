@@ -1,5 +1,4 @@
 "use client";
-import React, { useState } from "react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import {
@@ -22,7 +21,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-// import EditStudentDialog from "./EditStudentDialog";
+import {
+  formatClassSection,
+  formatDisplayDate,
+} from "@/modules/students/utils/formatters";
 
 type Props = {
   students: Student[];
@@ -36,6 +38,29 @@ type Props = {
   onView?: (id: string) => void;
   onEdit?: (id: string) => void;
 };
+
+function getPageNumbers(page: number, totalPages: number) {
+  const pages: (number | "ellipsis")[] = [];
+  const maxVisiblePages = 5;
+
+  if (totalPages <= maxVisiblePages) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+    return pages;
+  }
+
+  pages.push(1);
+  if (page > 3) pages.push("ellipsis");
+
+  const start = Math.max(2, page - 1);
+  const end = Math.min(totalPages, page + 1);
+  for (let i = start; i <= end; i++) {
+    if (i > 1 && i < totalPages) pages.push(i);
+  }
+
+  if (page < totalPages - 2) pages.push("ellipsis");
+  pages.push(totalPages);
+  return pages;
+}
 
 export default function StudentsTable({
   students,
@@ -52,40 +77,6 @@ export default function StudentsTable({
   const totalCount = total || students.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const showPagination = totalCount > pageSize && totalPages > 1;
-  const getPageNumbers = () => {
-    const pages: (number | "ellipsis")[] = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      if (page > 3) {
-        pages.push("ellipsis");
-      }
-
-      const start = Math.max(2, page - 1);
-      const end = Math.min(totalPages - 1, page + 1);
-
-      for (let i = start; i <= end; i++) {
-        if (i > 1 && i < totalPages) {
-          pages.push(i);
-        }
-      }
-
-      if (page < totalPages - 2) {
-        pages.push("ellipsis");
-      }
-
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-  const [open, setOpen] = useState(false);
 
   if (loading) {
     return (
@@ -137,9 +128,6 @@ export default function StudentsTable({
               <TableHead className="text-left py-4 hidden lg:table-cell">
                 Created
               </TableHead>
-              <TableHead className="text-left py-4 hidden lg:table-cell">
-                Fees Status
-              </TableHead>
               <TableHead className="text-right py-4 pr-10">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -159,9 +147,10 @@ export default function StudentsTable({
                     <div className="w-12 h-12">
                       <Image
                         src={
+                          s.photoUrl ||
                           "https://i.pinimg.com/736x/2a/bd/c4/2abdc427589317e312e55100ac612ace.jpg"
                         }
-                        alt="Avatar"
+                        alt={s.name ? `${s.name} avatar` : "Avatar"}
                         width={72}
                         height={72}
                         className="rounded-full h-full w-full object-cover"
@@ -170,34 +159,21 @@ export default function StudentsTable({
                     <div className="flex flex-col text-left">
                       <div className="text-[14px]">{s.name ?? "-"}</div>
                       <div className="text-[12px] text-[#737373]">
-                        Id-{s.id.slice(0, 8) ?? "-"}
+                        Id-{s.id.slice(0, 8)}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell className="py-3 hidden lg:table-cell">
-                  <div className=" flex">
+                  <div className="flex">
                     <div className="border border-[#D7E3FC] max-w-full px-2 py-1 rounded-full">
-                      {s.className
-                        ? `${s.className}${s.section ? ` - ${s.section}` : ""}`
-                        : "-"}
+                      {formatClassSection(s.className, s.section, "-")}
                     </div>
                   </div>
                 </TableCell>
 
                 <TableCell className="py-3 hidden lg:table-cell">
-                  {new Intl.DateTimeFormat(undefined, {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }).format(new Date(s.createdAt))}
-                </TableCell>
-                <TableCell className="py-3 hidden lg:table-cell">
-                  <div className=" flex">
-                    <div className="border border-[#16A34A] bg-[#DCFCE7] text-[12px] font-[600] max-w-full px-2 py-1 rounded-full">
-                      paid
-                    </div>
-                  </div>
+                  {formatDisplayDate(s.createdAt)}
                 </TableCell>
 
                 <TableCell className="py-3 flex justify-end pr-6">
@@ -228,13 +204,13 @@ export default function StudentsTable({
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    onClick={() => onPageChange(Math.max(1, (page || 1) - 1))}
-                    disabled={(page || 1) <= 1}
+                    onClick={() => onPageChange(Math.max(1, page - 1))}
+                    disabled={page <= 1}
                     className="cursor-pointer"
                   />
                 </PaginationItem>
 
-                {getPageNumbers().map((pageNumber, idx) => (
+                {getPageNumbers(page, totalPages).map((pageNumber, idx) => (
                   <PaginationItem key={idx}>
                     {pageNumber === "ellipsis" ? (
                       <PaginationEllipsis />
@@ -253,9 +229,9 @@ export default function StudentsTable({
                 <PaginationItem>
                   <PaginationNext
                     onClick={() =>
-                      onPageChange(Math.min(totalPages, (page || 1) + 1))
+                      onPageChange(Math.min(totalPages, page + 1))
                     }
-                    disabled={(page || 1) >= totalPages}
+                    disabled={page >= totalPages}
                     className="cursor-pointer"
                   />
                 </PaginationItem>

@@ -57,7 +57,11 @@ export async function fetchTeachers(
     const phone = (itObj.phone ?? user.phone ?? null) as string | null;
 
     let subjects: string[] | null = null;
-    if (Array.isArray(itObj.subjects)) {
+    if (Array.isArray(itObj.subjectsSpeciality)) {
+      subjects = (itObj.subjectsSpeciality as unknown[])
+        .map((s) => (typeof s === "string" ? s : null))
+        .filter(Boolean) as string[];
+    } else if (Array.isArray(itObj.subjects)) {
       subjects = (itObj.subjects as unknown[])
         .map((s) =>
           s && typeof s === "object"

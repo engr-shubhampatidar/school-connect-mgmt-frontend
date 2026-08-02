@@ -154,6 +154,20 @@ export default function ClassOverviewContainer() {
     };
   }, [clsId]);
 
+  const reloadTimetable = async () => {
+    if (!clsId) return;
+    setIsLoadingTimetable(true);
+    setTimetableError(null);
+    try {
+      const data = await fetchTimetable(clsId);
+      setTimetableItems((data ?? []) as ClassTimetableEntry[]);
+    } catch {
+      setTimetableError("Failed to load timetable. Please try again.");
+    } finally {
+      setIsLoadingTimetable(false);
+    }
+  };
+
   if (isLoadingDetails && !details && !detailsError) {
     return <ClassOverviewSkeleton />;
   }
@@ -170,7 +184,9 @@ export default function ClassOverviewContainer() {
       details={details}
       isLoadingDetails={isLoadingDetails}
       detailsError={detailsError}
+      classId={clsId}
       onReloadSubjects={reloadSubjects}
+      onReloadTimetable={reloadTimetable}
       onReloadDetails={reloadDetails}
     />
   );

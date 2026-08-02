@@ -197,12 +197,14 @@ export default function DefaultSelect({
   onChange,
   placeholder = "Select",
   className = "w-full bg-transparent border border-[#D7E3FC]",
+  disabled = false,
 }: {
   options: Option[];
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }) {
   const EMPTY_ITEM_VALUE = "__EMPTY__";
 
@@ -211,8 +213,8 @@ export default function DefaultSelect({
   };
 
   return (
-    <Select value={value} onValueChange={handleChange}>
-      <SelectTrigger className={className}>
+    <Select value={value} onValueChange={handleChange} disabled={disabled}>
+      <SelectTrigger className={className} disabled={disabled}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

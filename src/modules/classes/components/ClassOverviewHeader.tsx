@@ -96,7 +96,7 @@ export default function ClassOverviewHeader({
               {isLoading ? (
                 <span className="inline-block h-4 w-24 bg-slate-200 rounded animate-pulse" />
               ) : (
-                data?.roomNo ?? "—"
+                data?.room ?? data?.roomNo ?? "—"
               )}
             </p>
           </div>

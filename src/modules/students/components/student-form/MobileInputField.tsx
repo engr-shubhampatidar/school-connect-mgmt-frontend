@@ -1,28 +1,32 @@
 "use client";
 
 import React from "react";
-import { Controller, type Control, type FieldPath } from "react-hook-form";
+import {
+  Controller,
+  type Control,
+  type FieldPath,
+  type FieldValues,
+} from "react-hook-form";
 import { FormField, FormLabel, FormMessage, FormControl } from "@/components/ui/Form";
 import {
   cleanDigits,
   formatMobileDisplay,
 } from "@/modules/students/utils/formatters";
-import type { UpdateStudentForm } from "@/modules/students/schemas/updateStudentSchema";
 
-type Props = {
-  control: Control<UpdateStudentForm>;
-  name: FieldPath<UpdateStudentForm>;
+type Props<T extends FieldValues> = {
+  control: Control<T>;
+  name: FieldPath<T>;
   label: string;
   error?: string;
 };
 
 /** +91 prefix with 10 digits shown as "XXXXX XXXXX". */
-export default function MobileInputField({
+export default function MobileInputField<T extends FieldValues>({
   control,
   name,
   label,
   error,
-}: Props) {
+}: Props<T>) {
   return (
     <FormField>
       <FormLabel>{label}</FormLabel>

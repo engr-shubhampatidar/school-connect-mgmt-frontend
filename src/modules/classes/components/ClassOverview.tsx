@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react";
 import React from "react";
 import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
 import ClassOverviewHeader from "./ClassOverviewHeader";
 import AddSubjectToClassDialog from "./AddSubjectToClassDialog";
 import SubjectAllocationTable, {
@@ -13,24 +12,6 @@ import {
   type ClassTimetableEntry,
 } from "@/modules/timetable";
 import type { ClassDashboardDetails } from "@/modules/classes/types/classes";
-
-interface ClassMeta {
-  name: string;
-  academicYear: string;
-  teacher: { name: string; avatar?: string };
-  totalStudents: number;
-  room: string;
-  status: "Active" | "Inactive";
-}
-
-const CLASS_META: ClassMeta = {
-  name: "Class 10 – Section A",
-  academicYear: "2025–2026",
-  teacher: { name: "Mr. Anderson", avatar: undefined },
-  totalStudents: 34,
-  room: "Building A, Room-305",
-  status: "Active",
-};
 
 interface Props {
   subjects: ClassSubjectAllocation[];
@@ -68,6 +49,8 @@ export default function ClassOverview({
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [isTimetableDialogOpen, setIsTimetableDialogOpen] =
     React.useState(false);
+  const resolvedClassId = classId ?? details?.id;
+
   return (
     <div className="space-y-6">
       <ClassOverviewHeader
@@ -93,7 +76,8 @@ export default function ClassOverview({
           </Button>
           <AddSubjectToClassDialog
             open={isDialogOpen}
-            classId={classId ?? details?.id}
+            classId={resolvedClassId}
+            allocatedSubjectIds={subjects.map((s) => s.subjectId)}
             onClose={() => setIsDialogOpen(false)}
             onSuccess={() => {
               setIsDialogOpen(false);
@@ -106,14 +90,15 @@ export default function ClassOverview({
             items={subjects}
             isLoading={isLoading}
             error={error ?? null}
-            room={CLASS_META.room}
           />
         </div>
       </div>
 
-      <Card>
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium">Subject Time Timetable</h3>
+      <div className="bg-white rounded-lg border border-[#D7E3FC]">
+        <div className="flex items-center justify-between px-4 py-3">
+          <h3 className="text-[24px] font-semibold ">
+            Subject Time Timetable
+          </h3>
           <Button
             variant="dark"
             className="flex items-center gap-2 cursor-pointer"
@@ -123,26 +108,30 @@ export default function ClassOverview({
           </Button>
           <AddTimetableDialog
             open={isTimetableDialogOpen}
-            classId={classId ?? details?.id}
+            classId={resolvedClassId}
+            allocatedSubjects={subjects}
+            timetableItems={timetableItems}
+            room={details?.room ?? details?.roomNo ?? null}
             onClose={() => setIsTimetableDialogOpen(false)}
             onSuccess={() => {
-              setIsTimetableDialogOpen(false);
               onReloadTimetable?.();
             }}
           />
         </div>
 
-        <div className="mt-4">
+        <div className="px-0">
           <TimetableList
             items={timetableItems ?? []}
             isLoading={isLoadingTimetable ?? false}
             selectedDay={selectedDay}
           />
           {timetableError ? (
-            <div className="mt-2 text-sm text-red-600">{timetableError}</div>
+            <div className="mt-2 px-4 pb-4 text-sm text-red-600">
+              {timetableError}
+            </div>
           ) : null}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

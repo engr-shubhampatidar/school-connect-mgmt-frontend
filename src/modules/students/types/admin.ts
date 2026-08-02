@@ -19,20 +19,30 @@ export type StudentsResponse = {
 export type StudentsQuery = {
   search?: string;
   classId?: string;
-  status?: string;
   page?: number;
   pageSize?: number;
+};
+
+export type StudentMonthlyAttendance = {
+  year: number;
+  month: number;
+  present: number;
+  absent: number;
+  leave: number;
+  percentage: number;
 };
 
 /** GET /admin/students/{id} response */
 export interface StudentDetails {
   id: string;
   name: string;
-  email: string;
-  studentId: string;
+  email: string | null;
+  studentId: string | null;
   phoneNo: string | null;
   gender: string | null;
   admissionDate: string | null;
+  className: string | null;
+  section: string | null;
   aadhaarNumber: string | null;
   address: string | null;
   fatherName: string | null;
@@ -44,10 +54,8 @@ export interface StudentDetails {
   bloodGroup: string | null;
   medicalNotes: string | null;
   dob: string | null;
-  /** Optional class fields when API includes them */
+  attendance: StudentMonthlyAttendance | null;
+  /** Present on some update-loader payloads */
   classId?: string | null;
-  className?: string | null;
   category?: string | null;
-  /** @deprecated Prefer aadhaarNumber */
-  aadhaar?: string | null;
 }

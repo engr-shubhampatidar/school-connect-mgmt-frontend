@@ -1,93 +1,76 @@
 "use client";
+
+import dynamic from "next/dynamic";
+import { useCallback, useEffect, useState } from "react";
 import {
-  CreateStudentDialog,
-  UpdateStudentDialog,
   StudentsFilterBar,
   type StudentsFilters,
   StudentsTable,
   StudentsPageSkeleton,
-  fetchStudents,
-  type Student,
-  type StudentsQuery,
+  useStudentsQuery,
+  useInvalidateStudents,
+  STUDENTS_PAGE_SIZE,
 } from "@/modules/students";
-import { useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { type ClassItem, fetchClasses } from "@/modules/classes";
 import { useRouter } from "next/navigation";
 
+const CreateStudentDialog = dynamic(
+  () => import("@/modules/students/components/CreateStudentDialog"),
+  { ssr: false },
+);
+
+const UpdateStudentDialog = dynamic(
+  () => import("@/modules/students/components/UpdateStudentDialog"),
+  { ssr: false },
+);
+
 export default function AdminStudentsPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState<number>(0);
-
   const router = useRouter();
+  const { invalidateLists, invalidateDetail } = useInvalidateStudents();
 
-  const [page, setPage] = useState<number>(1);
-  const [pageSize] = useState<number>(10);
-
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<StudentsFilters>({});
-  const initialMountRef = useRef(true);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [creatingOpen, setCreatingOpen] = useState(false);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
-  const load = useCallback(async (q: StudentsQuery) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const resp = await fetchStudents(q);
-      setStudents(resp.students);
-      setTotal(resp.total ?? 0);
-    } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Failed to load students");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const query = {
+    ...filters,
+    page,
+    pageSize: STUDENTS_PAGE_SIZE,
+  };
+
+  const { data, isLoading, isFetching, error, refetch } =
+    useStudentsQuery(query);
 
   useEffect(() => {
     let mounted = true;
-    const q: StudentsQuery = { ...filters, page, pageSize };
     (async () => {
       try {
-        await load(q);
+        const resp = await fetchClasses({ pageSize: 1000 });
         if (!mounted) return;
-        if (initialMountRef.current) {
-          initialMountRef.current = false;
-          try {
-            const resp = await fetchClasses({ pageSize: 1000 });
-            if (!mounted) return;
-            setClasses(resp.classes ?? []);
-          } catch {
-            // ignore — keep empty
-          }
-        }
+        setClasses(resp.classes ?? []);
       } catch {
-        // load already handles errors
+        // keep empty class list
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [filters, page, pageSize, load]);
+  }, []);
 
-  const handleApply = useCallback(
-    (f: StudentsFilters) => {
-      setFilters(f);
-      setPage(1);
-    },
-    [setFilters, setPage],
-  );
-
-  const handleClear = useCallback(() => {
-    setFilters({});
+  const handleApply = useCallback((f: StudentsFilters) => {
+    setFilters(f);
     setPage(1);
-  }, [setFilters, setPage]);
+  }, []);
 
-  const [creatingOpen, setCreatingOpen] = useState(false);
-  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const students = data?.students ?? [];
+  const total = data?.total ?? 0;
+  const errorMessage =
+    error instanceof Error ? error.message : error ? "Failed to load students" : null;
 
-  const isInitialLoad = loading && students.length === 0 && !error;
+  const isInitialLoad = isLoading && students.length === 0 && !errorMessage;
 
   if (isInitialLoad) {
     return <StudentsPageSkeleton />;
@@ -109,14 +92,16 @@ export default function AdminStudentsPage() {
           <Button variant="dark" onClick={() => setCreatingOpen(true)}>
             + Add Student
           </Button>
-          <CreateStudentDialog
-            open={creatingOpen}
-            classes={classes}
-            onClose={() => setCreatingOpen(false)}
-            onCreated={() => {
-              void load({ ...filters, page, pageSize });
-            }}
-          />
+          {creatingOpen ? (
+            <CreateStudentDialog
+              open={creatingOpen}
+              classes={classes}
+              onClose={() => setCreatingOpen(false)}
+              onCreated={() => {
+                void invalidateLists();
+              }}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -125,31 +110,37 @@ export default function AdminStudentsPage() {
           classes={classes}
           initial={filters}
           onApply={handleApply}
-          onClear={handleClear}
         />
       </div>
 
       <StudentsTable
         students={students}
-        loading={loading}
-        error={error}
+        loading={isFetching}
+        error={errorMessage}
         total={total}
         page={page}
-        pageSize={pageSize}
-        onRetry={() => load({ ...filters, page, pageSize })}
-        onPageChange={(p) => setPage(p)}
+        pageSize={STUDENTS_PAGE_SIZE}
+        onRetry={() => {
+          void refetch();
+        }}
+        onPageChange={setPage}
         onView={(id) => router.push(`/admin/students/profile/${id}`)}
-        onEdit={(id) => setEditingStudentId(id)}
+        onEdit={setEditingStudentId}
       />
 
-      <UpdateStudentDialog
-        open={Boolean(editingStudentId)}
-        studentId={editingStudentId}
-        onClose={() => setEditingStudentId(null)}
-        onUpdated={() => {
-          void load({ ...filters, page, pageSize });
-        }}
-      />
+      {editingStudentId ? (
+        <UpdateStudentDialog
+          open={Boolean(editingStudentId)}
+          studentId={editingStudentId}
+          onClose={() => setEditingStudentId(null)}
+          onUpdated={() => {
+            void invalidateLists();
+            if (editingStudentId) {
+              void invalidateDetail(editingStudentId);
+            }
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -1,10 +1,7 @@
 import { z } from "zod";
+import { GENDER_VALUES, optionalMobile } from "./shared";
 
-export const GENDER_OPTIONS = [
-  { id: "MALE", name: "Male" },
-  { id: "FEMALE", name: "Female" },
-  { id: "OTHER", name: "Other" },
-] as const;
+export { GENDER_OPTIONS } from "./shared";
 
 const optionalEmail = z
   .string()
@@ -12,20 +9,12 @@ const optionalEmail = z
   .transform((v) => (v === "" ? undefined : v))
   .pipe(z.string().email("Invalid email address").optional());
 
-const optionalPhone = z
-  .string()
-  .trim()
-  .transform((v) => (v === "" ? undefined : v))
-  .pipe(
-    z.string().min(10, "Phone number must be 10 digits").max(15).optional(),
-  );
-
 export const createStudentSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   classId: z.string().min(1, "Class is required"),
   email: optionalEmail,
-  phoneNumber: optionalPhone,
+  phoneNumber: optionalMobile,
   profileUrl: z
     .string()
     .optional()
@@ -43,7 +32,7 @@ export const createStudentSchema = z.object({
   gender: z
     .string()
     .min(1, "Gender is required")
-    .pipe(z.enum(["MALE", "FEMALE", "OTHER"])),
+    .pipe(z.enum(GENDER_VALUES)),
 });
 
 export type CreateStudentValues = z.infer<typeof createStudentSchema>;

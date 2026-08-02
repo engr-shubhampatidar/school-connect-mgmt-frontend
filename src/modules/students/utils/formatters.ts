@@ -2,6 +2,24 @@ export function cleanDigits(value: string) {
   return value.replace(/\D+/g, "");
 }
 
+/** Formats an ISO date for profile display, e.g. "14 Jun 2024". */
+export function formatDisplayDate(iso?: string | null): string {
+  if (!iso) return "-";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Title-cases an uppercase enum-like value, e.g. "MALE" → "Male". */
+export function formatLabel(value?: string | null): string {
+  if (!value) return "-";
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
+
 /** Normalize a phone for form display: digits only, keep last 10 if longer (e.g. +91…). */
 export function normalizeMobileForForm(value?: string | null): string {
   const digits = cleanDigits(value ?? "");
@@ -22,6 +40,28 @@ export function formatAadharDisplay(value: string): string {
   return digits.replace(/(\d{4})(\d{0,4})(\d{0,4})/, (_, p1, p2, p3) =>
     [p1, p2, p3].filter(Boolean).join(" "),
   );
+}
+
+/** Class + optional section label for chips/tables. */
+export function formatClassSection(
+  className?: string | null,
+  section?: string | null,
+  emptyLabel = "Not Assigned",
+): string {
+  if (!className) return emptyLabel;
+  return section ? `${className} - ${section}` : className;
+}
+
+/** Safe mobile display for read-only UI; empty → "-". */
+export function displayMobile(value?: string | null): string {
+  if (!value) return "-";
+  return formatMobileDisplay(value) || "-";
+}
+
+/** Safe Aadhaar display for read-only UI; empty → "-". */
+export function displayAadhaar(value?: string | null): string {
+  if (!value) return "-";
+  return formatAadharDisplay(value) || "-";
 }
 
 export function toLower(value: string) {
