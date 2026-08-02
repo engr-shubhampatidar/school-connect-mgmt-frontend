@@ -39,6 +39,16 @@ export async function updateTimetableEntry(
   return res.data;
 }
 
+export async function updateTimetableBySubject(
+  classId: string,
+  subjectId: string,
+  payload: UpdateTimetableEntryDto,
+): Promise<TimetableEntryDto> {
+  const url = `${ADMIN_API.CLASSES}/${classId}/timetable/subject/${subjectId}`;
+  const res = await API.patch<TimetableEntryDto>(url, payload);
+  return res.data;
+}
+
 export async function deleteTimetableEntry(
   classId: string,
   teId: string,
