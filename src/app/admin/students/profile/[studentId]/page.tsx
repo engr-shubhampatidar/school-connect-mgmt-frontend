@@ -8,9 +8,32 @@ import {
   StudentProfileDocuments,
   StudentProfileSkeleton,
 } from "@/modules/students";
+import {
+  formatAadharDisplay,
+  formatDisplayDate,
+  formatLabel,
+  formatMobileDisplay,
+} from "@/modules/students/utils/formatters";
 import Image from "next/image";
 import { Card } from "@/components/ui";
 import { CalendarCheck } from "lucide-react";
+
+function classSectionLabel(student: StudentDetails | null) {
+  if (!student?.className) return "Not Assigned";
+  return student.section
+    ? `${student.className} - ${student.section}`
+    : student.className;
+}
+
+function displayMobile(value?: string | null) {
+  if (!value) return "-";
+  return formatMobileDisplay(value) || "-";
+}
+
+function displayAadhaar(value?: string | null) {
+  if (!value) return "-";
+  return formatAadharDisplay(value) || "-";
+}
 
 export default function StudentDetailsPage() {
   const { studentId } = useParams();
@@ -23,9 +46,8 @@ export default function StudentDetailsPage() {
       try {
         const data = await getStudentById(studentId as string);
         setStudent(data);
-        console.log(student);
       } catch {
-        // igrone it
+        // ignore
       } finally {
         setLoading(false);
       }
@@ -36,12 +58,15 @@ export default function StudentDetailsPage() {
 
   if (loading) return <StudentProfileSkeleton />;
 
+  const attendance = student?.attendance;
+  const attendancePct = attendance?.percentage ?? 0;
+
   return (
     <div className="p-3 md:p-6 ">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h1 className="text-[20px] lg:text-[24px] font-[600] text-[#021034]">
-            {`About ${student?.name ? student?.name : "Student"}`}
+            {`About ${student?.name ? student.name : "Student"}`}
           </h1>
           <p className="mt-1 text-[13px] lg:text-[14px] text-[#737373]">
             Manage, Student Profiles, status and Enrollment
@@ -64,20 +89,11 @@ export default function StudentDetailsPage() {
           </div>
           <div className="text-[13px] lg:text-[14px] font-[400] text-[#737373]">
             Student ID:{" "}
-            <span className="text-[#021034]">{student?.id ?? "-"}</span>
+            <span className="text-[#021034]">{student?.studentId ?? "-"}</span>
           </div>
           <div className="flex gap-2">
             <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 border rounded-full border-[#D7E3FC] bg-[#F5F9FF]">
-              {student?.name}
-            </p>
-            <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 flex items-center justify-center  rounded-full bg-[#DBEAFF] text-[#1E3A8A]">
-              {student ? "Not Assigned" : "Not Assigned"}
-            </p>
-            <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 flex items-center justify-center  rounded-full bg-[#F4E8FF] text-[#6930B3]">
-              {student ? "2026-27" : "2026-27"}
-            </p>
-            <p className="text-[8px] lg:text-[10px] font-[600] py-[3px] px-2 flex items-center justify-center  rounded-full bg-[#DCFCE6] text-[#16A34A]">
-              {student ? "N/A" : "N/A"}
+              {classSectionLabel(student)}
             </p>
           </div>
         </div>
@@ -85,15 +101,11 @@ export default function StudentDetailsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 mb-[20px]">
         <section className=" flex flex-col gap-6 col-span-2">
           <div className="w-full max-w-full bg-white rounded-xl border border-blue-200 p-[16px]">
-            {/* Title */}
             <h2 className="text-[16px] lg:text-[20px] font-semibold text-gray-900 mb-5">
               Personal Information
             </h2>
 
-            {/* Grid */}
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-              {/* Full Name */}
-
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Full Name
@@ -103,25 +115,22 @@ export default function StudentDetailsPage() {
                 </p>
               </div>
 
-              {/* Date of Birth */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Date of Birth
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.dob ?? "-"}
+                  {formatDisplayDate(student?.dob)}
                 </p>
               </div>
 
-              {/* Gender */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">Gender</p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.gender ?? "-"}
+                  {formatLabel(student?.gender)}
                 </p>
               </div>
 
-              {/* Blood Group */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Blood Group
@@ -131,37 +140,24 @@ export default function StudentDetailsPage() {
                 </p>
               </div>
 
-              {/* Category */}
-              <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
-                <p className="text-xs lg:text-sm text-gray-500 mb-1">
-                  Category
-                </p>
-                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.category ?? "-"}
-                </p>
-              </div>
-
-              {/* Aadhaar Number */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Aadhaar Number
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.aadhaarNumber ?? student?.aadhaar ?? "-"}
+                  {displayAadhaar(student?.aadhaarNumber)}
                 </p>
               </div>
 
-              {/* Phone */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Phone No.
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.phoneNo ?? "-"}
+                  {displayMobile(student?.phoneNo)}
                 </p>
               </div>
 
-              {/* Email */}
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Email Address
@@ -171,30 +167,45 @@ export default function StudentDetailsPage() {
                 </p>
               </div>
 
-              {/* Address (Full Width) */}
               <div className="col-span-2 border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">Address</p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
                   {student?.address ?? "-"}
                 </p>
               </div>
+
+              <div className="col-span-2 border border-blue-200 rounded-lg p-3 bg-blue-50">
+                <p className="text-xs lg:text-sm text-gray-500 mb-1">
+                  Medical Notes
+                </p>
+                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
+                  {student?.medicalNotes ?? "-"}
+                </p>
+              </div>
             </div>
           </div>
 
           <div className="w-full max-w-full bg-white rounded-xl border border-blue-200 p-[16px]">
-            {/* Title */}
             <h2 className="text-lg lg:text-[20px] font-semibold text-gray-900 mb-5">
               Parent / Guardian Information
             </h2>
 
-            {/* Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Father Name
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
                   {student?.fatherName ?? "-"}
+                </p>
+              </div>
+
+              <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                <p className="text-xs lg:text-sm text-gray-500 mb-1">
+                  Father Contact
+                </p>
+                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
+                  {displayMobile(student?.fatherMobile)}
                 </p>
               </div>
 
@@ -209,19 +220,10 @@ export default function StudentDetailsPage() {
 
               <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
                 <p className="text-xs lg:text-sm text-gray-500 mb-1">
-                  Parent Contact
-                </p>
-                <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.fatherMobile ?? "-"}
-                </p>
-              </div>
-
-              <div className="border border-blue-200 rounded-lg p-3 bg-blue-50">
-                <p className="text-xs lg:text-sm text-gray-500 mb-1">
                   Mother Contact
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.motherMobile ?? "-"}
+                  {displayMobile(student?.motherMobile)}
                 </p>
               </div>
 
@@ -239,18 +241,9 @@ export default function StudentDetailsPage() {
                   Guardian Contact
                 </p>
                 <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                  {student?.guardianMobile ?? "-"}
+                  {displayMobile(student?.guardianMobile)}
                 </p>
               </div>
-            </div>
-            {/* Address (Full Width) */}
-            <div className="c border border-blue-200 rounded-lg p-3 bg-blue-50 mt-4">
-              <p className="text-xs lg:text-sm text-gray-500 mb-1">
-                Medical Notes
-              </p>
-              <p className="text-[11px] lg:text-[14px] font-[500] text-gray-900">
-                {student?.medicalNotes ?? "-"}
-              </p>
             </div>
           </div>
         </section>
@@ -262,22 +255,7 @@ export default function StudentDetailsPage() {
             <div className="grid grid-cols-2 w-full">
               <div>
                 <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  Academic Number
-                </p>
-                <div className=" border-b border-blue-200 w-full "></div>
-
-                <p className="font-[500] text-[14px] text-[#021034] py-4">
                   Class & Section
-                </p>
-                <div className=" border-b border-blue-200 w-full "></div>
-
-                <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  Stream
-                </p>
-                <div className=" border-b border-blue-200 w-full "></div>
-
-                <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  Medium
                 </p>
                 <div className=" border-b border-blue-200 w-full "></div>
 
@@ -288,21 +266,11 @@ export default function StudentDetailsPage() {
               </div>
               <div className="flex flex-col items-end  ">
                 <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  ADM2024042
-                </p>
-                <div className=" border-b border-blue-200 w-full "></div>
-                <p className="font-[500] text-[14px] text-[#021034] py-4">10</p>
-                <div className=" border-b border-blue-200 w-full "></div>
-                <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  Science
+                  {classSectionLabel(student)}
                 </p>
                 <div className=" border-b border-blue-200 w-full "></div>
                 <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  English
-                </p>
-                <div className=" border-b border-blue-200 w-full "></div>
-                <p className="font-[500] text-[14px] text-[#021034] py-4">
-                  10 April 2025
+                  {formatDisplayDate(student?.admissionDate)}
                 </p>
                 <div className=" border-b border-blue-200 w-full "></div>
               </div>
@@ -311,14 +279,16 @@ export default function StudentDetailsPage() {
           <section className="flex flex-col  ">
             <div className="w-full max-w-full bg-white rounded-xl border border-blue-200 ">
               <h1 className="text-[#021034] font-[600] text-[20px] font-semibold mb-4 p-[16px] flex items-center justify-between">
-                Academic Info
+                Attendance
                 <CalendarCheck className="text-[#737373]" />
               </h1>
               <div className="border-b border-blue-200"></div>
               <div className="space-y-8 p-5">
                 <div className="py-5">
                   <div className="flex items-end gap-2">
-                    <h1 className="text-5xl font-bold text-slate-900">94.5%</h1>
+                    <h1 className="text-5xl font-bold text-slate-900">
+                      {attendancePct}%
+                    </h1>
 
                     <span className="mb-1 text-sm font-medium text-green-600">
                       This Month Attendance
@@ -326,7 +296,12 @@ export default function StudentDetailsPage() {
                   </div>
 
                   <div className="mt-6 h-5 w-full overflow-hidden rounded-full bg-blue-100">
-                    <div className="h-full w-[80%] rounded-full bg-[#09153E]"></div>
+                    <div
+                      className="h-full rounded-full bg-[#09153E] transition-all"
+                      style={{
+                        width: `${Math.min(Math.max(attendancePct, 0), 100)}%`,
+                      }}
+                    ></div>
                   </div>
                 </div>
 
@@ -340,7 +315,7 @@ export default function StudentDetailsPage() {
                     </div>
 
                     <span className="rounded-full bg-gray-100 px-4 py-1 text-sm font-semibold text-slate-700">
-                      85 Days
+                      {attendance?.present ?? 0} Days
                     </span>
                   </div>
 
@@ -353,14 +328,23 @@ export default function StudentDetailsPage() {
                     </div>
 
                     <span className="rounded-full bg-gray-100 px-4 py-1 text-sm font-semibold text-slate-700">
-                      05 Days
+                      {attendance?.absent ?? 0} Days
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="h-3 w-3 rounded-full bg-amber-500"></span>
+                      <span className="text-lg font-medium text-slate-700">
+                        Leave
+                      </span>
+                    </div>
+
+                    <span className="rounded-full bg-gray-100 px-4 py-1 text-sm font-semibold text-slate-700">
+                      {attendance?.leave ?? 0} Days
                     </span>
                   </div>
                 </div>
-
-                <button className="w-full rounded-lg border border-blue-200 py-3 text-lg font-semibold text-slate-900 transition hover:bg-blue-50">
-                  View Full Attendance
-                </button>
               </div>
             </div>
           </section>
@@ -379,12 +363,3 @@ export default function StudentDetailsPage() {
     </div>
   );
 }
-
-// function Info({ title, value }: { title: string; value?: string | null }) {
-//   return (
-//     <div className="rounded-lg border p-4">
-//       <p className="text-sm text-gray-500">{title}</p>
-//       <p className="mt-1 text-lg font-medium">{value || "-"}</p>
-//     </div>
-//   );
-// }

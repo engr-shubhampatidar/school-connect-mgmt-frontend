@@ -8,6 +8,7 @@ export type StudentProfileResponse = StudentDetails & {
   /** Legacy snake_case fallbacks some environments may still return */
   phone_no?: string;
   admission_date?: string | null;
+  aadhaar?: string | null;
   aadhar?: string;
   class_id?: string | { id?: string; name?: string; className?: string };
   class_name?: string;

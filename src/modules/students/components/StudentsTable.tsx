@@ -137,9 +137,6 @@ export default function StudentsTable({
               <TableHead className="text-left py-4 hidden lg:table-cell">
                 Created
               </TableHead>
-              <TableHead className="text-left py-4 hidden lg:table-cell">
-                Fees Status
-              </TableHead>
               <TableHead className="text-right py-4 pr-10">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -191,13 +188,6 @@ export default function StudentsTable({
                     month: "short",
                     day: "numeric",
                   }).format(new Date(s.createdAt))}
-                </TableCell>
-                <TableCell className="py-3 hidden lg:table-cell">
-                  <div className=" flex">
-                    <div className="border border-[#16A34A] bg-[#DCFCE7] text-[12px] font-[600] max-w-full px-2 py-1 rounded-full">
-                      paid
-                    </div>
-                  </div>
                 </TableCell>
 
                 <TableCell className="py-3 flex justify-end pr-6">

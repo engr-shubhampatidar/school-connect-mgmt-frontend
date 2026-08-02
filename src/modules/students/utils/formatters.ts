@@ -2,6 +2,24 @@ export function cleanDigits(value: string) {
   return value.replace(/\D+/g, "");
 }
 
+/** Formats an ISO date for profile display, e.g. "14 Jun 2024". */
+export function formatDisplayDate(iso?: string | null): string {
+  if (!iso) return "-";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Title-cases an uppercase enum-like value, e.g. "MALE" → "Male". */
+export function formatLabel(value?: string | null): string {
+  if (!value) return "-";
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
+
 /** Normalize a phone for form display: digits only, keep last 10 if longer (e.g. +91…). */
 export function normalizeMobileForForm(value?: string | null): string {
   const digits = cleanDigits(value ?? "");

@@ -1,4 +1,8 @@
-import type { StudentsQuery, StudentsResponse } from "@/modules/students/types/admin";
+import type {
+  StudentDetails,
+  StudentsQuery,
+  StudentsResponse,
+} from "@/modules/students/types/admin";
 import { ADMIN_API, STUDENT_API } from "@/config/api-routes";
 import API from "@/services/axios";
 
@@ -57,13 +61,8 @@ export async function fetchStudents(
   };
 }
 
-export async function getStudentById(id: string) {
-  console.log("BASE URL:", API.defaults.baseURL);
-  const url = `${ADMIN_API.STUDENTS}/${id}`;
-  const res = await API.get(url);
-
-  console.log(res);
-
+export async function getStudentById(id: string): Promise<StudentDetails> {
+  const res = await API.get<StudentDetails>(`${ADMIN_API.STUDENTS}/${id}`);
   return res.data;
 }
 
