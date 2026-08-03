@@ -96,9 +96,16 @@ export default function CreateClassDialog({ open, onClose, onCreated }: Props) {
                   </span>
                   <Input
                     {...form.register("number")}
-                    placeholder="e.g. 5"
+                    placeholder="e.g. 5 (1–12)"
                     inputMode="numeric"
                     className="rounded-l-none"
+                    onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                      const el = e.currentTarget as HTMLInputElement;
+                      el.value = el.value.replace(/\D/g, "").slice(0, 2);
+                      form.setValue("number", el.value, {
+                        shouldValidate: true,
+                      });
+                    }}
                   />
                 </div>
                 <FormMessage>
@@ -114,11 +121,17 @@ export default function CreateClassDialog({ open, onClose, onCreated }: Props) {
                   </span>
                   <Input
                     {...form.register("section")}
-                    placeholder="Optional (A)"
+                    placeholder="Optional (A–E)"
+                    maxLength={1}
                     onInput={(e: React.FormEvent<HTMLInputElement>) => {
                       const el = e.currentTarget as HTMLInputElement;
-                      el.value = el.value.toUpperCase().slice(0, 1);
-                      form.setValue("section", el.value);
+                      el.value = el.value
+                        .toUpperCase()
+                        .replace(/[^A-E]/g, "")
+                        .slice(0, 1);
+                      form.setValue("section", el.value, {
+                        shouldValidate: true,
+                      });
                     }}
                     className="rounded-l-none"
                   />

@@ -22,7 +22,12 @@ export async function fetchTeachers(
   const params: Record<string, string | number> = {};
   if (query.search) params.search = query.search;
   if (query.email) params.email = query.email;
-  if (query.subjectId) params.subjectId = query.subjectId;
+  const subjectIds = [
+    ...(query.subjectIds ?? []),
+    ...(query.subjectId ? [query.subjectId] : []),
+  ].filter(Boolean);
+  // Backend accepts repeated or comma-separated subjectIds (specialty filter).
+  if (subjectIds.length) params.subjectIds = subjectIds.join(",");
   if (query.classId) params.classId = query.classId;
   if (query.page) params.page = query.page;
   if (query.pageSize) {
@@ -159,6 +164,8 @@ export async function fetchTeachers(
       }
     }
 
+    const userId = String(itObj.userId ?? user.id ?? "") || undefined;
+
     return {
       id: (itObj.id ?? user.id ?? "") as string,
       name,
@@ -172,6 +179,7 @@ export async function fetchTeachers(
         : null,
       classTeacher,
       invitedAt: (itObj.invitedAt ?? null) as string | null,
+      user: userId ? { id: userId, fullName: name, email, phone } : null,
     } as Teacher;
   });
 

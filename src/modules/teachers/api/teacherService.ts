@@ -25,28 +25,45 @@ function normalizeTeacher(it: {
   id?: string;
   name?: string;
   subjects?: string[] | null;
+  subjectsSpeciality?: string[] | null;
   user?: { id?: string } | null;
+  userId?: string | null;
+  user_id?: string | null;
 } | null): TeacherOption {
   if (!it) return { id: "", name: "" };
+  const specialty = Array.isArray(it.subjectsSpeciality)
+    ? it.subjectsSpeciality
+    : Array.isArray(it.subjects)
+      ? it.subjects
+      : undefined;
+  const userId = it.user_id ?? it.userId ?? it.user?.id;
   return {
     id: String(it.id ?? ""),
     name: String(it.name ?? ""),
-    subjects: Array.isArray(it.subjects) ? it.subjects : undefined,
-    user_id: it.user?.id,
+    subjects: specialty?.filter(Boolean) as string[] | undefined,
+    user_id: userId ? String(userId) : undefined,
   };
 }
 
 export async function getTeachers(search = "", subjectId?: string | null) {
   const res = await adminFetchTeachers({
     search,
-    subjectId: subjectId ?? undefined,
+    subjectIds: subjectId ? [subjectId] : undefined,
+    page: 1,
+    pageSize: 100,
   });
   return (res.teachers ?? []).map(normalizeTeacher);
 }
 
 export async function getNotClassTeachers(search = "") {
   const res = await API.get(ADMIN_API.TEACHERS, {
-    params: { search, availableForClassTeacher: true },
+    params: {
+      search,
+      availableForClassTeacher: true,
+      page: 1,
+      pageSize: 100,
+      limit: 100,
+    },
   });
   const data = res?.data ?? res;
   const items = Array.isArray(data)
@@ -57,14 +74,19 @@ export async function getNotClassTeachers(search = "") {
       string,
       unknown
     >;
+    const nestedUser =
+      o.user && typeof o.user === "object"
+        ? (o.user as { id?: string })
+        : null;
     return normalizeTeacher({
       id: String(o.id ?? o._id ?? ""),
       name: String(o.fullName ?? o.name ?? o.email ?? ""),
       subjects: Array.isArray(o.subjects) ? (o.subjects as string[]) : null,
-      user:
-        o.user && typeof o.user === "object"
-          ? (o.user as { id?: string })
-          : null,
+      subjectsSpeciality: Array.isArray(o.subjectsSpeciality)
+        ? (o.subjectsSpeciality as string[])
+        : null,
+      userId: o.userId ? String(o.userId) : undefined,
+      user: nestedUser,
     });
   });
 }

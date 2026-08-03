@@ -12,10 +12,25 @@ interface Props {
   placeholder?: string;
   selectedLabel?: string | null;
   subjectId?: string | null;
+  /** Which teacher id to emit/match. Create class uses user_id; update class uses profile id. */
+  idKey?: "user_id" | "id";
   fetchTeachers?: (
     search: string,
     subjectId?: string | null,
   ) => Promise<Teacher[]>;
+}
+
+function teacherSelectId(
+  t: Teacher,
+  idKey: "user_id" | "id",
+): string | null {
+  if (idKey === "id") return t.id || null;
+  return t.user_id || null;
+}
+
+function teacherLabel(t: Teacher): string {
+  const specialty = (t.subjects ?? []).filter(Boolean).join(", ");
+  return specialty ? `${t.name} — ${specialty}` : t.name;
 }
 
 export default function SearchableDropdown({
@@ -25,6 +40,7 @@ export default function SearchableDropdown({
   selectedLabel,
   fetchTeachers,
   subjectId,
+  idKey = "user_id",
 }: Props) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<Teacher[]>([]);
@@ -37,6 +53,11 @@ export default function SearchableDropdown({
   useEffect(() => {
     fetchFnRef.current = fetchTeachers ?? getNotClassTeachers;
   }, [fetchTeachers]);
+
+  useEffect(() => {
+    setFetched(false);
+    setOptions([]);
+  }, [subjectId]);
 
   useEffect(() => {
     function onDoc(e: MouseEvent) {
@@ -65,7 +86,8 @@ export default function SearchableDropdown({
         setFetched(true);
         if (!value && selectedLabel) {
           const match = list.find((t) => t.name === selectedLabel);
-          if (match) onChange(match.user_id ?? null);
+          const id = match ? teacherSelectId(match, idKey) : null;
+          if (id) onChange(id);
         }
       })
       .catch(() => {
@@ -79,14 +101,19 @@ export default function SearchableDropdown({
     return () => {
       mounted = false;
     };
-  }, [open, fetched, subjectId, value, selectedLabel, onChange]);
+  }, [open, fetched, subjectId, value, selectedLabel, onChange, idKey]);
 
-  const selected = options.find((o) => o.user_id === value) ?? null;
-  const displayName = selected?.name ?? selectedLabel ?? placeholder;
+  const selected =
+    options.find((o) => teacherSelectId(o, idKey) === value) ?? null;
+  const displayName = selected
+    ? teacherLabel(selected)
+    : (selectedLabel ?? placeholder);
 
-  const filtered = options.filter(
-    (o) => !search || o.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = options.filter((o) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return teacherLabel(o).toLowerCase().includes(q);
+  });
 
   return (
     <div ref={ref} className="relative">
@@ -97,7 +124,7 @@ export default function SearchableDropdown({
           setOpen((s) => !s);
         }}
       >
-        <div>{displayName}</div>
+        <div className="truncate">{displayName}</div>
         <div>▾</div>
       </div>
       {open && (
@@ -116,19 +143,22 @@ export default function SearchableDropdown({
             <div className="p-2 text-sm text-slate-500">No teachers found</div>
           )}
           {!loading &&
-            filtered.map((opt) => (
-              <div
-                key={opt.id}
-                className="p-2 hover:bg-slate-50 cursor-pointer"
-                onClick={() => {
-                  onChange(opt.user_id ?? null);
-                  setOpen(false);
-                  setSearch("");
-                }}
-              >
-                {opt.name}
-              </div>
-            ))}
+            filtered.map((opt) => {
+              const id = teacherSelectId(opt, idKey);
+              return (
+                <div
+                  key={opt.id || id || opt.name}
+                  className="p-2 hover:bg-slate-50 cursor-pointer"
+                  onClick={() => {
+                    onChange(id);
+                    setOpen(false);
+                    setSearch("");
+                  }}
+                >
+                  {teacherLabel(opt)}
+                </div>
+              );
+            })}
         </div>
       )}
     </div>

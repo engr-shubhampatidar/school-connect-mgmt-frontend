@@ -268,9 +268,9 @@ export async function fetchClassDashboard(): Promise<ClassDashboardStats | null>
 
 export async function updateClass(
   id: string,
-  payload: { room_no: string; classTeacherId: string },
+  payload: { room_no: string; classTeacherId?: string },
 ): Promise<void> {
-  await API.put(`${ADMIN_API.CLASSES}/${id}`, payload);
+  await API.patch(`${ADMIN_API.CLASSES}/${id}`, payload);
 }
 
 export async function assignTeacherToClass(

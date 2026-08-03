@@ -94,7 +94,11 @@ export default function AdminClassesPage() {
             <CreateNewClass
               isOpen={open}
               onClose={() => setOpen(false)}
-            ></CreateNewClass>
+              onCreated={() => {
+                void load({ page, pageSize });
+                void fetchStats();
+              }}
+            />
             <CreateClassDialog
               open={creatingOpen}
               onClose={() => setCreatingOpen(false)}

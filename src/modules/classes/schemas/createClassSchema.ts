@@ -5,13 +5,17 @@ export const createClassSchema = z
     number: z
       .string()
       .min(1, "Class number is required")
-      .regex(/^\d{1,2}$/, "Class number must be 1 or 2 digits"),
+      .regex(/^\d{1,2}$/, "Class number must be digits only")
+      .refine((v) => {
+        const n = Number(v);
+        return n >= 1 && n <= 12;
+      }, "Class number must be between 1 and 12"),
     section: z
       .string()
       .optional()
       .transform((v) => (v ? v.trim().toUpperCase() : undefined))
-      .refine((v) => v === undefined || /^[A-Z]$/.test(v), {
-        message: "Section must be a single letter A–Z",
+      .refine((v) => v === undefined || /^[A-E]$/.test(v), {
+        message: "Section must be a letter from A–E",
       }),
   })
   .required();
