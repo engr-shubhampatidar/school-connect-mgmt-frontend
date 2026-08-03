@@ -32,6 +32,17 @@ interface Props {
   classId?: string | null;
 }
 
+function sanitizeClassName(value: string) {
+  return value.replace(/\D/g, "").slice(0, 2);
+}
+
+function sanitizeSection(value: string) {
+  return value
+    .toUpperCase()
+    .replace(/[^A-E]/g, "")
+    .slice(0, 1);
+}
+
 export default function CreateClassForm({ onClose, onCreated }: Props) {
   const { toast } = useToast();
 
@@ -67,9 +78,24 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
 
   function validate(): boolean {
     const errs: Record<string, string> = {};
+    const classNum = Number(className.trim());
 
-    if (!className.trim()) errs.className = "Class name is required";
-    if (!section.trim()) errs.section = "Section is required";
+    if (!className.trim()) {
+      errs.className = "Class name is required";
+    } else if (
+      !/^\d{1,2}$/.test(className.trim()) ||
+      classNum < 1 ||
+      classNum > 12
+    ) {
+      errs.className = "Class name must be a number from 1 to 12";
+    }
+
+    if (!section.trim()) {
+      errs.section = "Section is required";
+    } else if (!/^[A-E]$/.test(section.trim())) {
+      errs.section = "Section must be a letter from A–E";
+    }
+
     if (!homeRoom.trim()) errs.homeRoom = "Home room is required";
     if (!classTeacherId) errs.classTeacherId = "Class teacher is required";
     if (selectedSubjects.length === 0)
@@ -82,7 +108,12 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
         errs[`assignment_${a.subjectId}_start`] = "Start time required";
       if (!a.endTime)
         errs[`assignment_${a.subjectId}_end`] = "End time required";
-      if (!a.room) errs[`assignment_${a.subjectId}_room`] = "Room is required";
+      if (a.startTime && a.endTime && a.startTime >= a.endTime) {
+        errs[`assignment_${a.subjectId}_end`] =
+          "End time must be after start time";
+      }
+      if (!a.room?.trim())
+        errs[`assignment_${a.subjectId}_room`] = "Room is required";
     });
 
     setValidationErrors(errs);
@@ -105,9 +136,9 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
       }));
 
       const payload = {
-        className,
-        section,
-        homeRoom,
+        className: className.trim(),
+        section: section.trim().toUpperCase(),
+        homeRoom: homeRoom.trim(),
         classTeacherId,
         subjects: subjectsPayload,
       };
@@ -115,7 +146,9 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
       const res = await createClassWithSubjects(payload);
 
       toast({
-        title: (res as { message?: string })?.message ?? "Class created successfully",
+        title:
+          (res as { message?: string })?.message ??
+          "Class created successfully",
         type: "success",
       });
 
@@ -152,8 +185,11 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
               <FormControl>
                 <Input
                   value={className}
-                  onChange={(e) => setClassName(e.target.value)}
-                  placeholder="Class-10"
+                  onChange={(e) =>
+                    setClassName(sanitizeClassName(e.target.value))
+                  }
+                  placeholder="e.g. 10"
+                  inputMode="numeric"
                 />
               </FormControl>
               <FormMessage>{validationErrors.className}</FormMessage>
@@ -164,8 +200,11 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
               <FormControl>
                 <Input
                   value={section}
-                  onChange={(e) => setSection(e.target.value)}
-                  placeholder="B"
+                  onChange={(e) =>
+                    setSection(sanitizeSection(e.target.value))
+                  }
+                  placeholder="A–E"
+                  maxLength={1}
                 />
               </FormControl>
               <FormMessage>{validationErrors.section}</FormMessage>
@@ -193,6 +232,7 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
           <SearchableDropdown
             value={classTeacherId}
             onChange={setClassTeacherId}
+            placeholder="Select class teacher"
           />
 
           {validationErrors.classTeacherId && (
@@ -240,53 +280,119 @@ export default function CreateClassForm({ onClose, onCreated }: Props) {
                       <button
                         type="button"
                         onClick={() => removeSubject(a.subjectId)}
+                        aria-label={`Remove ${subject?.name ?? "subject"}`}
                       >
                         <X size={16} />
                       </button>
+                    </div>
 
-                      <SearchableDropdown
-                        value={a.teacherId ?? null}
-                        subjectId={a.subjectId}
-                        onChange={(id) =>
-                          updateAssignment(a.subjectId, {
-                            teacherId: id,
-                          })
-                        }
-                        fetchTeachers={getTeachers}
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          Teacher *
+                        </label>
+                        <SearchableDropdown
+                          value={a.teacherId ?? null}
+                          subjectId={a.subjectId}
+                          onChange={(id) =>
+                            updateAssignment(a.subjectId, {
+                              teacherId: id,
+                            })
+                          }
+                          fetchTeachers={getTeachers}
+                          placeholder="Select teacher"
+                        />
+                        {validationErrors[
+                          `assignment_${a.subjectId}_teacher`
+                        ] && (
+                          <div className="text-sm text-red-600 mt-1">
+                            {
+                              validationErrors[
+                                `assignment_${a.subjectId}_teacher`
+                              ]
+                            }
+                          </div>
+                        )}
+                      </div>
 
-                      <input
-                        type="time"
-                        value={a.startTime || ""}
-                        onChange={(e) =>
-                          updateAssignment(a.subjectId, {
-                            startTime: e.target.value,
-                          })
-                        }
-                        className="border rounded px-3 py-2"
-                      />
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          Start *
+                        </label>
+                        <input
+                          type="time"
+                          value={a.startTime || ""}
+                          onChange={(e) =>
+                            updateAssignment(a.subjectId, {
+                              startTime: e.target.value,
+                            })
+                          }
+                          className="w-full border rounded px-3 py-2"
+                        />
+                        {validationErrors[
+                          `assignment_${a.subjectId}_start`
+                        ] && (
+                          <div className="text-sm text-red-600 mt-1">
+                            {
+                              validationErrors[
+                                `assignment_${a.subjectId}_start`
+                              ]
+                            }
+                          </div>
+                        )}
+                      </div>
 
-                      <input
-                        type="time"
-                        value={a.endTime || ""}
-                        onChange={(e) =>
-                          updateAssignment(a.subjectId, {
-                            endTime: e.target.value,
-                          })
-                        }
-                        className="border rounded px-3 py-2"
-                      />
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          End *
+                        </label>
+                        <input
+                          type="time"
+                          value={a.endTime || ""}
+                          onChange={(e) =>
+                            updateAssignment(a.subjectId, {
+                              endTime: e.target.value,
+                            })
+                          }
+                          className="w-full border rounded px-3 py-2"
+                        />
+                        {validationErrors[`assignment_${a.subjectId}_end`] && (
+                          <div className="text-sm text-red-600 mt-1">
+                            {
+                              validationErrors[
+                                `assignment_${a.subjectId}_end`
+                              ]
+                            }
+                          </div>
+                        )}
+                      </div>
 
-                      <input
-                        placeholder="Room"
-                        value={a.room || ""}
-                        onChange={(e) =>
-                          updateAssignment(a.subjectId, {
-                            room: e.target.value,
-                          })
-                        }
-                        className="border rounded px-3 py-2"
-                      />
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">
+                          Room *
+                        </label>
+                        <input
+                          placeholder="Room"
+                          value={a.room || ""}
+                          onChange={(e) =>
+                            updateAssignment(a.subjectId, {
+                              room: e.target.value,
+                            })
+                          }
+                          className="w-full border rounded px-3 py-2"
+                        />
+                        {validationErrors[
+                          `assignment_${a.subjectId}_room`
+                        ] && (
+                          <div className="text-sm text-red-600 mt-1">
+                            {
+                              validationErrors[
+                                `assignment_${a.subjectId}_room`
+                              ]
+                            }
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );

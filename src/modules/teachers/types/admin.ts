@@ -37,7 +37,10 @@ export type TeachersResponse = {
 export type TeachersQuery = {
   search?: string;
   email?: string;
+  /** Filter by subject specialty (single id; sent as subjectIds to API). */
   subjectId?: string;
+  /** Filter by subject specialty IDs (match any). */
+  subjectIds?: string[];
   classId?: string;
   page?: number;
   pageSize?: number;

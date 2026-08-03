@@ -6,6 +6,7 @@ import CreateClassForm from "./CreateClassForm";
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: () => void;
   classId?: string | null;
   title?: string;
   children?: ReactNode;
@@ -14,6 +15,7 @@ interface ModalProps {
 export default function CreateNewClass({
   isOpen,
   onClose,
+  onCreated,
   classId = null,
   title = "Create New Class",
 }: ModalProps) {
@@ -50,7 +52,11 @@ export default function CreateNewClass({
           </div>
         </div>
 
-        <CreateClassForm classId={classId} onClose={onClose} />
+        <CreateClassForm
+          classId={classId}
+          onClose={onClose}
+          onCreated={onCreated}
+        />
       </div>
     </div>
   );

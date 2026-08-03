@@ -5,10 +5,14 @@ import { isAxiosError } from "axios";
 import { Lock, Plus } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { FormField, FormLabel, FormControl, FormMessage } from "@/components/ui/Form";
+import {
+  FormField,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/use-toast";
-import { SearchableDropdown, getTeachers } from "@/modules/teachers";
 import { fetchClassById, updateClass } from "@/modules/classes/api/classes";
 
 type Props = {
@@ -30,7 +34,6 @@ export default function EditClassDialog({
   const [className, setClassName] = useState("");
   const [section, setSection] = useState("");
   const [roomNo, setRoomNo] = useState("");
-  const [classTeacherId, setClassTeacherId] = useState<string | null>(null);
   const [classTeacherName, setClassTeacherName] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -46,7 +49,6 @@ export default function EditClassDialog({
         setSection(data.section);
         setRoomNo(data.homeRoom);
         setClassTeacherName(data.classTeacherName);
-        setClassTeacherId(null);
       })
       .catch(() => {
         if (!mounted) return;
@@ -65,8 +67,6 @@ export default function EditClassDialog({
   function validate() {
     const errs: Record<string, string> = {};
     if (!roomNo.trim()) errs.roomNo = "Room number is required";
-    if (!classTeacherId && !classTeacherName)
-      errs.classTeacherId = "Class teacher is required";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -75,24 +75,10 @@ export default function EditClassDialog({
     e.preventDefault();
     if (!classId || !validate()) return;
 
-    let teacherId = classTeacherId;
-    if (!teacherId && classTeacherName) {
-      const teachers = await getTeachers(classTeacherName);
-      teacherId = teachers.find((t) => t.name === classTeacherName)?.id ?? null;
-    }
-    if (!teacherId) {
-      setErrors((prev) => ({
-        ...prev,
-        classTeacherId: "Class teacher is required",
-      }));
-      return;
-    }
-
     setLoading(true);
     try {
       await updateClass(classId, {
         room_no: roomNo.trim(),
-        classTeacherId: teacherId,
       });
       toast({ title: "Class updated successfully", type: "success" });
       onUpdated?.();
@@ -176,18 +162,13 @@ export default function EditClassDialog({
                 <FormField>
                   <FormLabel>Class Teacher</FormLabel>
                   <FormControl>
-                    <SearchableDropdown
-                      value={classTeacherId}
-                      onChange={setClassTeacherId}
-                      selectedLabel={classTeacherName}
-                      fetchTeachers={getTeachers}
-                      placeholder="Select class teacher"
-                    />
+                    <div className="flex items-center justify-between w-full rounded-md border border-[#D7E3FC] bg-[#F5F9FF] px-3 py-2 text-[14px] text-[#64748B]">
+                      <span>{classTeacherName || "Not Assigned"}</span>
+                      <Lock size={14} className="text-[#94A3B8]" />
+                    </div>
                   </FormControl>
-                  <FormMessage>{errors.classTeacherId}</FormMessage>
                   <p className="text-[12px] text-[#737373] mt-1">
-                    The teacher will be responsible for attendance and grading
-                    for this class.
+                    Class teacher cannot be changed from this screen for now.
                   </p>
                 </FormField>
               </div>
