@@ -1,37 +1,48 @@
-export type Announcement = {
-  id: string;
-  title: string;
-  message?: string | null;
-  status?: string | null;
-  role?: string | null;
-  attachments?: string | null;
-  createdAt?: string | null;
-  scheduledAt?: string | null;
-};
+export type AnnouncementScope = "SCHOOL" | "CLASS";
 
-export type AnnouncementsResponse = {
-  announcements: Announcement[];
-  total?: number;
-  page?: number;
-  pageSize?: number;
-};
-
-export type AnnouncementsQuery = {
-  search?: string;
-  status?: string;
-  role?: string;
-  page?: number;
-  pageSize?: number;
-};
-
-export type CreateAnnouncementAttachment = {
+export type AnnouncementAttachment = {
   filename: string;
   url: string;
 };
 
+export type Announcement = {
+  id: string;
+  title: string;
+  message: string;
+  scope: AnnouncementScope;
+  targetClassId: string | null;
+  targetClassName: string | null;
+  schoolId: string;
+  attachments: AnnouncementAttachment[] | null;
+  createdByUserId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AnnouncementsResponse = {
+  data: Announcement[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type AnnouncementsQuery = {
+  search?: string;
+  scope?: AnnouncementScope;
+  classId?: string;
+  date?: string;
+  page?: number;
+  limit?: number;
+};
+
+export type CreateAnnouncementAttachment = AnnouncementAttachment;
+
 export type CreateAnnouncementPayload = {
   title: string;
   message: string;
-  audience: string;
-  attachments: CreateAnnouncementAttachment[];
+  scope: AnnouncementScope;
+  targetClassId?: string;
+  attachments?: CreateAnnouncementAttachment[];
 };
+
+export type UpdateAnnouncementPayload = Partial<CreateAnnouncementPayload>;
