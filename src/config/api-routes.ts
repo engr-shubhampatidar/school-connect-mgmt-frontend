@@ -33,6 +33,22 @@ export const ADMIN_API = {
   DOCUMENTS: "/admin/documents",
   DOCUMENTS_UPLOAD: "/admin/documents/upload",
   DOCUMENT_BY_ID: (id: string) => `/admin/documents/${id}`,
+  FEES_DASHBOARD: "/admin/fees/dashboard",
+  FEES_REPORTS: "/admin/fees/reports",
+  FEE_CATEGORIES: "/admin/fees/categories",
+  FEE_CATEGORY_BY_ID: (id: string) => `/admin/fees/categories/${id}`,
+  FEE_STRUCTURES: "/admin/fees/structures",
+  FEE_STRUCTURE_BY_ID: (id: string) => `/admin/fees/structures/${id}`,
+  FEE_ASSIGNMENTS: "/admin/fees/assignments",
+  FEE_ASSIGNMENT_BY_ID: (id: string) => `/admin/fees/assignments/${id}`,
+  FEE_ASSIGNMENTS_BULK: "/admin/fees/assignments/bulk",
+  FEE_ASSIGNMENT_DISCOUNT: (id: string) =>
+    `/admin/fees/assignments/${id}/discount`,
+  FEE_ASSIGNMENT_WAIVE: (id: string) => `/admin/fees/assignments/${id}/waive`,
+  FEE_PAYMENTS: "/admin/fees/payments",
+  FEE_PAYMENT_COLLECT: "/admin/fees/payments/collect",
+  FEE_PAYMENT_BY_ID: (id: string) => `/admin/fees/payments/${id}`,
+  FEE_PAYMENT_RECEIPT: (id: string) => `/admin/fees/payments/${id}/receipt`,
 };
 
 export const TEACHER_API = {
@@ -57,6 +73,9 @@ export const STUDENT_API = {
   BY_ID: (id: string) => `/admin/students/${id}`,
   /** Update student (admin or class teacher) */
   UPDATE: (id: string) => `/students/${id}`,
+  FEES: "/student/fees",
+  FEE_PAYMENTS: "/student/fees/payments",
+  FEE_PAYMENT_RECEIPT: (id: string) => `/student/fees/payments/${id}/receipt`,
 };
 
 const routes = {
