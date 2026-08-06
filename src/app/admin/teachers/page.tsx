@@ -46,7 +46,10 @@ export default function AdminTeachersPage() {
   );
 
   const classOptions = useMemo(() => {
-    return classes.map((c) => ({ id: c.id, name: c.name }));
+    return classes.map((c) => ({
+      id: c.id,
+      name: c.section ? `${c.name} - ${c.section}` : c.name,
+    }));
   }, [classes]);
 
   const load = useCallback(
@@ -104,8 +107,8 @@ export default function AdminTeachersPage() {
     (async () => {
       try {
         const [clsResp, subjResp] = await Promise.all([
-          fetchClasses({ pageSize: 1000 }),
-          fetchSubjects({ pageSize: 1000 }),
+          fetchClasses({ pageSize: 100 }),
+          fetchSubjects({ pageSize: 100 }),
         ]);
         if (!mounted) return;
         setClasses(clsResp.classes ?? []);
