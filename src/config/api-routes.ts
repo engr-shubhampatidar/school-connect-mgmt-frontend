@@ -33,6 +33,22 @@ export const ADMIN_API = {
   DOCUMENTS: "/admin/documents",
   DOCUMENTS_UPLOAD: "/admin/documents/upload",
   DOCUMENT_BY_ID: (id: string) => `/admin/documents/${id}`,
+  EXAMS_DASHBOARD: "/admin/exams/dashboard",
+  EXAMS: "/admin/exams",
+  EXAM_BY_ID: (id: string) => `/admin/exams/${id}`,
+  EXAM_STATUS: (id: string) => `/admin/exams/${id}/status`,
+  EXAM_SCHEDULES: (examId: string) => `/admin/exams/${examId}/schedules`,
+  EXAM_SCHEDULE_BY_ID: (examId: string, scheduleId: string) =>
+    `/admin/exams/${examId}/schedules/${scheduleId}`,
+  EXAM_MARKS: (examId: string) => `/admin/exams/${examId}/marks`,
+  EXAM_RESULTS: (examId: string) => `/admin/exams/${examId}/results`,
+  EXAM_RESULTS_GENERATE: (examId: string) =>
+    `/admin/exams/${examId}/results/generate`,
+  EXAM_RESULTS_PUBLISH: (examId: string) =>
+    `/admin/exams/${examId}/results/publish`,
+  EXAM_REPORT_CARD: (examId: string, studentUserId: string) =>
+    `/admin/exams/${examId}/report-cards/${studentUserId}`,
+  EXAM_CLASS_REPORT: (examId: string) => `/admin/exams/${examId}/class-report`,
 };
 
 export const TEACHER_API = {
@@ -57,6 +73,8 @@ export const STUDENT_API = {
   BY_ID: (id: string) => `/admin/students/${id}`,
   /** Update student (admin or class teacher) */
   UPDATE: (id: string) => `/students/${id}`,
+  EXAMS: "/student/exams",
+  EXAM_REPORT_CARD: (examId: string) => `/student/exams/${examId}/report-card`,
 };
 
 const routes = {

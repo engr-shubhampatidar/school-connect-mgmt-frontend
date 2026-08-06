@@ -50,7 +50,7 @@ export const managementNav = [
   },
   {
     label: "Exams & Results",
-    href: "/admin/staff",
+    href: "/admin/exams",
     icon: BookOpen,
   },
   {
@@ -98,5 +98,10 @@ export const studentNav = [
     label: "My Profile",
     href: "/student/profile",
     icon: GraduationCap,
+  },
+  {
+    label: "My Exams",
+    href: "/student/exams",
+    icon: BookOpen,
   },
 ];
