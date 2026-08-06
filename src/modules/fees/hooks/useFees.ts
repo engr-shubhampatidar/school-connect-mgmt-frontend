@@ -25,6 +25,7 @@ import {
   fetchMyFees,
   fetchStudentFeeDetail,
   fetchStudentFeeSummaries,
+  fetchMyFeesSummary,
   fetchStudentFees,
   optOutAssignment,
   previewFeeAssignment,
@@ -179,6 +180,13 @@ export function useMyFeePayments(query: Record<string, unknown> = {}) {
         page: (query.page as number) ?? 1,
         limit: (query.limit as number) ?? FEES_PAGE_SIZE,
       }),
+  });
+}
+
+export function useMyFeesSummary() {
+  return useQuery({
+    queryKey: feeQueryKeys.studentSummary(),
+    queryFn: fetchMyFeesSummary,
   });
 }
 

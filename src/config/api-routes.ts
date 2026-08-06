@@ -24,6 +24,11 @@ export const ADMIN_API = {
   DASHBOARD: "/admin/dashboard",
   STUDENTS: "/admin/students",
   TEACHERS: "/admin/teachers",
+  PARENTS: "/admin/parents",
+  PARENT_BY_ID: (id: string) => `/admin/parents/${id}`,
+  PARENT_CHILDREN: (id: string) => `/admin/parents/${id}/children`,
+  PARENT_UNLINK_CHILD: (id: string, studentId: string) =>
+    `/admin/parents/${id}/children/${studentId}`,
   CLASSES: "/admin/classes",
   CLASSES_WITH_TEACHER: "/admin/classes/with-class-teacher",
   SUBJECTS: "/admin/subjects",
@@ -97,22 +102,54 @@ export const ATTENDANCE_API = {
 };
 
 export const STUDENT_API = {
-  ME: "/api/student/me",
-  PROFILE: "/api/student/profile",
-  ATTENDANCE: "/api/student/attendance",
-  CHANGE_PASSWORD: "/api/student/auth/change-password",
+  ME: "/student/me",
+  PROFILE: "/student/profile",
+  ATTENDANCE: "/student/attendance",
+  CHANGE_PASSWORD: "/auth/change-password",
   /** Admin-facing student profile by id */
   BY_ID: (id: string) => `/admin/students/${id}`,
   /** Update student (admin or class teacher) */
   UPDATE: (id: string) => `/students/${id}`,
+  DASHBOARD: "/student/dashboard",
+  TIMETABLE: "/student/timetable",
+  DOCUMENTS: "/student/documents",
+  DOCUMENTS_UPLOAD: "/student/documents/upload",
+  ANNOUNCEMENTS: "/student/class/announcements",
+  ATTENDANCE_MONTHLY: "/student/attendance/monthly",
   HOMEWORK: "/student/homework",
   HOMEWORK_BY_ID: (id: string) => `/student/homework/${id}`,
   HOMEWORK_SUBMIT: (id: string) => `/student/homework/${id}/submissions`,
   EXAMS: "/student/exams",
   EXAM_REPORT_CARD: (examId: string) => `/student/exams/${examId}/report-card`,
   FEES: "/student/fees",
+  FEES_SUMMARY: "/student/fees/summary",
   FEE_PAYMENTS: "/student/fees/payments",
   FEE_PAYMENT_RECEIPT: (id: string) => `/student/fees/payments/${id}/receipt`,
+  EXAMS_SCHEDULE: "/student/exams/schedule",
+};
+
+export const PARENT_API = {
+  ME: "/parent/me",
+  CHILDREN: "/parent/children",
+  CHILD_DASHBOARD: (id: string) => `/parent/children/${id}/dashboard`,
+  CHILD_PROFILE: (id: string) => `/parent/children/${id}/profile`,
+  CHILD_ATTENDANCE: (id: string) => `/parent/children/${id}/attendance`,
+  CHILD_ATTENDANCE_MONTHLY: (id: string) =>
+    `/parent/children/${id}/attendance/monthly`,
+  CHILD_CLASS: (id: string) => `/parent/children/${id}/class`,
+  CHILD_TIMETABLE: (id: string) => `/parent/children/${id}/timetable`,
+  CHILD_ANNOUNCEMENTS: (id: string) => `/parent/children/${id}/announcements`,
+  CHILD_DOCUMENTS: (id: string) => `/parent/children/${id}/documents`,
+  CHILD_HOMEWORK: (id: string) => `/parent/children/${id}/homework`,
+  CHILD_HOMEWORK_BY_ID: (id: string, hwId: string) =>
+    `/parent/children/${id}/homework/${hwId}`,
+  CHILD_FEES: (id: string) => `/parent/children/${id}/fees`,
+  CHILD_FEES_SUMMARY: (id: string) => `/parent/children/${id}/fees/summary`,
+  CHILD_FEE_PAYMENTS: (id: string) => `/parent/children/${id}/fees/payments`,
+  CHILD_EXAMS: (id: string) => `/parent/children/${id}/exams`,
+  CHILD_EXAMS_SCHEDULE: (id: string) => `/parent/children/${id}/exams/schedule`,
+  CHILD_REPORT_CARD: (id: string, examId: string) =>
+    `/parent/children/${id}/exams/${examId}/report-card`,
 };
 
 const routes = {
@@ -123,6 +160,7 @@ const routes = {
   ADMIN_API,
   TEACHER_API,
   STUDENT_API,
+  PARENT_API,
 };
 
 export default routes;

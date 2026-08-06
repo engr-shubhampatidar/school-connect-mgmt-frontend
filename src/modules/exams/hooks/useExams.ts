@@ -14,6 +14,7 @@ import {
   fetchExamSchedules,
   fetchExams,
   fetchMyExamResults,
+  fetchMyExamSchedule,
   fetchMyReportCard,
   fetchReportCard,
   generateExamResults,
@@ -124,6 +125,13 @@ export function useMyExamResults() {
   return useQuery({
     queryKey: examQueryKeys.studentList(),
     queryFn: fetchMyExamResults,
+  });
+}
+
+export function useMyExamSchedule() {
+  return useQuery({
+    queryKey: examQueryKeys.studentSchedule(),
+    queryFn: fetchMyExamSchedule,
   });
 }
 

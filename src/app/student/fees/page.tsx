@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   useMyFees,
   useMyFeePayments,
+  useMyFeesSummary,
   downloadMyReceipt,
   formatInr,
   FEE_STATUS_LABELS,
@@ -18,11 +19,12 @@ import {
 export default function StudentFeesPage() {
   const { toast } = useToast();
   const [tab, setTab] = useState<"dues" | "history">("dues");
+  const summary = useMyFeesSummary();
   const fees = useMyFees({ page: 1, limit: 50 });
   const payments = useMyFeePayments({ page: 1, limit: 50 });
 
   return (
-    <div className="mx-auto px-4 py-6">
+    <div className="mx-auto px-4 py-6 bg-[#F5F9FF] min-h-full">
       <div className="mb-4">
         <h1 className="text-[24px] font-[600] text-[#021034]">My Fees</h1>
         <p className="mt-1 text-[14px] text-[#737373]">
@@ -30,8 +32,48 @@ export default function StudentFeesPage() {
         </p>
       </div>
 
+      {summary.isLoading ? (
+        <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-20 animate-pulse rounded-xl border border-[#D7E3FC] bg-white"
+            />
+          ))}
+        </div>
+      ) : summary.data ? (
+        <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {[
+            {
+              label: "Outstanding",
+              value: formatInr(summary.data.totalOutstanding),
+            },
+            { label: "Paid", value: formatInr(summary.data.totalPaid) },
+            {
+              label: "Pending",
+              value: String(summary.data.pendingCount),
+            },
+            {
+              label: "Overdue",
+              value: String(summary.data.overdueCount),
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-xl border border-[#D7E3FC] bg-white px-4 py-3"
+            >
+              <p className="text-xs text-[#737373]">{stat.label}</p>
+              <p className="mt-1 text-lg font-semibold text-[#021034]">
+                {stat.value}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="mb-4 flex gap-2">
         <button
+          type="button"
           className={`rounded-md px-3 py-1.5 text-sm font-medium ${
             tab === "dues"
               ? "bg-[#DBEAFE] text-[#021034]"
@@ -42,6 +84,7 @@ export default function StudentFeesPage() {
           Dues
         </button>
         <button
+          type="button"
           className={`rounded-md px-3 py-1.5 text-sm font-medium ${
             tab === "history"
               ? "bg-[#DBEAFE] text-[#021034]"
@@ -176,6 +219,7 @@ export default function StudentFeesPage() {
                       </td>
                       <td className="py-3">
                         <button
+                          type="button"
                           className="text-blue-700 hover:underline"
                           onClick={async () => {
                             try {

@@ -13,6 +13,7 @@ import type {
   ExamStatus,
   Paginated,
   ReportCard,
+  StudentExamScheduleGroup,
   UpsertMarkItem,
 } from "@/modules/exams/types";
 
@@ -170,4 +171,11 @@ export async function fetchMyExamResults(): Promise<ExamResult[]> {
 export async function fetchMyReportCard(examId: string): Promise<ReportCard> {
   const res = await API.get<ReportCard>(STUDENT_API.EXAM_REPORT_CARD(examId));
   return res.data;
+}
+
+export async function fetchMyExamSchedule(): Promise<StudentExamScheduleGroup[]> {
+  const res = await API.get<StudentExamScheduleGroup[]>(
+    STUDENT_API.EXAMS_SCHEDULE,
+  );
+  return Array.isArray(res.data) ? res.data : [];
 }

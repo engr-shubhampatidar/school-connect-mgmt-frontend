@@ -18,6 +18,7 @@ import type {
   StudentFeeDetail,
   StudentFeeStatus,
   StudentFeeSummary,
+  StudentFeesSummary,
   FineType,
   FeeFrequency,
 } from "@/modules/fees/types";
@@ -387,4 +388,9 @@ export async function downloadMyReceipt(paymentId: string): Promise<void> {
     responseType: "blob",
   });
   downloadBlob(res.data as Blob, `receipt-${paymentId}.pdf`);
+}
+
+export async function fetchMyFeesSummary(): Promise<StudentFeesSummary> {
+  const res = await API.get<StudentFeesSummary>(STUDENT_API.FEES_SUMMARY);
+  return res.data;
 }

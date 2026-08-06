@@ -21,4 +21,5 @@ export const feeQueryKeys = {
     [...feeQueryKeys.all, "student", "fees", query ?? {}] as const,
   studentPayments: (query?: Record<string, unknown>) =>
     [...feeQueryKeys.all, "student", "payments", query ?? {}] as const,
+  studentSummary: () => [...feeQueryKeys.all, "student", "summary"] as const,
 };

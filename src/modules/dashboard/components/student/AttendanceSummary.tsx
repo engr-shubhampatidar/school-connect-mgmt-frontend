@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { PieChart, Pie, Label } from "recharts";
 
 type AttendanceSummaryProps = {
@@ -15,11 +16,12 @@ export default function AttendanceSummary({
   monthlyPercentage,
 }: AttendanceSummaryProps) {
   const total = presentDays + absentDays;
-  const percentage = ((presentDays / total) * 100).toFixed(1);
+  const percentage =
+    total > 0 ? ((presentDays / total) * 100).toFixed(1) : "0.0";
 
   const data = [
-    { name: "Present", value: presentDays, fill: "#2ca02c" },
-    { name: "Absent", value: absentDays, fill: "#d62728" },
+    { name: "Present", value: presentDays || 0, fill: "#2ca02c" },
+    { name: "Absent", value: absentDays || 0, fill: "#d62728" },
   ];
 
   return (
@@ -28,7 +30,9 @@ export default function AttendanceSummary({
         <h2 className="text-lg font-semibold text-[#021034]">
           Attendance Summary
         </h2>
-        <span className="text-[#737373]">📅</span>
+        <span className="text-[#737373]" aria-hidden>
+          📅
+        </span>
       </div>
 
       <div className="flex justify-center py-6">
@@ -47,8 +51,8 @@ export default function AttendanceSummary({
                 let cy: number;
 
                 if ("cx" in viewBox && "cy" in viewBox) {
-                  cx = viewBox.cx;
-                  cy = viewBox.cy;
+                  cx = viewBox.cx as number;
+                  cy = viewBox.cy as number;
                 } else {
                   cx = viewBox.x + viewBox.width / 2;
                   cy = viewBox.y + viewBox.height / 2;
@@ -101,9 +105,12 @@ export default function AttendanceSummary({
           This Month : {monthlyPercentage}%
         </div>
 
-        <button className="w-full rounded-md border border-[#D7E3FC] py-2 text-sm font-medium text-[#021034] hover:bg-blue-50 transition">
+        <Link
+          href="/student/attendance"
+          className="block w-full rounded-md border border-[#D7E3FC] py-2 text-center text-sm font-medium text-[#021034] hover:bg-blue-50 transition"
+        >
           View Full Attendance
-        </button>
+        </Link>
       </div>
     </div>
   );

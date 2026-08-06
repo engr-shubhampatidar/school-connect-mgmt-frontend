@@ -265,3 +265,11 @@ export type PackageAssignItem = {
   optedIn: boolean;
   transportDistanceKm?: number;
 };
+
+export type StudentFeesSummary = {
+  totalOutstanding: number;
+  totalPaid: number;
+  overdueCount: number;
+  pendingCount: number;
+  totalAssignments: number;
+};

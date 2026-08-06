@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { adminNav, studentNav, teacherNav, managementNav } from "./navConfig";
+import { adminNav, studentNav, teacherNav, managementNav, parentNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
 import { getUser } from "@/modules/auth";
@@ -32,6 +32,8 @@ export default function Navbar() {
     navItems = teacherNav;
   } else if (pathname.startsWith("/student")) {
     navItems = studentNav;
+  } else if (pathname.startsWith("/parent")) {
+    navItems = parentNav;
   } else {
     return null;
   }
@@ -74,6 +76,7 @@ export default function Navbar() {
                   (item.href !== "/admin/dashboard" &&
                     item.href !== "/teacher/dashboard" &&
                     item.href !== "/student/dashboard" &&
+                    item.href !== "/parent/dashboard" &&
                     pathname.startsWith(item.href));
                 return (
                   <Link key={item.href} href={item.href}>
