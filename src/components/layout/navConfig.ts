@@ -55,6 +55,11 @@ export const managementNav = [
     icon: BookOpen,
   },
   {
+    label: "Homework",
+    href: "/admin/homework",
+    icon: ClipboardCheck,
+  },
+  {
     label: "Reports & Analytics",
     href: "/admin/reports",
     icon: ClipboardList,
@@ -78,6 +83,11 @@ export const teacherNav = [
     icon: GraduationCap,
   },
   {
+    label: "Homework",
+    href: "/teacher/homework",
+    icon: ClipboardList,
+  },
+  {
     label: "Take Attendance",
     href: "/teacher/attendance",
     icon: ClipboardCheck,
@@ -99,6 +109,11 @@ export const studentNav = [
     label: "My Profile",
     href: "/student/profile",
     icon: GraduationCap,
+  },
+  {
+    label: "My Homework",
+    href: "/student/homework",
+    icon: ClipboardList,
   },
   {
     label: "My Exams",
