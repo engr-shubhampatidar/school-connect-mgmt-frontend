@@ -28,12 +28,18 @@ export async function fetchTeachers(
   ].filter(Boolean);
   // Backend accepts repeated or comma-separated subjectIds (specialty filter).
   if (subjectIds.length) params.subjectIds = subjectIds.join(",");
-  if (query.classId) params.classId = query.classId;
+
+  const classIds = [
+    ...(query.classIds ?? []),
+    ...(query.classId ? [query.classId] : []),
+  ].filter(Boolean);
+  // Backend expects `classIds` (whitelist strips unknown `classId`).
+  if (classIds.length) params.classIds = classIds.join(",");
+
   if (query.page) params.page = query.page;
   if (query.pageSize) {
-    params.pageSize = query.pageSize;
-    // some APIs expect `limit` instead of `pageSize`
-    params.limit = query.pageSize;
+    // Backend PaginationTeacherDto uses `limit` (@Max(100)); pageSize is ignored.
+    params.limit = Math.min(query.pageSize, 100);
   }
   const res = await API.get<TeachersResponse>(ADMIN_API.TEACHERS, {
     params,

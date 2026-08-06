@@ -48,7 +48,7 @@ export default function AdminStudentsPage() {
     let mounted = true;
     (async () => {
       try {
-        const resp = await fetchClasses({ pageSize: 1000 });
+        const resp = await fetchClasses({ pageSize: 100 });
         if (!mounted) return;
         setClasses(resp.classes ?? []);
       } catch {
