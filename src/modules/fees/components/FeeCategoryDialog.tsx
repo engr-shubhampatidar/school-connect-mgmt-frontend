@@ -10,6 +10,7 @@ type Props = {
   onSubmit: (values: {
     name: string;
     description?: string;
+    requirement: "MANDATORY" | "OPTIONAL";
     isActive: boolean;
   }) => Promise<void>;
   initial?: FeeCategory | null;
@@ -33,6 +34,9 @@ export const FeeCategoryDialog: FC<Props> = ({
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [requirement, setRequirement] = useState<"MANDATORY" | "OPTIONAL">(
+    "MANDATORY",
+  );
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +45,7 @@ export const FeeCategoryDialog: FC<Props> = ({
     if (!open) return;
     setName(initial?.name ?? "");
     setDescription(initial?.description ?? "");
+    setRequirement(initial?.requirement ?? "MANDATORY");
     setIsActive(initial?.isActive ?? true);
     setError(null);
     setLoading(false);
@@ -75,6 +80,50 @@ export const FeeCategoryDialog: FC<Props> = ({
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              Fee requirement
+            </label>
+            <p className="mt-0.5 text-xs text-slate-500">
+              Mandatory fees apply to all students; optional fees can be skipped.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-3">
+              <label
+                className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${
+                  requirement === "MANDATORY"
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-slate-200 text-slate-600"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="requirement"
+                  value="MANDATORY"
+                  checked={requirement === "MANDATORY"}
+                  onChange={() => setRequirement("MANDATORY")}
+                  className="accent-blue-600"
+                />
+                Mandatory
+              </label>
+              <label
+                className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${
+                  requirement === "OPTIONAL"
+                    ? "border-amber-600 bg-amber-50 text-amber-800"
+                    : "border-slate-200 text-slate-600"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="requirement"
+                  value="OPTIONAL"
+                  checked={requirement === "OPTIONAL"}
+                  onChange={() => setRequirement("OPTIONAL")}
+                  className="accent-amber-600"
+                />
+                Optional
+              </label>
+            </div>
+          </div>
           <label className="flex items-center gap-2 text-sm text-slate-600">
             <input
               type="checkbox"
@@ -99,6 +148,7 @@ export const FeeCategoryDialog: FC<Props> = ({
                 await onSubmit({
                   name: name.trim(),
                   description: description.trim() || undefined,
+                  requirement,
                   isActive,
                 });
                 onClose();

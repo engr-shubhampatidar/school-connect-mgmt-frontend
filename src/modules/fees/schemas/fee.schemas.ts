@@ -3,6 +3,7 @@ import { z } from "zod";
 export const feeCategorySchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500).optional().or(z.literal("")),
+  requirement: z.enum(["MANDATORY", "OPTIONAL"]).default("MANDATORY"),
   isActive: z.boolean().default(true),
 });
 

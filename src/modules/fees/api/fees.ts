@@ -3,6 +3,7 @@ import API from "@/services/axios";
 import type {
   BulkAssignResult,
   FeeCategory,
+  FeeCategoryRequirement,
   FeeDashboardStats,
   FeePayment,
   FeeReport,
@@ -34,6 +35,7 @@ export async function fetchFeeCategories(params: {
 export async function createFeeCategory(payload: {
   name: string;
   description?: string;
+  requirement?: FeeCategoryRequirement;
   isActive?: boolean;
 }): Promise<FeeCategory> {
   const res = await API.post<FeeCategory>(ADMIN_API.FEE_CATEGORIES, payload);
@@ -42,7 +44,12 @@ export async function createFeeCategory(payload: {
 
 export async function updateFeeCategory(
   id: string,
-  payload: Partial<{ name: string; description: string; isActive: boolean }>,
+  payload: Partial<{
+    name: string;
+    description: string;
+    requirement: FeeCategoryRequirement;
+    isActive: boolean;
+  }>,
 ): Promise<FeeCategory> {
   const res = await API.patch<FeeCategory>(
     ADMIN_API.FEE_CATEGORY_BY_ID(id),

@@ -71,6 +71,7 @@ export default function AdminFeeCategoriesPage() {
           columns={[
             { headerWidth: "w-32", cellWidth: "w-40" },
             { headerWidth: "w-40", cellWidth: "w-56", hideOnMobile: true },
+            { headerWidth: "w-24", cellWidth: "w-28" },
             { headerWidth: "w-20", cellWidth: "w-16" },
             { headerWidth: "w-24", cellWidth: "w-28" },
           ]}
@@ -92,6 +93,7 @@ export default function AdminFeeCategoriesPage() {
                 <tr className="text-left text-slate-500">
                   <th className="py-2 pr-3">Name</th>
                   <th className="hidden py-2 pr-3 md:table-cell">Description</th>
+                  <th className="py-2 pr-3">Requirement</th>
                   <th className="py-2 pr-3">Status</th>
                   <th className="py-2">Actions</th>
                 </tr>
@@ -99,7 +101,7 @@ export default function AdminFeeCategoriesPage() {
               <tbody>
                 {(data?.data ?? []).length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-6 text-slate-500">
+                    <td colSpan={5} className="py-6 text-slate-500">
                       No categories yet
                     </td>
                   </tr>
@@ -111,6 +113,19 @@ export default function AdminFeeCategoriesPage() {
                       </td>
                       <td className="hidden py-3 pr-3 text-slate-600 md:table-cell">
                         {row.description || "—"}
+                      </td>
+                      <td className="py-3 pr-3">
+                        <span
+                          className={`rounded px-2 py-0.5 text-xs ${
+                            row.requirement === "MANDATORY"
+                              ? "bg-blue-50 text-blue-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {row.requirement === "MANDATORY"
+                            ? "Mandatory"
+                            : "Optional"}
+                        </span>
                       </td>
                       <td className="py-3 pr-3">
                         <span

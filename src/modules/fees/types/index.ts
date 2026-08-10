@@ -23,6 +23,8 @@ export type PaymentMethod =
 
 export type PaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
 
+export type FeeCategoryRequirement = "MANDATORY" | "OPTIONAL";
+
 export type Paginated<T> = {
   data: T[];
   total: number;
@@ -35,6 +37,7 @@ export type FeeCategory = {
   schoolId: string;
   name: string;
   description?: string | null;
+  requirement: FeeCategoryRequirement;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
