@@ -7,6 +7,10 @@ export const feeQueryKeys = {
     [...feeQueryKeys.all, "categories", query ?? {}] as const,
   structures: (query?: Record<string, unknown>) =>
     [...feeQueryKeys.all, "structures", query ?? {}] as const,
+  classPolicies: (query?: Record<string, unknown>) =>
+    [...feeQueryKeys.all, "class-policies", query ?? {}] as const,
+  studentFeeDetail: (studentUserId: string) =>
+    [...feeQueryKeys.all, "student-detail", studentUserId] as const,
   assignments: (query?: Record<string, unknown>) =>
     [...feeQueryKeys.all, "assignments", query ?? {}] as const,
   payments: (query?: Record<string, unknown>) =>

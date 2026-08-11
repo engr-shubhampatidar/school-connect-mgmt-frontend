@@ -11,6 +11,7 @@ import {
   downloadMyReceipt,
   formatInr,
   FEE_STATUS_LABELS,
+  FEE_FREQUENCY_LABELS,
   PAYMENT_METHOD_LABELS,
 } from "@/modules/fees";
 
@@ -79,7 +80,7 @@ export default function StudentFeesPage() {
                   <tr className="text-left text-slate-500">
                     <th className="py-2 pr-3">Fee</th>
                     <th className="py-2 pr-3">Outstanding</th>
-                    <th className="py-2 pr-3">Due date</th>
+                    <th className="py-2 pr-3">Frequency</th>
                     <th className="py-2">Status</th>
                   </tr>
                 </thead>
@@ -109,7 +110,7 @@ export default function StudentFeesPage() {
                           </div>
                         </td>
                         <td className="py-3 pr-3">
-                          {row.dueDate?.slice(0, 10)}
+                          {FEE_FREQUENCY_LABELS[row.frequency] ?? row.frequency}
                         </td>
                         <td className="py-3">
                           {FEE_STATUS_LABELS[row.status] ?? row.status}

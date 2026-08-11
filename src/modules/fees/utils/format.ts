@@ -35,6 +35,14 @@ export function toCsv(rows: Record<string, unknown>[]): string {
   ].join("\n");
 }
 
+export const FEE_FREQUENCY_LABELS: Record<string, string> = {
+  ONE_TIME: "One time",
+  MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  HALF_YEARLY: "Half-yearly",
+  YEARLY: "Yearly",
+};
+
 export const FINE_TYPE_LABELS: Record<string, string> = {
   NONE: "None",
   DAILY_FIXED: "Daily fixed",
