@@ -3,21 +3,34 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   assignStudentFee,
+  assignFeePackage,
   bulkAssignStudentFees,
+  bulkAssignFeePackage,
   collectFeePayment,
   createFeeCategory,
+  createFeeClassPolicy,
   createFeeStructure,
+  deleteAssignment,
   deleteFeeCategory,
+  deleteFeeClassPolicy,
   deleteFeeStructure,
   fetchFeeCategories,
+  fetchFeeClassPolicies,
+  fetchFeeClassPolicyByClass,
   fetchFeeDashboard,
   fetchFeePayments,
   fetchFeeReport,
   fetchFeeStructures,
   fetchMyFeePayments,
   fetchMyFees,
+  fetchStudentFeeDetail,
+  fetchStudentFeeSummaries,
   fetchStudentFees,
+  optOutAssignment,
+  previewFeeAssignment,
+  updateAssignmentTransport,
   updateFeeCategory,
+  updateFeeClassPolicy,
   updateFeeStructure,
   updateStudentFeeDiscount,
   waiveStudentFee,
@@ -64,6 +77,45 @@ export function useFeeStructures(query: {
         categoryId: query.categoryId,
         classId: query.classId,
       }),
+  });
+}
+
+export function useFeeClassPolicies(query: {
+  page?: number;
+  limit?: number;
+  classId?: string;
+  academicYear?: string;
+} = {}) {
+  return useQuery({
+    queryKey: feeQueryKeys.classPolicies(query),
+    queryFn: () =>
+      fetchFeeClassPolicies({
+        page: query.page ?? 1,
+        limit: query.limit ?? 100,
+        classId: query.classId,
+        academicYear: query.academicYear,
+      }),
+  });
+}
+
+export function useStudentFeeSummaries(query: Record<string, unknown> = {}) {
+  return useQuery({
+    queryKey: feeQueryKeys.assignments(query),
+    queryFn: () =>
+      fetchStudentFeeSummaries({
+        page: (query.page as number) ?? 1,
+        limit: (query.limit as number) ?? FEES_PAGE_SIZE,
+        search: query.search as string | undefined,
+        classId: query.classId as string | undefined,
+      }),
+  });
+}
+
+export function useStudentFeeDetail(studentUserId: string) {
+  return useQuery({
+    queryKey: feeQueryKeys.studentFeeDetail(studentUserId),
+    queryFn: () => fetchStudentFeeDetail(studentUserId),
+    enabled: !!studentUserId,
   });
 }
 
@@ -158,7 +210,8 @@ export function useFeeMutations() {
       onSuccess: invalidate,
     }),
     createStructure: useMutation({
-      mutationFn: createFeeStructure,
+      mutationFn: (payload: Record<string, unknown>) =>
+        createFeeStructure(payload),
       onSuccess: invalidate,
     }),
     updateStructure: useMutation({
@@ -175,12 +228,59 @@ export function useFeeMutations() {
       mutationFn: deleteFeeStructure,
       onSuccess: invalidate,
     }),
+    createClassPolicy: useMutation({
+      mutationFn: createFeeClassPolicy,
+      onSuccess: invalidate,
+    }),
+    updateClassPolicy: useMutation({
+      mutationFn: ({
+        id,
+        payload,
+      }: {
+        id: string;
+        payload: Parameters<typeof updateFeeClassPolicy>[1];
+      }) => updateFeeClassPolicy(id, payload),
+      onSuccess: invalidate,
+    }),
+    deleteClassPolicy: useMutation({
+      mutationFn: deleteFeeClassPolicy,
+      onSuccess: invalidate,
+    }),
     assign: useMutation({
       mutationFn: assignStudentFee,
       onSuccess: invalidate,
     }),
     bulkAssign: useMutation({
       mutationFn: bulkAssignStudentFees,
+      onSuccess: invalidate,
+    }),
+    previewAssignment: useMutation({
+      mutationFn: previewFeeAssignment,
+    }),
+    assignPackage: useMutation({
+      mutationFn: assignFeePackage,
+      onSuccess: invalidate,
+    }),
+    bulkAssignPackage: useMutation({
+      mutationFn: bulkAssignFeePackage,
+      onSuccess: invalidate,
+    }),
+    updateTransport: useMutation({
+      mutationFn: ({
+        id,
+        transportDistanceKm,
+      }: {
+        id: string;
+        transportDistanceKm: number;
+      }) => updateAssignmentTransport(id, { transportDistanceKm }),
+      onSuccess: invalidate,
+    }),
+    optOut: useMutation({
+      mutationFn: optOutAssignment,
+      onSuccess: invalidate,
+    }),
+    deleteAssignment: useMutation({
+      mutationFn: deleteAssignment,
       onSuccess: invalidate,
     }),
     updateDiscount: useMutation({

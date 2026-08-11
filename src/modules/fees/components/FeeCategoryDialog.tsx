@@ -11,6 +11,7 @@ type Props = {
     name: string;
     description?: string;
     requirement: "MANDATORY" | "OPTIONAL";
+    type: "STANDARD" | "TRANSPORT";
     isActive: boolean;
   }) => Promise<void>;
   initial?: FeeCategory | null;
@@ -37,6 +38,7 @@ export const FeeCategoryDialog: FC<Props> = ({
   const [requirement, setRequirement] = useState<"MANDATORY" | "OPTIONAL">(
     "MANDATORY",
   );
+  const [type, setType] = useState<"STANDARD" | "TRANSPORT">("STANDARD");
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +48,7 @@ export const FeeCategoryDialog: FC<Props> = ({
     setName(initial?.name ?? "");
     setDescription(initial?.description ?? "");
     setRequirement(initial?.requirement ?? "MANDATORY");
+    setType(initial?.type ?? "STANDARD");
     setIsActive(initial?.isActive ?? true);
     setError(null);
     setLoading(false);
@@ -81,12 +84,22 @@ export const FeeCategoryDialog: FC<Props> = ({
             />
           </div>
           <div>
+            <label className="text-sm text-slate-600">Category type</label>
+            <select
+              className="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm"
+              value={type}
+              onChange={(e) =>
+                setType(e.target.value as "STANDARD" | "TRANSPORT")
+              }
+            >
+              <option value="STANDARD">Standard</option>
+              <option value="TRANSPORT">Transport</option>
+            </select>
+          </div>
+          <div>
             <label className="text-sm font-medium text-slate-700">
               Fee requirement
             </label>
-            <p className="mt-0.5 text-xs text-slate-500">
-              Mandatory fees apply to all students; optional fees can be skipped.
-            </p>
             <div className="mt-2 flex flex-wrap gap-3">
               <label
                 className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm ${
@@ -98,10 +111,8 @@ export const FeeCategoryDialog: FC<Props> = ({
                 <input
                   type="radio"
                   name="requirement"
-                  value="MANDATORY"
                   checked={requirement === "MANDATORY"}
                   onChange={() => setRequirement("MANDATORY")}
-                  className="accent-blue-600"
                 />
                 Mandatory
               </label>
@@ -115,10 +126,8 @@ export const FeeCategoryDialog: FC<Props> = ({
                 <input
                   type="radio"
                   name="requirement"
-                  value="OPTIONAL"
                   checked={requirement === "OPTIONAL"}
                   onChange={() => setRequirement("OPTIONAL")}
-                  className="accent-amber-600"
                 />
                 Optional
               </label>
@@ -149,6 +158,7 @@ export const FeeCategoryDialog: FC<Props> = ({
                   name: name.trim(),
                   description: description.trim() || undefined,
                   requirement,
+                  type,
                   isActive,
                 });
                 onClose();

@@ -39,9 +39,21 @@ export const ADMIN_API = {
   FEE_CATEGORY_BY_ID: (id: string) => `/admin/fees/categories/${id}`,
   FEE_STRUCTURES: "/admin/fees/structures",
   FEE_STRUCTURE_BY_ID: (id: string) => `/admin/fees/structures/${id}`,
+  FEE_CLASS_POLICIES: "/admin/fees/class-policies",
+  FEE_CLASS_POLICY_BY_ID: (id: string) => `/admin/fees/class-policies/${id}`,
+  FEE_CLASS_POLICY_BY_CLASS: "/admin/fees/class-policies/by-class",
+  STUDENT_FEE_DETAIL: (studentUserId: string) =>
+    `/admin/fees/students/${studentUserId}/fees`,
   FEE_ASSIGNMENTS: "/admin/fees/assignments",
   FEE_ASSIGNMENT_BY_ID: (id: string) => `/admin/fees/assignments/${id}`,
   FEE_ASSIGNMENTS_BULK: "/admin/fees/assignments/bulk",
+  FEE_ASSIGNMENTS_PREVIEW: "/admin/fees/assignments/preview",
+  FEE_ASSIGNMENTS_PACKAGE: "/admin/fees/assignments/package",
+  FEE_ASSIGNMENTS_BULK_PACKAGE: "/admin/fees/assignments/bulk-package",
+  FEE_ASSIGNMENT_TRANSPORT: (id: string) =>
+    `/admin/fees/assignments/${id}/transport`,
+  FEE_ASSIGNMENT_OPT_OUT: (id: string) =>
+    `/admin/fees/assignments/${id}/opt-out`,
   FEE_ASSIGNMENT_DISCOUNT: (id: string) =>
     `/admin/fees/assignments/${id}/discount`,
   FEE_ASSIGNMENT_WAIVE: (id: string) => `/admin/fees/assignments/${id}/waive`,

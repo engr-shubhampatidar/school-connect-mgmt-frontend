@@ -15,17 +15,18 @@ import {
   FeeSubnav,
   formatInr,
   useFeeDashboard,
-  useStudentFees,
-  FEE_STATUS_LABELS,
+  useStudentFeeSummaries,
 } from "@/modules/fees";
 
 export default function AdminFeesDashboardPage() {
   const { data, isLoading, error, refetch } = useFeeDashboard();
-  const overdueQuery = useStudentFees({
+  const overdueQuery = useStudentFeeSummaries({
     page: 1,
-    limit: 5,
-    status: "OVERDUE",
+    limit: 20,
   });
+  const overdueStudents = (overdueQuery.data?.data ?? [])
+    .filter((row) => row.statusSummary === "OVERDUE")
+    .slice(0, 5);
 
   return (
     <div className="mx-auto px-4 py-6">
@@ -165,15 +166,15 @@ export default function AdminFeesDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(overdueQuery.data?.data ?? []).length === 0 ? (
+                    {overdueStudents.length === 0 ? (
                       <tr>
                         <td colSpan={3} className="py-4 text-slate-500">
                           No overdue fees
                         </td>
                       </tr>
                     ) : (
-                      overdueQuery.data?.data.map((fee) => (
-                        <tr key={fee.id} className="border-t">
+                      overdueStudents.map((fee) => (
+                        <tr key={fee.studentUserId} className="border-t">
                           <td className="py-2 pr-3">
                             <Link
                               href={`/admin/fees/students/${fee.studentUserId}`}
@@ -182,14 +183,17 @@ export default function AdminFeesDashboardPage() {
                               {fee.studentName ?? fee.studentUserId}
                             </Link>
                             <div className="text-xs text-slate-500">
-                              {FEE_STATUS_LABELS[fee.status]} ·{" "}
-                              {formatInr(fee.outstandingAmount)}
+                              {fee.className ?? ""} ·{" "}
+                              {formatInr(fee.totalOutstanding)}
                             </div>
                           </td>
                           <td className="py-2 pr-3">
-                            {fee.feeStructureName ?? "—"}
+                            {fee.pendingInstallmentCount} installment
+                            {fee.pendingInstallmentCount === 1 ? "" : "s"} due
                           </td>
-                          <td className="py-2">{fee.dueDate?.slice(0, 10)}</td>
+                          <td className="py-2">
+                            {fee.nextDueDate?.slice(0, 10) ?? "—"}
+                          </td>
                         </tr>
                       ))
                     )}

@@ -2,15 +2,21 @@
 
 import React, { FC, useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
-import type { PaymentMethod, StudentFee } from "@/modules/fees/types";
+import type { FeeInstallment, PaymentMethod } from "@/modules/fees/types";
 import { formatInr } from "@/modules/fees/utils/format";
+
+type CollectTarget = {
+  feeInstallmentId: string;
+  label: string;
+  outstandingAmount: number;
+};
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  studentFee: StudentFee | null;
+  target: CollectTarget | null;
   onSubmit: (values: {
-    studentFeeId: string;
+    feeInstallmentId: string;
     amount: number;
     method: PaymentMethod;
     referenceNumber?: string;
@@ -31,7 +37,7 @@ const backdrop: React.CSSProperties = {
 export const CollectPaymentDialog: FC<Props> = ({
   open,
   onClose,
-  studentFee,
+  target,
   onSubmit,
 }) => {
   const [amount, setAmount] = useState("");
@@ -42,16 +48,16 @@ export const CollectPaymentDialog: FC<Props> = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!open || !studentFee) return;
-    setAmount(String(studentFee.outstandingAmount ?? 0));
+    if (!open || !target) return;
+    setAmount(String(target.outstandingAmount ?? 0));
     setMethod("CASH");
     setReferenceNumber("");
     setNotes("");
     setError(null);
     setLoading(false);
-  }, [open, studentFee]);
+  }, [open, target]);
 
-  if (!open || !studentFee) return null;
+  if (!open || !target) return null;
 
   return (
     <div style={backdrop} onClick={onClose}>
@@ -61,9 +67,7 @@ export const CollectPaymentDialog: FC<Props> = ({
       >
         <h2 className="text-lg font-semibold text-[#021034]">Collect payment</h2>
         <p className="mt-1 text-sm text-slate-500">
-          {studentFee.studentName ?? "Student"} ·{" "}
-          {studentFee.feeStructureName ?? "Fee"} · Outstanding{" "}
-          {formatInr(studentFee.outstandingAmount)}
+          {target.label} · Outstanding {formatInr(target.outstandingAmount)}
         </p>
         <div className="mt-4 space-y-3">
           <div>
@@ -122,7 +126,7 @@ export const CollectPaymentDialog: FC<Props> = ({
               setError(null);
               try {
                 await onSubmit({
-                  studentFeeId: studentFee.id,
+                  feeInstallmentId: target.feeInstallmentId,
                   amount: Number(amount),
                   method,
                   referenceNumber: referenceNumber.trim() || undefined,

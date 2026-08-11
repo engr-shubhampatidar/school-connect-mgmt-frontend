@@ -8,50 +8,73 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   FeeSubnav,
   FeeStructureDialog,
+  ClassFeePolicyDialog,
   useFeeStructures,
   useFeeCategories,
+  useFeeClassPolicies,
   useFeeMutations,
   formatInr,
   FINE_TYPE_LABELS,
+  FEE_FREQUENCY_LABELS,
 } from "@/modules/fees";
-import type { FeeStructure } from "@/modules/fees";
+import type { FeeClassPolicy, FeeStructure } from "@/modules/fees";
 
 export default function AdminFeeStructuresPage() {
   const { toast } = useToast();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<FeeStructure | null>(null);
+  const [planDialogOpen, setPlanDialogOpen] = useState(false);
+  const [policyDialogOpen, setPolicyDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<FeeStructure | null>(null);
+  const [editingPolicy, setEditingPolicy] = useState<FeeClassPolicy | null>(
+    null,
+  );
 
   const { data, isLoading, error, refetch } = useFeeStructures({
     page,
     limit: 10,
     search: search || undefined,
   });
+  const policiesQuery = useFeeClassPolicies({ page: 1, limit: 100 });
   const categoriesQuery = useFeeCategories({ page: 1, limit: 100 });
   const mutations = useFeeMutations();
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / 10));
+
+  const policyForPlan = (plan: FeeStructure) =>
+    policiesQuery.data?.data?.find(
+      (p) =>
+        p.classId === plan.classId && p.academicYear === plan.academicYear,
+    );
 
   return (
     <div className="mx-auto px-4 py-6">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-[24px] font-[600] text-[#021034]">
-            Fee structures
-          </h1>
+          <h1 className="text-[24px] font-[600] text-[#021034]">Fee plans</h1>
           <p className="mt-1 text-[14px] text-[#737373]">
-            Templates with amounts, due dates, and fine rules
+            Annual category amounts and class payment policies
           </p>
         </div>
-        <Button
-          variant="dark"
-          onClick={() => {
-            setEditing(null);
-            setDialogOpen(true);
-          }}
-        >
-          + Add structure
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setEditingPolicy(null);
+              setPolicyDialogOpen(true);
+            }}
+          >
+            + Class policy
+          </Button>
+          <Button
+            variant="dark"
+            onClick={() => {
+              setEditingPlan(null);
+              setPlanDialogOpen(true);
+            }}
+          >
+            + Add fee plan
+          </Button>
+        </div>
       </div>
 
       <FeeSubnav />
@@ -59,7 +82,7 @@ export default function AdminFeeStructuresPage() {
       <div className="mb-4">
         <input
           className="w-full max-w-sm rounded border border-slate-200 bg-white px-3 py-2 text-sm"
-          placeholder="Search structures"
+          placeholder="Search plans"
           value={search}
           onChange={(e) => {
             setPage(1);
@@ -73,16 +96,15 @@ export default function AdminFeeStructuresPage() {
           rows={8}
           columns={[
             { headerWidth: "w-40", cellWidth: "w-48" },
+            { headerWidth: "w-32", cellWidth: "w-40" },
             { headerWidth: "w-24", cellWidth: "w-28" },
-            { headerWidth: "w-20", cellWidth: "w-24" },
-            { headerWidth: "w-24", cellWidth: "w-28", hideOnMobile: true },
             { headerWidth: "w-20", cellWidth: "w-24" },
           ]}
         />
       ) : error ? (
         <Card>
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-slate-700">Failed to load structures.</p>
+            <p className="text-sm text-slate-700">Failed to load fee plans.</p>
             <Button variant="dark" onClick={() => void refetch()}>
               Retry
             </Button>
@@ -94,78 +116,107 @@ export default function AdminFeeStructuresPage() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left text-slate-500">
-                  <th className="py-2 pr-3">Name</th>
-                  <th className="py-2 pr-3">Category</th>
-                  <th className="py-2 pr-3">Amount</th>
-                  <th className="hidden py-2 pr-3 md:table-cell">Fine</th>
+                  <th className="py-2 pr-3">Plan</th>
+                  <th className="py-2 pr-3">Categories (annual)</th>
+                  <th className="py-2 pr-3">Policy</th>
                   <th className="py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {(data?.data ?? []).length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-6 text-slate-500">
-                      No structures yet
+                    <td colSpan={4} className="py-6 text-slate-500">
+                      No fee plans yet
                     </td>
                   </tr>
                 ) : (
-                  data?.data.map((row) => (
-                    <tr key={row.id} className="border-t">
-                      <td className="py-3 pr-3">
-                        <div className="font-medium text-[#021034]">
-                          {row.name}
-                        </div>
-                        <div className="text-xs text-slate-500">
-                          {row.academicYear}
-                          {row.className ? ` · ${row.className}` : ""} · Due{" "}
-                          {row.dueDate?.slice(0, 10)}
-                        </div>
-                      </td>
-                      <td className="py-3 pr-3">{row.categoryName ?? "—"}</td>
-                      <td className="py-3 pr-3">{formatInr(row.amount)}</td>
-                      <td className="hidden py-3 pr-3 md:table-cell">
-                        {FINE_TYPE_LABELS[row.fineType] ?? row.fineType}
-                      </td>
-                      <td className="py-3">
-                        <div className="flex gap-2">
-                          <button
-                            className="text-blue-700 hover:underline"
-                            onClick={() => {
-                              setEditing(row);
-                              setDialogOpen(true);
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="text-red-600 hover:underline"
-                            onClick={async () => {
-                              try {
-                                await mutations.deleteStructure.mutateAsync(
-                                  row.id,
-                                );
-                                toast({
-                                  title: "Structure deleted",
-                                  type: "success",
-                                });
-                              } catch (err) {
-                                toast({
-                                  title: "Delete failed",
-                                  description:
-                                    err instanceof Error
-                                      ? err.message
-                                      : undefined,
-                                  type: "error",
-                                });
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  data?.data.map((row) => {
+                    const policy = policyForPlan(row);
+                    return (
+                      <tr key={row.id} className="border-t">
+                        <td className="py-3 pr-3">
+                          <div className="font-medium text-[#021034]">
+                            {row.name}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {row.className ?? "—"} · {row.academicYear}
+                          </div>
+                        </td>
+                        <td className="py-3 pr-3">
+                          <ul className="space-y-1 text-xs text-slate-600">
+                            {(row.items ?? []).map((item) => (
+                              <li key={item.id}>
+                                {item.categoryName}: {formatInr(item.amount)}
+                                {item.categoryType === "TRANSPORT"
+                                  ? " (+ tiers)"
+                                  : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        </td>
+                        <td className="py-3 pr-3 text-xs text-slate-600">
+                          {policy ? (
+                            <>
+                              {FEE_FREQUENCY_LABELS[policy.frequency]} ·{" "}
+                              {FINE_TYPE_LABELS[policy.fineType]} · Start{" "}
+                              {policy.startDate?.slice(0, 10)}
+                            </>
+                          ) : (
+                            <span className="text-amber-600">
+                              No policy — add before assigning fees
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              className="text-blue-700 hover:underline"
+                              onClick={() => {
+                                setEditingPlan(row);
+                                setPlanDialogOpen(true);
+                              }}
+                            >
+                              Edit plan
+                            </button>
+                            <button
+                              className="text-blue-700 hover:underline"
+                              onClick={() => {
+                                setEditingPolicy(policy ?? null);
+                                setPolicyDialogOpen(true);
+                              }}
+                            >
+                              {policy ? "Edit policy" : "Add policy"}
+                            </button>
+                            <button
+                              className="text-red-600 hover:underline"
+                              onClick={async () => {
+                                try {
+                                  await mutations.deleteStructure.mutateAsync(
+                                    row.id,
+                                  );
+                                  toast({
+                                    title: "Plan deleted",
+                                    type: "success",
+                                  });
+                                } catch (err) {
+                                  toast({
+                                    title: "Delete failed",
+                                    description:
+                                      err instanceof Error
+                                        ? err.message
+                                        : undefined,
+                                    type: "error",
+                                  });
+                                }
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -195,20 +246,42 @@ export default function AdminFeeStructuresPage() {
       )}
 
       <FeeStructureDialog
-        open={dialogOpen}
-        initial={editing}
+        open={planDialogOpen}
+        initial={editingPlan}
         categories={categoriesQuery.data?.data ?? []}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => setPlanDialogOpen(false)}
         onSubmit={async (values) => {
-          if (editing) {
+          if (editingPlan) {
             await mutations.updateStructure.mutateAsync({
-              id: editing.id,
+              id: editingPlan.id,
               payload: values,
             });
-            toast({ title: "Structure updated", type: "success" });
+            toast({ title: "Plan updated", type: "success" });
           } else {
             await mutations.createStructure.mutateAsync(values);
-            toast({ title: "Structure created", type: "success" });
+            toast({ title: "Plan created", type: "success" });
+          }
+        }}
+      />
+
+      <ClassFeePolicyDialog
+        open={policyDialogOpen}
+        initial={editingPolicy}
+        presetClassId={editingPlan?.classId}
+        presetAcademicYear={editingPlan?.academicYear}
+        onClose={() => setPolicyDialogOpen(false)}
+        onSubmit={async (values) => {
+          if (editingPolicy) {
+            await mutations.updateClassPolicy.mutateAsync({
+              id: editingPolicy.id,
+              payload: values,
+            });
+            toast({ title: "Policy updated", type: "success" });
+          } else {
+            await mutations.createClassPolicy.mutateAsync(
+              values as Parameters<typeof mutations.createClassPolicy.mutateAsync>[0],
+            );
+            toast({ title: "Policy created", type: "success" });
           }
         }}
       />
