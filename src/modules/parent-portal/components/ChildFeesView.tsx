@@ -169,7 +169,7 @@ export default function ChildFeesView({ studentId }: { studentId: string }) {
                           </div>
                         </td>
                         <td className="py-3 pr-3">
-                          {row.dueDate?.slice(0, 10)}
+                          —
                         </td>
                         <td className="py-3">
                           {FEE_STATUS_LABELS[row.status] ?? row.status}
