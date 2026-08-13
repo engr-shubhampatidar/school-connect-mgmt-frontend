@@ -46,7 +46,11 @@ function handleLoginResponse(role: Role, data: unknown) {
     }
 
     const respUser =
-      payload.user ?? payload.teacher ?? payload.student ?? payload;
+      payload.user ??
+      payload.teacher ??
+      payload.student ??
+      payload.parent ??
+      payload;
     const user =
       respUser && typeof respUser === "object"
         ? normalizeUser(respUser as Record<string, unknown>, role)
@@ -99,9 +103,17 @@ export async function studentLogin(values: {
   return login("student", values);
 }
 
+export async function parentLogin(values: {
+  email: string;
+  password: string;
+}) {
+  return login("parent", values);
+}
+
 export default {
   login,
   adminLogin,
   teacherLogin,
   studentLogin,
+  parentLogin,
 };

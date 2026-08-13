@@ -21,9 +21,11 @@ import {
   type AdminDashboardResponse,
 } from "@/modules/dashboard";
 import { getUser } from "@/modules/auth";
+import { fetchFeeDashboard, formatInr } from "@/modules/fees";
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<AdminDashboardResponse | null>(null);
+  const [pendingFees, setPendingFees] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const mountedRef = useRef(false);
@@ -39,8 +41,12 @@ export default function AdminDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const dashboardData = await getAdminDashboard();
+      const [dashboardData, feeStats] = await Promise.all([
+        getAdminDashboard(),
+        fetchFeeDashboard().catch(() => null),
+      ]);
       setData(dashboardData);
+      setPendingFees(feeStats?.totalOutstanding ?? null);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setError(
@@ -115,10 +121,12 @@ export default function AdminDashboardPage() {
         <StatCard
           label="Pending Fees"
           className="bg-[#FFFFFF] border-[#FECACA]"
-          value={"$12,875"}
+          value={
+            pendingFees === null ? "—" : formatInr(pendingFees)
+          }
           iconBgColor="bg-[#FECACA]"
           icon={CreditCard}
-          progressLabel="Due within 7 days"
+          progressLabel="Outstanding balance"
           progressLabelColor="text-[#FF3838]"
         />
       </section>

@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UsersRound,
   GraduationCap,
   School,
   IndianRupee,
@@ -8,6 +9,11 @@ import {
   BookOpen,
   FileMinus,
   ClipboardList,
+  CalendarDays,
+  Megaphone,
+  FileText,
+  KeyRound,
+  UserCircle,
 } from "lucide-react";
 
 export const adminNav = [
@@ -27,6 +33,11 @@ export const adminNav = [
     icon: GraduationCap,
   },
   {
+    label: "Parents",
+    href: "/admin/parents",
+    icon: UsersRound,
+  },
+  {
     label: "Classes",
     href: "/admin/classes",
     icon: School,
@@ -40,8 +51,9 @@ export const adminNav = [
     label: "Announcements",
     href: "/admin/announcement",
     icon: ClipboardList,
-  }
+  },
 ];
+
 export const managementNav = [
   {
     label: "Fees & Finance",
@@ -50,8 +62,13 @@ export const managementNav = [
   },
   {
     label: "Exams & Results",
-    href: "/admin/staff",
+    href: "/admin/exams",
     icon: BookOpen,
+  },
+  {
+    label: "Homework",
+    href: "/admin/homework",
+    icon: ClipboardCheck,
   },
   {
     label: "Reports & Analytics",
@@ -77,6 +94,11 @@ export const teacherNav = [
     icon: GraduationCap,
   },
   {
+    label: "Homework",
+    href: "/teacher/homework",
+    icon: ClipboardList,
+  },
+  {
     label: "Take Attendance",
     href: "/teacher/attendance",
     icon: ClipboardCheck,
@@ -97,6 +119,59 @@ export const studentNav = [
   {
     label: "My Profile",
     href: "/student/profile",
+    icon: UserCircle,
+  },
+  {
+    label: "Attendance",
+    href: "/student/attendance",
+    icon: ClipboardCheck,
+  },
+  {
+    label: "Timetable",
+    href: "/student/timetable",
+    icon: CalendarDays,
+  },
+  {
+    label: "Announcements",
+    href: "/student/announcements",
+    icon: Megaphone,
+  },
+  {
+    label: "Documents",
+    href: "/student/documents",
+    icon: FileText,
+  },
+  {
+    label: "My Homework",
+    href: "/student/homework",
+    icon: ClipboardList,
+  },
+  {
+    label: "My Exams",
+    href: "/student/exams",
+    icon: BookOpen,
+  },
+  {
+    label: "My Fees",
+    href: "/student/fees",
+    icon: IndianRupee,
+  },
+  {
+    label: "Change Password",
+    href: "/student/change-password",
+    icon: KeyRound,
+  },
+];
+
+export const parentNav = [
+  {
+    label: "Dashboard",
+    href: "/parent/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "My Children",
+    href: "/parent/children",
     icon: GraduationCap,
   },
 ];

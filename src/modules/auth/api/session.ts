@@ -4,7 +4,7 @@ export type { Role };
 
 const PREFIX = "sc:auth";
 const ACTIVE_ROLE_KEY = `${PREFIX}:activeRole`;
-const ROLES: Role[] = ["admin", "teacher", "student"];
+const ROLES: Role[] = ["admin", "teacher", "student", "parent"];
 
 /** Access token lives in memory only (not localStorage). */
 let accessToken: string | null = null;
@@ -58,7 +58,12 @@ export function setAccessToken(token: string | null) {
 export function getActiveRole(): Role | null {
   try {
     const role = localStorage.getItem(ACTIVE_ROLE_KEY);
-    if (role === "admin" || role === "teacher" || role === "student") {
+    if (
+      role === "admin" ||
+      role === "teacher" ||
+      role === "student" ||
+      role === "parent"
+    ) {
       return role;
     }
     return null;
