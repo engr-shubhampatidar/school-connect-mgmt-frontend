@@ -4,6 +4,7 @@ export {
   adminLogin,
   teacherLogin,
   studentLogin,
+  parentLogin,
 } from "./api/authServices";
 export { default as authServices } from "./api/authServices";
 export { loginSchema, type LoginSchema } from "./schemas/loginSchema";

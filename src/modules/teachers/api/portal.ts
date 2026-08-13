@@ -20,6 +20,7 @@ export type AssignedClass = {
 
 export type AssignedSubject = {
   subjectId: string;
+  classId?: string;
   class: string;
   section: string;
   subject: string;

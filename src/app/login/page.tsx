@@ -2,16 +2,30 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import UnifiedLoginForm from "@/modules/auth/components/UnifiedLoginForm";
-import Button from "../../components/ui/Button";
+import type { Role } from "@/types/auth";
+
+const LOGIN_ROLES: Role[] = ["admin", "teacher", "student", "parent"];
+
+function portalTitle(role: Role) {
+  switch (role) {
+    case "admin":
+      return "Admin Portal";
+    case "teacher":
+      return "Teacher Portal";
+    case "student":
+      return "Student Portal";
+    case "parent":
+      return "Parent Portal";
+  }
+}
 
 export default function Page() {
-  const [role, setRole] = useState<"admin" | "teacher" | "student">("admin");
+  const [role, setRole] = useState<Role>("admin");
 
   return (
     <>
       <div className="flex items-center justify-center h-screen overflow-hidden">
         <div className="relative w-full h-screen lg:flex hidden">
-          {/* Image */}
           <Image
             src="/images/Login.png"
             alt="Teacher Login Illustration"
@@ -19,7 +33,6 @@ export default function Page() {
             className="object-cover lg:flex hidden"
           />
 
-          {/* Overlay text */}
           <div className="absolute w-1/2 lg:flex items-start justify-start hidden flex-col pl-12 pt-12">
             <div className="w-full flex items-center mb-92">
               <h1 className="font-bold text-2xl text-white max-w-[100px]">
@@ -33,7 +46,7 @@ export default function Page() {
               <h1 className="text-[48px] font-[600] leading-[56px] mb-4">
                 Sign in to SchoolConnect
               </h1>
-              <p>Secure access For Admin, Teachers and Student</p>
+              <p>Secure access for Admin, Teachers, Students and Parents</p>
             </div>
           </div>
         </div>
@@ -49,21 +62,16 @@ export default function Page() {
                 className="mx-auto h-16 w-auto mb-5"
               />
               <h1 className="text-xl font-semibold text-slate-900 text-center">
-                Sign in to{" "}
-                {role === "admin"
-                  ? " Admin Portal"
-                  : role === "teacher"
-                    ? " Teacher Portal"
-                    : " Student Portal"}
+                Sign in to {portalTitle(role)}
               </h1>
               <p className="mt-1 text-sm text-slate-500 text-center">
-                Secure access for Admins, Teachers and Students.
+                Secure access for Admins, Teachers, Students and Parents.
               </p>
             </div>
 
             <div className="mb-4" role="tablist" aria-label="Login role">
-              <div className="flex gap-2 bg-[#EEF4FF] p-1 rounded-lg w-fit">
-                {(["admin", "teacher", "student"] as const).map((r) => {
+              <div className="flex flex-wrap gap-2 bg-[#EEF4FF] p-1 rounded-lg w-fit justify-center">
+                {LOGIN_ROLES.map((r) => {
                   const active = role === r;
                   return (
                     <button

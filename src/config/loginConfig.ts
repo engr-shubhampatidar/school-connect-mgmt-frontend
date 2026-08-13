@@ -70,6 +70,13 @@ export const loginConfig: Record<
     redirectPath: "/student/dashboard",
     title: "Student Portal",
   },
+  parent: {
+    schema: loginSchema,
+    submit: authServices.parentLogin,
+    fields: sharedLoginFields,
+    redirectPath: "/parent/dashboard",
+    title: "Parent Portal",
+  },
 };
 
 export default loginConfig;

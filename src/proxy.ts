@@ -15,6 +15,7 @@ const ROLE_DASHBOARDS: Record<string, string> = {
   admin: "/admin/dashboard",
   teacher: "/teacher/dashboard",
   student: "/student/dashboard",
+  parent: "/parent/dashboard",
 };
 
 /** Role → allowed path prefix (not just dashboard). */
@@ -22,6 +23,7 @@ const ROLE_PREFIXES: Record<string, string> = {
   admin: "/admin",
   teacher: "/teacher",
   student: "/student",
+  parent: "/parent",
 };
 
 function isPublicPath(cleanPath: string): boolean {

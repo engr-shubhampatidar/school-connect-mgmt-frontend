@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { adminNav, studentNav, teacherNav, managementNav } from "./navConfig";
+import { adminNav, studentNav, teacherNav, managementNav, parentNav } from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
 import { getUser } from "@/modules/auth";
@@ -32,6 +32,8 @@ export default function Navbar() {
     navItems = teacherNav;
   } else if (pathname.startsWith("/student")) {
     navItems = studentNav;
+  } else if (pathname.startsWith("/parent")) {
+    navItems = parentNav;
   } else {
     return null;
   }
@@ -69,11 +71,18 @@ export default function Navbar() {
               )}
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/admin/dashboard" &&
+                    item.href !== "/teacher/dashboard" &&
+                    item.href !== "/student/dashboard" &&
+                    item.href !== "/parent/dashboard" &&
+                    pathname.startsWith(item.href));
                 return (
                   <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
-                        pathname === item.href
+                        active
                           ? `${
                               openSidebar
                                 ? "bg-[#DBEAFE]  text-[#021034]"
@@ -90,7 +99,7 @@ export default function Navbar() {
                       {openSidebar && (
                         <SidebarItem
                           label={item.label}
-                          active={pathname === item.href}
+                          active={active}
                         />
                       )}
                     </div>
@@ -104,11 +113,13 @@ export default function Navbar() {
               )}
               {managementNavItems.map((item) => {
                 const Icon = item.icon;
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
-                        pathname === item.href
+                        active
                           ? `${
                               openSidebar
                                 ? "bg-[#DBEAFE] text-[#021034]"
@@ -125,7 +136,7 @@ export default function Navbar() {
                       {openSidebar && (
                         <SidebarItem
                           label={item.label}
-                          active={pathname === item.href}
+                          active={active}
                         />
                       )}
                     </div>
