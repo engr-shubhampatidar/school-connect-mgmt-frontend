@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UsersRound,
   GraduationCap,
   School,
   IndianRupee,
@@ -8,6 +9,11 @@ import {
   BookOpen,
   FileMinus,
   ClipboardList,
+  CalendarDays,
+  Megaphone,
+  FileText,
+  KeyRound,
+  UserCircle,
 } from "lucide-react";
 
 export const adminNav = [
@@ -25,6 +31,11 @@ export const adminNav = [
     label: "Students",
     href: "/admin/students",
     icon: GraduationCap,
+  },
+  {
+    label: "Parents",
+    href: "/admin/parents",
+    icon: UsersRound,
   },
   {
     label: "Classes",
@@ -108,7 +119,27 @@ export const studentNav = [
   {
     label: "My Profile",
     href: "/student/profile",
-    icon: GraduationCap,
+    icon: UserCircle,
+  },
+  {
+    label: "Attendance",
+    href: "/student/attendance",
+    icon: ClipboardCheck,
+  },
+  {
+    label: "Timetable",
+    href: "/student/timetable",
+    icon: CalendarDays,
+  },
+  {
+    label: "Announcements",
+    href: "/student/announcements",
+    icon: Megaphone,
+  },
+  {
+    label: "Documents",
+    href: "/student/documents",
+    icon: FileText,
   },
   {
     label: "My Homework",
@@ -124,5 +155,23 @@ export const studentNav = [
     label: "My Fees",
     href: "/student/fees",
     icon: IndianRupee,
+  },
+  {
+    label: "Change Password",
+    href: "/student/change-password",
+    icon: KeyRound,
+  },
+];
+
+export const parentNav = [
+  {
+    label: "Dashboard",
+    href: "/parent/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    label: "My Children",
+    href: "/parent/children",
+    icon: GraduationCap,
   },
 ];

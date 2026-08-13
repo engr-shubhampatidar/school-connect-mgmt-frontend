@@ -190,3 +190,8 @@ export type UpsertMarkItem = {
   isAbsent?: boolean;
   remarks?: string | null;
 };
+
+export type StudentExamScheduleGroup = {
+  exam: Exam;
+  schedules: ExamSchedule[];
+};

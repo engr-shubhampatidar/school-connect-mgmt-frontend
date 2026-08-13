@@ -16,6 +16,7 @@ export const examQueryKeys = {
   classReport: (examId: string) =>
     [...examQueryKeys.all, "class-report", examId] as const,
   studentList: () => [...examQueryKeys.all, "student-list"] as const,
+  studentSchedule: () => [...examQueryKeys.all, "student-schedule"] as const,
   studentReportCard: (examId: string) =>
     [...examQueryKeys.all, "student-report-card", examId] as const,
 };
