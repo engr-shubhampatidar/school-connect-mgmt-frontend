@@ -40,8 +40,9 @@ export const adminNav = [
     label: "Announcements",
     href: "/admin/announcement",
     icon: ClipboardList,
-  }
+  },
 ];
+
 export const managementNav = [
   {
     label: "Fees & Finance",
@@ -103,5 +104,10 @@ export const studentNav = [
     label: "My Exams",
     href: "/student/exams",
     icon: BookOpen,
+  },
+  {
+    label: "My Fees",
+    href: "/student/fees",
+    icon: IndianRupee,
   },
 ];

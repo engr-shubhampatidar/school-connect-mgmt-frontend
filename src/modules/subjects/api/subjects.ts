@@ -19,8 +19,10 @@ export async function fetchSubjects(
   if (query.search) params.search = query.search;
   if (query.page) params.page = query.page;
   if (query.pageSize) {
-    params.pageSize = query.pageSize;
-    params.limit = query.pageSize;
+    // Backend PaginationSubjectDto enforces @Max(100) on `limit`
+    const limit = Math.min(query.pageSize, 100);
+    params.pageSize = limit;
+    params.limit = limit;
   }
   const res = await API.get<{
     subjects?: Subject[];

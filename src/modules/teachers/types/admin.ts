@@ -41,7 +41,10 @@ export type TeachersQuery = {
   subjectId?: string;
   /** Filter by subject specialty IDs (match any). */
   subjectIds?: string[];
+  /** Filter by class (single id; sent as classIds to API). */
   classId?: string;
+  /** Filter by class IDs (subject teacher or class teacher; match any). */
+  classIds?: string[];
   page?: number;
   pageSize?: number;
 };

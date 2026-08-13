@@ -69,11 +69,17 @@ export default function Navbar() {
               )}
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/admin/dashboard" &&
+                    item.href !== "/teacher/dashboard" &&
+                    item.href !== "/student/dashboard" &&
+                    pathname.startsWith(item.href));
                 return (
                   <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
-                        pathname === item.href
+                        active
                           ? `${
                               openSidebar
                                 ? "bg-[#DBEAFE]  text-[#021034]"
@@ -90,7 +96,7 @@ export default function Navbar() {
                       {openSidebar && (
                         <SidebarItem
                           label={item.label}
-                          active={pathname === item.href}
+                          active={active}
                         />
                       )}
                     </div>
@@ -104,11 +110,13 @@ export default function Navbar() {
               )}
               {managementNavItems.map((item) => {
                 const Icon = item.icon;
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link key={item.href} href={item.href}>
                     <div
                       className={`flex items-center rounded-md ${
-                        pathname === item.href
+                        active
                           ? `${
                               openSidebar
                                 ? "bg-[#DBEAFE] text-[#021034]"
@@ -125,7 +133,7 @@ export default function Navbar() {
                       {openSidebar && (
                         <SidebarItem
                           label={item.label}
-                          active={pathname === item.href}
+                          active={active}
                         />
                       )}
                     </div>
