@@ -33,6 +33,8 @@ export const ADMIN_API = {
   DOCUMENTS: "/admin/documents",
   DOCUMENTS_UPLOAD: "/admin/documents/upload",
   DOCUMENT_BY_ID: (id: string) => `/admin/documents/${id}`,
+  HOMEWORK: "/admin/homework",
+  HOMEWORK_BY_ID: (id: string) => `/admin/homework/${id}`,
   EXAMS_DASHBOARD: "/admin/exams/dashboard",
   EXAMS: "/admin/exams",
   EXAM_BY_ID: (id: string) => `/admin/exams/${id}`,
@@ -84,6 +86,8 @@ export const TEACHER_API = {
   DASHBOARD: "/teacher/dashboard",
   CLASS: "/teacher/class",
   PROFILE: (id: string) => `/admin/teachers/${id}`,
+  HOMEWORK: "/teacher/homework",
+  HOMEWORK_BY_ID: (id: string) => `/teacher/homework/${id}`,
 };
 
 export const ATTENDANCE_API = {
@@ -101,6 +105,9 @@ export const STUDENT_API = {
   BY_ID: (id: string) => `/admin/students/${id}`,
   /** Update student (admin or class teacher) */
   UPDATE: (id: string) => `/students/${id}`,
+  HOMEWORK: "/student/homework",
+  HOMEWORK_BY_ID: (id: string) => `/student/homework/${id}`,
+  HOMEWORK_SUBMIT: (id: string) => `/student/homework/${id}/submissions`,
   EXAMS: "/student/exams",
   EXAM_REPORT_CARD: (examId: string) => `/student/exams/${examId}/report-card`,
   FEES: "/student/fees",
