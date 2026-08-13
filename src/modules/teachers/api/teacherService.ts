@@ -166,7 +166,7 @@ export async function updateTeacher(
   payload: UpdateTeacherPayload,
 ): Promise<unknown> {
   try {
-    const resp = await API.put(`/api/admin/teachers/${id}`, payload);
+    const resp = await API.put(`/admin/teachers/${id}`, payload);
     return resp.data;
   } catch (err) {
     if (axios.isAxiosError(err)) {

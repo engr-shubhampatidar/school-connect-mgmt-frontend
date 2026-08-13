@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getUser, clearSession, getActiveRole } from "@/modules/auth";
 import { roleFromPath } from "@/lib/roleFromPath";
 import { useRouter } from "next/navigation";
+import { EllipsisVertical } from "lucide-react";
 export default function Topbar({
   onSearch,
 }: {
@@ -81,23 +82,6 @@ export default function Topbar({
         className="flex bg-white items-center justify-between  border-b border-slate-200 p-5 min-h-[85px] "
       >
         <h2 className="text-md font-bold min-w-[10%]">{topName}</h2>
-        <div className="w-full items-start- justify-center pl-8">
-          {/* <button onClick={handleSearchToggle}> click</button> */}
-          {showSearch && (
-            <div className="grid w-full max-w-1/2 gap-6">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search by name or email"
-                  onChange={(e) => onSearch?.(e.target.value)}
-                  className="rounded-lg border w-full  py-2 pl-9 pr-3 text-sm outline-none focus:border-slate-300"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-
         <div className="flex items-center gap-4">
           <IconButton title="Mail">{BellIcon()}</IconButton>
           <div className="flex items-center gap-3">
@@ -136,9 +120,9 @@ export default function Topbar({
               aria-expanded={menuOpen}
               aria-haspopup="menu"
               onClick={() => setMenuOpen((v) => !v)}
-              className="p-2 text-black rounded-md hover:bg-slate-100"
+              className="p-2 text- rounded-md hover:bg-slate-100"
             >
-              {DotsVerticalIcon()}
+              <EllipsisVertical />
             </button>
             {menuOpen && (
               <div
@@ -199,26 +183,6 @@ function BellIcon() {
         d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"
         stroke="currentColor"
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DotsVerticalIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 6v.01M12 12v.01M12 18v.01"
-        stroke="currentColor"
-        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

@@ -40,9 +40,7 @@ export default function StudentListCard({
       const name = (s.name ?? "").toString().toLowerCase();
       const email = (s.email ?? "").toString().toLowerCase();
       const studentId = (s.studentId ?? "").toString().toLowerCase();
-      return (
-        name.includes(q) || email.includes(q) || studentId.includes(q)
-      );
+      return name.includes(q) || email.includes(q) || studentId.includes(q);
     });
   }, [students, searchTerm]);
 
@@ -53,7 +51,7 @@ export default function StudentListCard({
       return;
     }
     if (!student.studentId) return;
-    router.push(`/teacher/attendance/${student.studentId}`);
+    router.push(`/teacher/student-profile/${student.studentId}`);
   };
   return (
     <div className="w-full rounded-xl border border-[#D7E3FC] bg-white">
