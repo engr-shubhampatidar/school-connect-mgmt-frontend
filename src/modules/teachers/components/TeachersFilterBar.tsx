@@ -71,7 +71,6 @@ export default function TeachersFilterBar({
     classOptions && classOptions.length > 0
       ? [{ id: "", name: "All Classes" }, ...classOptions]
       : [{ id: "", name: "All Classes" }];
-      
 
   const handleClear = () => {
     setSearch("");
@@ -79,11 +78,6 @@ export default function TeachersFilterBar({
     setSubjectId("");
     setClassId("");
     onClear();
-  };
-
-  const handleApply = () => {
-    const s = search.trim() || email.trim();
-    onApply({ search: s, email: email.trim(), subjectId, classId });
   };
 
   return (
@@ -127,7 +121,6 @@ export default function TeachersFilterBar({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button onClick={handleApply}>Apply</Button>
           <Button variant="ghost" onClick={handleClear}>
             Reset
           </Button>

@@ -1,7 +1,13 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { adminNav, studentNav, teacherNav, managementNav, parentNav } from "./navConfig";
+import {
+  adminNav,
+  studentNav,
+  teacherNav,
+  managementNav,
+  parentNav,
+} from "./navConfig";
 import { useState } from "react";
 import { Settings, HeartHandshake, PanelRight } from "lucide-react";
 import { getUser } from "@/modules/auth";
@@ -47,9 +53,9 @@ export default function Navbar() {
       >
         <div className="flex flex-col min-h-full h-screen justify-between">
           <div>
-            <div className="text-2xl font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
+            <div className="text-2xl sticky top-0 bottom-0 font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
               {openSidebar ? (
-                <div className="flex items-center justify-center  font-semibold text-xl ">
+                <div className="flex items-center justify-center  font-semibold text-xl  ">
                   <PanelRight
                     onClick={handleSideBar}
                     className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
@@ -63,7 +69,7 @@ export default function Navbar() {
                 />
               )}
             </div>
-            <nav className="mt-8 px-4 space-y-1 gap-2">
+            <nav className="mt-4 px-4 space-y-1 gap-2">
               {openSidebar && (
                 <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
                   Overview....
@@ -97,10 +103,7 @@ export default function Navbar() {
                     >
                       <Icon className="w-5 h-5" />
                       {openSidebar && (
-                        <SidebarItem
-                          label={item.label}
-                          active={active}
-                        />
+                        <SidebarItem label={item.label} active={active} />
                       )}
                     </div>
                   </Link>
@@ -114,7 +117,8 @@ export default function Navbar() {
               {managementNavItems.map((item) => {
                 const Icon = item.icon;
                 const active =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`);
                 return (
                   <Link key={item.href} href={item.href}>
                     <div
@@ -134,10 +138,7 @@ export default function Navbar() {
                     >
                       <Icon className="w-5 h-5" />
                       {openSidebar && (
-                        <SidebarItem
-                          label={item.label}
-                          active={active}
-                        />
+                        <SidebarItem label={item.label} active={active} />
                       )}
                     </div>
                   </Link>

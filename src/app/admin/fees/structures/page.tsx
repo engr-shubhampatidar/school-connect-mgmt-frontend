@@ -42,8 +42,7 @@ export default function AdminFeeStructuresPage() {
 
   const policyForPlan = (plan: FeeStructure) =>
     policiesQuery.data?.data?.find(
-      (p) =>
-        p.classId === plan.classId && p.academicYear === plan.academicYear,
+      (p) => p.classId === plan.classId && p.academicYear === plan.academicYear,
     );
 
   return (
@@ -146,7 +145,10 @@ export default function AdminFeeStructuresPage() {
                           <ul className="space-y-1 text-xs text-slate-600">
                             {(row.items ?? []).map((item) => (
                               <li key={item.id}>
-                                {item.categoryName}: {formatInr(item.amount)}
+                                {item.categoryName
+                                  ? item.categoryName
+                                  : "School Fee"}
+                                : {formatInr(item.amount)}
                                 {item.categoryType === "TRANSPORT"
                                   ? " (+ tiers)"
                                   : ""}
@@ -187,7 +189,10 @@ export default function AdminFeeStructuresPage() {
                             >
                               {policy ? "Edit policy" : "Add policy"}
                             </button>
-                            <button
+
+                            {/* this button is commentOut because it might cause some issue with fee stucture */}
+
+                            {/* <button
                               className="text-red-600 hover:underline"
                               onClick={async () => {
                                 try {
@@ -211,7 +216,7 @@ export default function AdminFeeStructuresPage() {
                               }}
                             >
                               Delete
-                            </button>
+                            </button> */}
                           </div>
                         </td>
                       </tr>
@@ -279,7 +284,9 @@ export default function AdminFeeStructuresPage() {
             toast({ title: "Policy updated", type: "success" });
           } else {
             await mutations.createClassPolicy.mutateAsync(
-              values as Parameters<typeof mutations.createClassPolicy.mutateAsync>[0],
+              values as Parameters<
+                typeof mutations.createClassPolicy.mutateAsync
+              >[0],
             );
             toast({ title: "Policy created", type: "success" });
           }
