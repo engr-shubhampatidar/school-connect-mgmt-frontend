@@ -46,4 +46,18 @@ export { default as MyClassPageSkeleton } from "./components/skeletons/MyClassPa
 export { default as TeacherSubjectsPageSkeleton } from "./components/skeletons/TeacherSubjectsPageSkeleton";
 
 export * from "./api/portal";
+export {
+  fetchTeacherAttendanceContext,
+  teacherCheckIn,
+  teacherCheckOut,
+  getCurrentPosition,
+  type TeacherAttendanceContext,
+  type TeacherAttendanceStatus,
+  type CheckInOutPayload,
+} from "./api/teacherAttendance";
+export { useTeacherSelfAttendance } from "./hooks/useTeacherSelfAttendance";
+export {
+  default as TeacherSelfAttendanceCard,
+  TeacherSelfAttendanceCard as TeacherSelfAttendanceCardNamed,
+} from "./components/TeacherSelfAttendanceCard";
 export { default as ClassSubjectAllocationTable } from "./components/ClassSubjectAllocationTable";
