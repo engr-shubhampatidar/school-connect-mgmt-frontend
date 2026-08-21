@@ -10,7 +10,7 @@ function normalizeUser(respUser: Record<string, unknown>, role: Role) {
       respUser?.username ??
       null) as string | null,
     email: (respUser?.email ?? null) as string | null,
-    role: (respUser?.role ?? role) as string,
+   role: String(respUser?.role ?? role).toLowerCase(),
     school: (respUser?.school ?? null) as unknown,
     schoolId: (respUser?.schoolId ?? null) as string | null,
   };
@@ -56,11 +56,19 @@ function handleLoginResponse(role: Role, data: unknown) {
         ? normalizeUser(respUser as Record<string, unknown>, role)
         : undefined;
 
+   const actualRole = user?.role?.toLowerCase() as Role | undefined;
+
+     if (actualRole && actualRole !== role.toLowerCase()) {
+      throw new Error(
+    `These credentials are not valid for the ${role} portal.`,
+        );
+}
+
     setSession({
       accessToken: access,
-      refreshToken: refresh,
-      role,
-      user,
+     refreshToken: refresh,
+     role: actualRole ?? role,
+     user,
     });
   } catch (err) {
     if (

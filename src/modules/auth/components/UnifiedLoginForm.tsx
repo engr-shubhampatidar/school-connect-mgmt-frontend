@@ -41,12 +41,30 @@ export default function UnifiedLoginForm({ defaultRole = "admin" }: Props) {
 
   const onSubmit = async (values: any) => {
     try {
-      await (loginConfig as any)[role].submit(values);
+      const response = await (loginConfig as any)[role].submit(values);
+
+      const actualRole = response?.user?.role?.toLowerCase() as
+        | Role
+        | undefined;
+
+      if (actualRole && actualRole !== role.toLowerCase()) {
+        const roleName = role.charAt(0).toUpperCase() + role.slice(1);
+
+        toast({
+          title: "Invalid Credentials",
+          description: `These credentials are not valid for the ${roleName} portal.`,
+          type: "error",
+        });
+
+        return;
+      }
+
       toast({
         title: "Logged in",
         description: "Redirecting...",
         type: "success",
       });
+
       router.push((loginConfig as any)[role].redirectPath);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {

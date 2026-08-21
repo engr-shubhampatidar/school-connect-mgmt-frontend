@@ -186,7 +186,7 @@ export default function AdminFeeReportsPage() {
                         className="border-t"
                       >
                         <td className="py-3 pr-3">
-                          {row.categoryName ?? "—"}
+                          {row.categoryName ?? "School Fee"}
                         </td>
                         <td className="py-3 pr-3">{row.className ?? "—"}</td>
                         <td className="py-3 pr-3">

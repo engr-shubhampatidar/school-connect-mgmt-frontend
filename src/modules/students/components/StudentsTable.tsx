@@ -228,9 +228,7 @@ export default function StudentsTable({
 
                 <PaginationItem>
                   <PaginationNext
-                    onClick={() =>
-                      onPageChange(Math.min(totalPages, page + 1))
-                    }
+                    onClick={() => onPageChange(Math.min(totalPages, page + 1))}
                     disabled={page >= totalPages}
                     className="cursor-pointer"
                   />

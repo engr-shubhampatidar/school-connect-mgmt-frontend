@@ -23,7 +23,7 @@ export default function AdminExamsDashboardPage() {
   const { data, isLoading, error, refetch } = useExamDashboard();
 
   return (
-    <div className="mx-auto px-4 py-6">
+    <div className="mx-auto px-4 py-6 ">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-[24px] font-[600] text-[#021034]">
@@ -136,7 +136,9 @@ export default function AdminExamsDashboardPage() {
                       className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-100 px-3 py-2 text-sm"
                     >
                       <div>
-                        <p className="font-medium text-[#021034]">{exam.name}</p>
+                        <p className="font-medium text-[#021034]">
+                          {exam.name}
+                        </p>
                         <p className="text-slate-500">
                           {formatClassLabel(exam.className, exam.classSection)}
                         </p>

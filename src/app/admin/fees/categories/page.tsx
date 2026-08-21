@@ -149,7 +149,10 @@ export default function AdminFeeCategoriesPage() {
                           >
                             Edit
                           </button>
-                          <button
+
+                          {/*  Delete button is commentOut becauce it might cause some issue */}
+                          
+                          {/* <button
                             className="text-red-600 hover:underline"
                             onClick={async () => {
                               try {
@@ -173,7 +176,7 @@ export default function AdminFeeCategoriesPage() {
                             }}
                           >
                             Delete
-                          </button>
+                          </button> */}
                         </div>
                       </td>
                     </tr>

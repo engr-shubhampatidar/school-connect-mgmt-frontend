@@ -17,6 +17,14 @@ import {
   useFeeDashboard,
   useStudentFeeSummaries,
 } from "@/modules/fees";
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
 
 export default function AdminFeesDashboardPage() {
   const { data, isLoading, error, refetch } = useFeeDashboard();
@@ -133,9 +141,7 @@ export default function AdminFeesDashboardPage() {
                           <td className="py-2 pr-3">
                             {formatInr(row.collected)}
                           </td>
-                          <td className="py-2">
-                            {formatInr(row.outstanding)}
-                          </td>
+                          <td className="py-2">{formatInr(row.outstanding)}</td>
                         </tr>
                       ))
                     )}
@@ -144,63 +150,110 @@ export default function AdminFeesDashboardPage() {
               </div>
             </Card>
 
-            <Card>
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-[#021034]">
-                  Overdue fees
-                </h3>
+            <div className="w-full rounded-xl border border-[#D7E3FC] bg-white ">
+              <div className="mb-4 flex items-start justify-between p-[16px] pb-0">
+                <div>
+                  <h2 className="text-[24px] text-[#021034] font-[600] text-slate-900">
+                    Overdue{" "}
+                  </h2>
+                </div>
+
                 <Link
                   href="/admin/fees/collect"
-                  className="text-sm text-blue-700 hover:underline"
+                  className="rounded-lg border px-3 py-[5.5px] text-sm text-slate-600 transition hover:bg-slate-50"
                 >
                   View all
                 </Link>
               </div>
-              <div className="mt-3 overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-slate-500">
-                      <th className="py-2 pr-3">Student</th>
-                      <th className="py-2 pr-3">Fee</th>
-                      <th className="py-2">Due</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {overdueStudents.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="py-4 text-slate-500">
-                          No overdue fees
-                        </td>
-                      </tr>
-                    ) : (
-                      overdueStudents.map((fee) => (
-                        <tr key={fee.studentUserId} className="border-t">
-                          <td className="py-2 pr-3">
-                            <Link
-                              href={`/admin/fees/students/${fee.studentUserId}`}
-                              className="text-blue-700 hover:underline"
-                            >
-                              {fee.studentName ?? fee.studentUserId}
-                            </Link>
-                            <div className="text-xs text-slate-500">
-                              {fee.className ?? ""} ·{" "}
-                              {formatInr(fee.totalOutstanding)}
+              <Table className="w-full table-auto">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="py-4 pl-6 text-left">
+                      Student
+                    </TableHead>
+
+                    <TableHead className="py-4 text-left">Class</TableHead>
+
+                    <TableHead className="py-4 text-left">
+                      Installments
+                    </TableHead>
+
+                    <TableHead className="py-4 text-left">Due Date</TableHead>
+
+                    <TableHead className="py-4 pr-6 text-right">
+                      Outstanding
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {overdueStudents.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="py-8 text-center text-sm text-slate-500"
+                      >
+                        No overdue fees
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    overdueStudents.map((fee) => (
+                      <TableRow
+                        key={fee.studentUserId}
+                        className="border-t border-[#D7E3FC] text-[14px] text-[#021034] hover:bg-slate-50"
+                      >
+                        {/* Student */}
+                        <TableCell className="py-3 pl-6">
+                          <Link
+                            href={`/admin/fees/students/${fee.studentUserId}`}
+                            className="flex items-center gap-3"
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                              {fee.studentName?.charAt(0)?.toUpperCase() ?? "S"}
                             </div>
-                          </td>
-                          <td className="py-2 pr-3">
-                            {fee.pendingInstallmentCount} installment
-                            {fee.pendingInstallmentCount === 1 ? "" : "s"} due
-                          </td>
-                          <td className="py-2">
-                            {fee.nextDueDate?.slice(0, 10) ?? "—"}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
+
+                            <div className="flex flex-col">
+                              <span className="font-medium text-slate-900 hover:text-blue-700">
+                                {fee.studentName ?? fee.studentUserId}
+                              </span>
+
+                              <span className="text-[12px] text-[#737373]">
+                                Id-{fee.studentUserId.slice(0, 8)}
+                              </span>
+                            </div>
+                          </Link>
+                        </TableCell>
+
+                        {/* Class */}
+                        <TableCell className="py-3">
+                          <div className="w-fit text-xs rounded-full border border-[#D7E3FC] px-2 py-1">
+                            {fee.className ?? "-"}
+                          </div>
+                        </TableCell>
+
+                        {/* Installments */}
+                        <TableCell className="py-3 text-xs">
+                          {fee.pendingInstallmentCount} installment
+                          {fee.pendingInstallmentCount === 1 ? "" : "s"} due
+                        </TableCell>
+
+                        {/* Due Date */}
+                        <TableCell className="py-3 text-xs">
+                          {fee.nextDueDate?.slice(0, 10) ?? "—"}
+                        </TableCell>
+
+                        {/* Outstanding */}
+                        <TableCell className="py-3 pr-6 text-right">
+                          <span className="font-medium text-red-600">
+                            {formatInr(fee.totalOutstanding)}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           </section>
         </>
       )}
