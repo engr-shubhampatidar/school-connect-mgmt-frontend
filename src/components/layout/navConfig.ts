@@ -52,6 +52,11 @@ export const adminNav = [
     href: "/admin/announcement",
     icon: ClipboardList,
   },
+  {
+    label: "School Settings",
+    href: "/admin/settings",
+    icon: School,
+  },
 ];
 
 export const managementNav = [
@@ -102,6 +107,11 @@ export const teacherNav = [
     label: "Take Attendance",
     href: "/teacher/attendance",
     icon: ClipboardCheck,
+  },
+  {
+    label: "My Attendance",
+    href: "/teacher/my-attendance",
+    icon: UserCircle,
   },
   {
     label: "Attendance history",
