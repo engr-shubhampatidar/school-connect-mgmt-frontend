@@ -8,7 +8,7 @@ import type {
   LeaveListResponse,
   TeacherLeaveBalance,
   TeacherLeaveBalanceList,
-} from "./types";
+} from "../types";
 
 function apiMessage(error: unknown, fallback: string): string {
   if (typeof error === "object" && error !== null && "response" in error) {
