@@ -1,2 +1,10 @@
-/** Leave module scaffold — no features yet. */
-export {};
+export * from "./types";
+export * from "./utils";
+export * from "./api/leave";
+export { AdminLeaveSubnav } from "./components/AdminLeaveSubnav";
+export { LeaveStatusBadge } from "./components/LeaveStatusBadge";
+export { LeaveBalanceCards } from "./components/LeaveBalanceCards";
+export { ApplyLeaveForm } from "./components/ApplyLeaveForm";
+export { LeaveHistoryTable } from "./components/LeaveHistoryTable";
+export { AdminLeaveApprovals } from "./components/AdminLeaveApprovals";
+export { AdminLeaveAllocation } from "./components/AdminLeaveAllocation";
