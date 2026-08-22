@@ -57,6 +57,11 @@ export const adminNav = [
     href: "/admin/settings",
     icon: School,
   },
+  {
+    label: "Teacher Leaves",
+    href: "/admin/leaves",
+    icon: CalendarDays,
+  },
 ];
 
 export const managementNav = [
@@ -112,6 +117,11 @@ export const teacherNav = [
     label: "My Attendance",
     href: "/teacher/my-attendance",
     icon: UserCircle,
+  },
+  {
+    label: "My Leaves",
+    href: "/teacher/leaves",
+    icon: CalendarDays,
   },
   {
     label: "Attendance history",

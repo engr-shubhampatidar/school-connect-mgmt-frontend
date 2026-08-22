@@ -38,6 +38,12 @@ export type TeacherAttendanceContext = {
     workingMinutes: number;
     remarks: string;
   };
+  monthlyAttendance: {
+    month: string;
+    present: number;
+    absent: number;
+    leaves: number;
+  };
 };
 
 type ApiEnvelope<T> = {

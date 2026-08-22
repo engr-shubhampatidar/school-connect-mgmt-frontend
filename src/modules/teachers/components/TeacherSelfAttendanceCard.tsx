@@ -25,7 +25,7 @@ export function TeacherSelfAttendanceCard({
   onCheckIn,
   onCheckOut,
 }: TeacherSelfAttendanceCardProps) {
-  const { profile, school, todayAttendance } = context;
+  const { profile, school, todayAttendance, monthlyAttendance } = context;
   const hasCheckedIn = Boolean(todayAttendance.checkInTime);
   const hasCheckedOut = Boolean(todayAttendance.checkOutTime);
   const canCheckIn =
@@ -71,6 +71,32 @@ export function TeacherSelfAttendanceCard({
             it before you can check in.
           </p>
         )}
+      </Card>
+
+      <Card>
+        <h3 className="text-base font-semibold text-[#1B263B]">
+          {monthlyAttendance?.month ?? "This month"}
+        </h3>
+        <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+          <div>
+            <p className="text-2xl font-semibold text-[#1B263B]">
+              {monthlyAttendance?.present ?? 0}
+            </p>
+            <p className="text-xs text-[#415A77]">Present</p>
+          </div>
+          <div>
+            <p className="text-2xl font-semibold text-[#1B263B]">
+              {monthlyAttendance?.absent ?? 0}
+            </p>
+            <p className="text-xs text-[#415A77]">Absent</p>
+          </div>
+          <div>
+            <p className="text-2xl font-semibold text-[#1B263B]">
+              {monthlyAttendance?.leaves ?? 0}
+            </p>
+            <p className="text-xs text-[#415A77]">Leaves</p>
+          </div>
+        </div>
       </Card>
 
       <Card>
