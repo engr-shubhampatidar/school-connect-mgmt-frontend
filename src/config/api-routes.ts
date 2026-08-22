@@ -36,6 +36,13 @@ export const ADMIN_API = {
   GRAPH: "/admin/attendance/graph",
   SCHOOL_SETTINGS: "/admin/schools/settings",
   SCHOOL_LOCATION: "/admin/schools/settings/location",
+  TEACHER_LEAVES: "/admin/teacher-leaves",
+  TEACHER_LEAVE_BY_ID: (id: string) => `/admin/teacher-leaves/${id}`,
+  TEACHER_LEAVE_APPROVE: (id: string) => `/admin/teacher-leaves/${id}/approve`,
+  TEACHER_LEAVE_REJECT: (id: string) => `/admin/teacher-leaves/${id}/reject`,
+  TEACHER_LEAVE_ALLOCATIONS: "/admin/teacher-leaves/allocations",
+  TEACHER_LEAVE_ALLOCATION: (id: string) =>
+    `/admin/teacher-leaves/allocations/${id}`,
   CLASS_DASHBOARD: "/admin/classes/dashboard",
   DOCUMENTS: "/admin/documents",
   DOCUMENTS_UPLOAD: "/admin/documents/upload",
@@ -99,6 +106,8 @@ export const TEACHER_API = {
   ATTENDANCE_HISTORY: "/teacher/attendance/history",
   CHECK_IN: "/teacher/check-in",
   CHECK_OUT: "/teacher/check-out",
+  LEAVES: "/teacher/leaves",
+  LEAVE_BALANCES: "/teacher/leaves/balances",
   HOMEWORK: "/teacher/homework",
   HOMEWORK_BY_ID: (id: string) => `/teacher/homework/${id}`,
 };
