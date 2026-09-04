@@ -49,123 +49,125 @@ export default function Navbar() {
       <aside
         className={`${
           openSidebar ? "w-72" : "w-20"
-        } h-screen sticky top-0 bg-white border-r border-slate-200  px-0  py-4 pt-0`}
+        } h-screen sticky top-0 bg-white border-r border-slate-200`}
       >
-        <div className="flex flex-col min-h-full h-screen justify-between">
-          <div>
-            <div className="text-2xl sticky top-0 bottom-0 font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
-              {openSidebar ? (
-                <div className="flex items-center justify-center  font-semibold text-xl  ">
-                  <PanelRight
-                    onClick={handleSideBar}
-                    className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
-                  />
-                  {userName ?? "School."}
-                </div>
-              ) : (
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="shrink-0 text-2xl font-semibold text-slate-900 border-b border-slate-200 min-h-[85px] flex items-center justify-center">
+            {openSidebar ? (
+              <div className="flex items-center justify-center font-semibold text-xl">
                 <PanelRight
                   onClick={handleSideBar}
-                  className="w-6 h-6 text-slate-600 cursor-pointer"
+                  className="w-6 h-6 inline-block mr-2 text-slate-600 cursor-pointer"
                 />
-              )}
-            </div>
-            <nav className="mt-4 px-4 space-y-1 gap-2">
-              {openSidebar && (
-                <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
-                  Overview....
-                </p>
-              )}
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active =
-                  pathname === item.href ||
-                  (item.href !== "/admin/dashboard" &&
-                    item.href !== "/teacher/dashboard" &&
-                    item.href !== "/student/dashboard" &&
-                    item.href !== "/parent/dashboard" &&
-                    pathname.startsWith(item.href));
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <div
-                      className={`flex items-center rounded-md ${
-                        active
-                          ? `${
-                              openSidebar
-                                ? "bg-[#DBEAFE]  text-[#021034]"
-                                : "text-[#021034]"
-                            }`
-                          : "text-[#737373]"
-                      } px-2 my-2 gap-2 ${
-                        openSidebar
-                          ? "hover:bg-slate-100"
-                          : "justify-center py-2"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {openSidebar && (
-                        <SidebarItem label={item.label} active={active} />
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-              {openSidebar && (
-                <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
-                  {pathname.startsWith("/admin") ? "Management" : ""}
-                </p>
-              )}
-              {managementNavItems.map((item) => {
-                const Icon = item.icon;
-                const active =
-                  pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`);
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <div
-                      className={`flex items-center rounded-md ${
-                        active
-                          ? `${
-                              openSidebar
-                                ? "bg-[#DBEAFE] text-[#021034]"
-                                : "text-[#021034]"
-                            }`
-                          : "text-[#737373]"
-                      } px-2 my-2 gap-2 ${
-                        openSidebar
-                          ? "hover:bg-slate-100"
-                          : "justify-center py-2"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      {openSidebar && (
-                        <SidebarItem label={item.label} active={active} />
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </nav>
+                {userName ?? "School."}
+              </div>
+            ) : (
+              <PanelRight
+                onClick={handleSideBar}
+                className="w-6 h-6 text-slate-600 cursor-pointer"
+              />
+            )}
           </div>
-          <div className="mt-auto sticky bottom-0 ">
-            <div className="border-t-2 border-slate-100 pt-4 px-4 space-y-2 sticky bottom-0 bg-white">
-              <div
-                className={`flex items-center ${
-                  openSidebar ? "justify-start" : "justify-center py-2"
-                }`}
-              >
-                <Settings
-                  className={`w-5 h-5 inline-block mr-2 text-slate-600`}
-                />
-                {openSidebar && <SidebarItem label="Settings" />}
-              </div>
-              <div
-                className={`flex items-center ${
-                  openSidebar ? "justify-start" : "justify-center py-2"
-                }`}
-              >
-                <HeartHandshake className="w-5 h-5 inline-block mr-2 text-slate-600" />
-                {openSidebar && <SidebarItem label="Get help" />}
-              </div>
+
+          {/* Scrollable Navigation */}
+          <nav className="flex-1 min-h-0 overflow-y-auto no-scrollbar px-4 py-4 space-y-1 ">
+            {openSidebar && (
+              <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2">
+                Overview
+              </p>
+            )}
+
+            {navItems.map((item) => {
+              const Icon = item.icon;
+
+              const active =
+                pathname === item.href ||
+                (item.href !== "/admin/dashboard" &&
+                  item.href !== "/teacher/dashboard" &&
+                  item.href !== "/student/dashboard" &&
+                  item.href !== "/parent/dashboard" &&
+                  pathname.startsWith(item.href));
+
+              return (
+                <Link key={item.href} href={item.href}>
+                  <div
+                    className={`flex items-center rounded-md ${
+                      active
+                        ? openSidebar
+                          ? "bg-[#DBEAFE] text-[#021034]"
+                          : "text-[#021034]"
+                        : "text-[#737373]"
+                    } px-2 my-2 gap-2 ${
+                      openSidebar ? "hover:bg-slate-100" : "justify-center py-2"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 shrink-0" />
+
+                    {openSidebar && (
+                      <SidebarItem label={item.label} active={active} />
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+
+            {openSidebar && managementNavItems.length > 0 && (
+              <p className="text-[12px] font-[500] text-[#64748B] mb-2 ml-2 mt-6">
+                Management
+              </p>
+            )}
+
+            {managementNavItems.map((item) => {
+              const Icon = item.icon;
+
+              const active =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+              return (
+                <Link key={item.href} href={item.href}>
+                  <div
+                    className={`flex items-center rounded-md ${
+                      active
+                        ? openSidebar
+                          ? "bg-[#DBEAFE] text-[#021034]"
+                          : "text-[#021034]"
+                        : "text-[#737373]"
+                    } px-2 my-2 gap-2 ${
+                      openSidebar ? "hover:bg-slate-100" : "justify-center py-2"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 shrink-0" />
+
+                    {openSidebar && (
+                      <SidebarItem label={item.label} active={active} />
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Fixed Bottom Actions */}
+          <div className="shrink-0 border-t border-slate-100 pt-4 px-4 pb-4 space-y-2 bg-white">
+            <div
+              className={`flex items-center ${
+                openSidebar ? "justify-start" : "justify-center py-2"
+              }`}
+            >
+              <Settings className="w-5 h-5 text-slate-600" />
+
+              {openSidebar && <SidebarItem label="Settings" />}
+            </div>
+
+            <div
+              className={`flex items-center ${
+                openSidebar ? "justify-start" : "justify-center py-2"
+              }`}
+            >
+              <HeartHandshake className="w-5 h-5 text-slate-600" />
+
+              {openSidebar && <SidebarItem label="Get help" />}
             </div>
           </div>
         </div>
