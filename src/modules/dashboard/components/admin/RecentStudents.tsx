@@ -126,14 +126,19 @@ export default function RecentStudents({
           <div key={index} className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3 px-2">
               <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-200">
-                <Image
-                  src={student?.photoUrl ?? "/images/avatar.png"}
-                  alt={student.name}
-                  width={72}
-                  height={72}
-                  unoptimized
-                  className="h-9 w-9 rounded-full object-cover"
-                />
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-slate-200">
+                  <Image
+                    src={
+                      student?.photoUrl ||
+                      "https://i.pinimg.com/736x/5e/d1/da/5ed1da21e5470532dfe623d0bc39d4e8.jpg"
+                    }
+                    alt={student.name}
+                    width={72}
+                    height={72}
+                    quality={90}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                </div>
               </div>
 
               <div>
@@ -141,8 +146,7 @@ export default function RecentStudents({
                   {"New Student Admitted"}
                 </p>
                 <p className="text-sm text-slate-500">
-                  {student.name} was added to{" "}Grade{" "}
-                  {student.className}
+                  {student.name} was added to Grade {student.className}
                 </p>
               </div>
             </div>
