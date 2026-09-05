@@ -88,23 +88,16 @@ export default function Topbar({
           </div>
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-800 font-medium">
-              {user?.name ? (
-                user.name
-                  .split(" ")
-                  .map((s) => s[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()
-              ) : (
-                <>
-                  <Image
-                    src={`/images/Avatar.png`}
-                    alt={"User Avatar"}
-                    height={16}
-                    width={16}
-                  />
-                </>
-              )}
+              <>
+                <Image
+                  src={`https://i.pinimg.com/736x/5e/d1/da/5ed1da21e5470532dfe623d0bc39d4e8.jpg`}
+                  alt={"User Avtar"}
+                    width={72}
+                    height={72}
+                    quality={90}
+                    className="h-full w-full rounded-full object-cover"
+                />
+              </>
             </div>
             <div className="text-sm min-w-[120px]">
               <div className="font-[400] text-[12px]">
